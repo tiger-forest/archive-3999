@@ -577,6 +577,11 @@
       background: rgba(255, 59, 59, 0.3);
     }
 
+    body.no-jitter .tok-threat,
+    .tok-threat.no-jitter {
+      animation: none !important;
+    }
+
     /* 第五幕：真实长文档中激活的「研究员塔罗兰」锚点 */
     .real-anchor {
       transition: all 0.25s ease;
@@ -600,11 +605,11 @@
 
     .real-anchor.erased-anchor {
       display: inline;
-      padding: 0 3px;
+      padding: 0 4px;
       color: var(--text-muted);
       text-decoration: line-through;
       text-decoration-thickness: 2px;
-      opacity: 0.4;
+      opacity: 0.55;
       cursor: default;
       border: none;
       background: transparent;
@@ -3523,31 +3528,89 @@
         el.vignette.style.opacity = '0.18';
         Sound.setDrone(0.16);
 
+        // 从此句开始，所有红字均不乱颤
+        document.body.classList.add('no-jitter');
+
         log('采访结束。高频噪声退去，进入最终处置程序。', 'cold');
 
-        // 1. 最后的篡改：塔罗兰放出收容描述，3999 篡改句尾，玩家划掉
+        // 1. 最后的篡改：塔罗兰逐字放出最终收容描述，最后再出现 3999 篡改红字，玩家划掉
         const box = document.createElement('div');
         box.className = 'clinical-entry';
-        box.innerHTML =
-          '<span>最终收容描述：经观测，SCP-3999 寄生于<span class="real-anchor" data-anchor="8">研究员塔罗兰</span>的单一认知锚点，现执行物理注销以彻底终结异常——</span>' +
-          '<span id="a5-tail-tamper" class="tok-threat">并将研究员塔罗兰的残骸永远封存于虚空之中。</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
-        setTool('strike');
-        setHint('3999 篡改了收容描述的句尾：使用 [2] 删除线 将红色句尾划掉。', false);
-        setReferenceCards('划掉句尾篡改后，开始在文档中抹除自身锚点', []);
+        setHint('正在录入最终收容描述……', false);
+        setReferenceCards('终局归档程序执行中……', []);
 
-        document.getElementById('a5-tail-tamper').addEventListener('click', function () {
-          if (State.tool !== 'strike') {
-            setHint('请使用 [2] 删除线 工具！', true);
-            nudgeTool('strike');
-            return;
+        const textPart1 = '最终收容描述：经观测，SCP-3999 寄生于';
+        const textPart2 = '的单一认知锚点，现执行物理注销以彻底终结异常——';
+
+        const spanPart1 = document.createElement('span');
+        box.appendChild(spanPart1);
+
+        let i1 = 0;
+        const iv1 = addInterval(function () {
+          if (State.ended) { clearInterval(iv1); return; }
+          spanPart1.textContent += textPart1.charAt(i1);
+          if (i1 % 2 === 0) Sound.key(false);
+          i1++;
+          scrollDoc();
+          if (i1 >= textPart1.length) {
+            clearInterval(iv1);
+
+            // 插入真实锚点 8
+            const anchor8 = document.createElement('span');
+            anchor8.className = 'real-anchor';
+            anchor8.setAttribute('data-anchor', '8');
+            anchor8.textContent = '研究员塔罗兰';
+            box.appendChild(anchor8);
+            Sound.key(false);
+            scrollDoc();
+
+            // 逐字输出 Part 2
+            const spanPart2 = document.createElement('span');
+            box.appendChild(spanPart2);
+
+            let i2 = 0;
+            const iv2 = addInterval(function () {
+              if (State.ended) { clearInterval(iv2); return; }
+              spanPart2.textContent += textPart2.charAt(i2);
+              if (i2 % 2 === 0) Sound.key(false);
+              i2++;
+              scrollDoc();
+              if (i2 >= textPart2.length) {
+                clearInterval(iv2);
+
+                // 最后再出现 3999 篡改红字
+                addTimeout(function () {
+                  Sound.glitch(0.25);
+                  shake();
+                  const redSpan = document.createElement('span');
+                  redSpan.id = 'a5-tail-tamper';
+                  redSpan.className = 'tok-threat';
+                  redSpan.textContent = '并将研究员塔罗兰的残骸永远封存于虚空之中。';
+                  box.appendChild(redSpan);
+                  scrollDoc();
+
+                  setTool('strike');
+                  setHint('3999 篡改了收容描述的句尾：使用 [2] 删除线 将红色句尾划掉。', false);
+                  setReferenceCards('划掉句尾篡改后，开始在文档中抹除自身锚点', []);
+
+                  redSpan.addEventListener('click', function () {
+                    if (State.tool !== 'strike') {
+                      setHint('请使用 [2] 删除线 工具！', true);
+                      nudgeTool('strike');
+                      return;
+                    }
+                    Sound.confirm();
+                    this.className = 'tok tok-struck';
+                    addTimeout(startAct5RealAnchorDeletion, 650);
+                  }, { once: true });
+                }, 350);
+              }
+            }, 22);
           }
-          Sound.confirm();
-          this.className = 'tok tok-struck';
-          addTimeout(startAct5RealAnchorDeletion, 650);
-        }, { once: true });
+        }, 22);
       }
 
       // 2. 在真实累积下来的长文档中，逐个删除原本就存在的「研究员塔罗兰」
@@ -3601,6 +3664,7 @@
 
         anchorEl.classList.remove('active-anchor');
         anchorEl.classList.add('erased-anchor');
+        anchorEl.textContent = '已抹除';
         State.a5AnchorsDone++;
         Sound.key(false);
         Sound.confirm();
@@ -3663,8 +3727,12 @@
           this.className = 'tok tok-struck';
           div.classList.add('resolved');
           State.a5BlockedByInterference = false;
-          setHint('干扰已清除。请继续抹除剩余的「研究员塔罗兰」。', false);
-          scrollToNextAnchor();
+          setHint('干扰已清除。', false);
+          // 停顿一下让玩家反应，随后平滑翻回上一处发光锚点
+          addTimeout(function () {
+            setHint('请继续抹除剩余的「研究员塔罗兰」。', false);
+            scrollToNextAnchor();
+          }, 1100);
         }, { once: true });
       }
 
