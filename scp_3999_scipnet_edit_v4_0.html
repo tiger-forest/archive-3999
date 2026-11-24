@@ -3388,7 +3388,7 @@
         {
           speech: '秩序是恶棍们的通行证！没有我的允许你连呼吸的资格都没有！',
           hitsNeeded: 2, // 保持 2 次拉锯
-          talloranReply: '别想威胁我，没有我你什么都做不成。第一个百万年间我曾感到世间最为深重的痛苦，第二个百万年依然备受煎熬，到了第三个百万年我已经近乎麻木——但我活下来了。'
+          talloranReply: '别想威胁我，没有我你什么都做不成。第一个百万年间我曾感到世间最为深重的痛苦，第二个百万年依然备受煎熬，到了第三个百万年我已经近乎麻木——但我活下来了。一个连痛苦都感受不到的人，你还剩什么可以拿走的？'
         },
         {
           speech: '我会带着O5议会用最荒诞的垃圾把你彻底淹没！SCP-3999是不朽的！',
@@ -3806,68 +3806,103 @@
                     failLine.style.color = '#64748b';
                     Sound.key(true);
 
-                    // 连拍 2：慢速一个点一个点地打出省略号，之后 3999 冒出「我恨自己。」
+                    // 连拍 2：省略号后，出现"我爱自己"卡片——但悬停时变红变成"我恨自己"，
+                    // 玩家被迫点下去，把"我恨自己"放入文档，再亲手划掉，才能拿到干净的"我爱自己"。
                     setHint('……', false);
                     spawnSilenceDots(3, function () {
-                      const hateLine = document.createElement('div');
-                      hateLine.className = 'quiet-finale-line';
-                      hateLine.innerHTML = '<span id="f-hate" class="tok-threat">我恨自己。</span>';
-                      el.docDynamic.appendChild(hateLine);
-                      Sound.key(true);
-                      scrollDoc();
-                      setHint('点击划掉「我恨自己。」', false);
+                      // 创建特殊卡片：外显"我爱自己"，hover 时变红变成"我恨自己"
+                      el.refStatus.textContent = '';
+                      el.refCards.innerHTML = '';
 
-                      document.getElementById('f-hate').addEventListener('click', function () {
-                        Sound.key(false);
-                        this.className = 'tok tok-struck';
-                        setHint('点击底部卡片，放上「我爱自己。」', false);
-                        setReferenceCards('', [
-                          {
-                            tag: '',
-                            text: '我爱自己。',
-                            highlight: true,
-                            onClick: function () {
-                              setReferenceCards('', []);
-                              const loveLine = document.createElement('div');
-                              loveLine.className = 'quiet-finale-line';
-                              loveLine.style.color = '#e2e8f0';
-                              el.docDynamic.appendChild(loveLine);
-                              scrollDoc();
+                      const hoverCard = document.createElement('button');
+                      hoverCard.className = 'ref-card highlight-card';
+                      hoverCard.textContent = '我爱自己。';
 
-                              // 逐字打出「我爱自己。」，极慢沉重（320ms/字）
-                              typeInto(loveLine, '我爱自己。', false, 320, function () {
-                                setHint('……', false);
+                      hoverCard.addEventListener('mouseenter', function () {
+                        this.textContent = '我恨自己。';
+                        this.style.color = 'var(--crimson)';
+                        this.style.borderColor = 'var(--crimson)';
+                        Sound.glitch(0.08);
+                      });
 
-                                // 慢速一个点一个点地打出省略号，之后再提供“我写完了”
-                                spawnSilenceDots(4, function () {
-                                  setHint('点击底部卡片完成最终归档。', false);
-                                  setReferenceCards('', [
-                                    {
-                                      tag: '',
-                                      text: '我写完了。',
-                                      highlight: true,
-                                      onClick: function () {
-                                        setReferenceCards('', []);
-                                        const doneLine = document.createElement('div');
-                                        doneLine.className = 'quiet-finale-line';
-                                        doneLine.style.color = '#34d399';
-                                        el.docDynamic.appendChild(doneLine);
-                                        scrollDoc();
+                      hoverCard.addEventListener('mouseleave', function () {
+                        this.textContent = '我爱自己。';
+                        this.style.color = '';
+                        this.style.borderColor = '';
+                      });
 
-                                        typeInto(doneLine, '我写完了。', false, 55, function () {
-                                          el.refDock.classList.add('stripped');
-                                          Sound.confirm();
-                                          addTimeout(triggerFinalSite118Report, 2800);
-                                        });
+                      hoverCard.addEventListener('click', function () {
+                        Sound.unlock();
+                        el.refCards.innerHTML = '';
+                        el.refStatus.textContent = '';
+
+                        // 点击后写入文档的是"我恨自己。"
+                        const hateLine = document.createElement('div');
+                        hateLine.className = 'quiet-finale-line';
+                        hateLine.innerHTML = '<span id="f-hate" class="tok-threat" style="cursor:pointer;">我恨自己。</span>';
+                        el.docDynamic.appendChild(hateLine);
+                        Sound.key(true);
+                        scrollDoc();
+                        setHint('划掉它。', false);
+
+                        // 玩家点击划掉"我恨自己。"
+                        document.getElementById('f-hate').addEventListener('click', function () {
+                          Sound.key(false);
+                          this.className = 'tok tok-struck';
+
+                          // 然后出现干净的"我爱自己。"卡片
+                          setHint('点击底部卡片，放上「我爱自己。」', false);
+                          setReferenceCards('', [
+                            {
+                              tag: '',
+                              text: '我爱自己。',
+                              highlight: true,
+                              onClick: function () {
+                                setReferenceCards('', []);
+                                const loveLine = document.createElement('div');
+                                loveLine.className = 'quiet-finale-line';
+                                loveLine.style.color = '#e2e8f0';
+                                el.docDynamic.appendChild(loveLine);
+                                scrollDoc();
+
+                                // 逐字打出「我爱自己。」，极慢沉重（320ms/字）
+                                typeInto(loveLine, '我爱自己。', false, 320, function () {
+                                  setHint('……', false);
+
+                                  // 慢速省略号，之后再提供"我写完了"
+                                  spawnSilenceDots(4, function () {
+                                    setHint('点击底部卡片完成最终归档。', false);
+                                    setReferenceCards('', [
+                                      {
+                                        tag: '',
+                                        text: '我写完了。',
+                                        highlight: true,
+                                        onClick: function () {
+                                          setReferenceCards('', []);
+                                          const doneLine = document.createElement('div');
+                                          doneLine.className = 'quiet-finale-line';
+                                          doneLine.style.color = '#e2e8f0';
+                                          el.docDynamic.appendChild(doneLine);
+                                          scrollDoc();
+
+                                          typeInto(doneLine, '我写完了。', false, 55, function () {
+                                            el.refDock.classList.add('stripped');
+                                            Sound.confirm();
+                                            addTimeout(triggerFinalSite118Report, 2800);
+                                          });
+                                        }
                                       }
-                                    }
-                                  ]);
+                                    ]);
+                                  });
                                 });
-                              });
+                              }
                             }
-                          }
-                        ]);
+                          ]);
+                        }, { once: true });
                       }, { once: true });
+
+                      el.refCards.appendChild(hoverCard);
+                      setHint('点击底部卡片。', false);
                     });
                   }, 550);
                 });
