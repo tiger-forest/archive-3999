@@ -627,6 +627,18 @@
       font-size: 15px;
     }
 
+    @keyframes pulse-amber {
+      0%, 100% { opacity: 1; text-shadow: 0 0 6px rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08); }
+      50% { opacity: 0.55; text-shadow: 0 0 12px rgba(245, 158, 11, 0.85); background: rgba(245, 158, 11, 0.22); }
+    }
+    .pending-highlight {
+      animation: pulse-amber 1.2s infinite ease-in-out;
+      border-bottom: 2px dashed var(--amber);
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
     /* 动态正文块 */
     .clinical-entry {
       margin: 12px 0;
@@ -1355,7 +1367,6 @@
         <div class="brand">
           <span id="status-dot" class="status-dot"></span>
           <span class="brand-title">SCiPNET-EDIT v4.0</span>
-          <span id="phase-badge" class="phase-badge">标准建档</span>
         </div>
 
         <!-- 放大后的工具栏 -->
@@ -1425,7 +1436,7 @@
 
               <p><span class="field-key">描述：</span></p>
               <div id="a1-desc-slot" class="blank-desc-box">
-                [ 数据缺失 / 请先完成上方机密遮盖、批注划除与硬件核验，再写入标准描述 ]<span class="cursor-green"></span>
+                [ 数据缺失 / 请先完成上方机密遮盖、批注划除与硬件核验，再写入标准描述 ]
               </div>
             </div>
 
@@ -1876,7 +1887,6 @@
         btnEnter: document.getElementById('btn-enter-terminal'),
 
         statusDot: document.getElementById('status-dot'),
-        phaseBadge: document.getElementById('phase-badge'),
         anchorCounter: document.getElementById('anchor-counter'),
         anchorCountNum: document.getElementById('anchor-count-num'),
         toolGroup: document.getElementById('tool-group'),
@@ -2145,7 +2155,6 @@
       function startAct1() {
         State.act = 1;
         document.title = 'SCP-3999 - SCiPNET 档案起草';
-        el.phaseBadge.textContent = '标准建档';
         setTool('redact');
         log('已登录：3级研究员 詹姆斯·塔罗兰。', 'safe');
         log('任务：完成 SCP-3999 机密遮盖、格式清理与描述补全。');
@@ -2153,6 +2162,7 @@
 
       function checkAct1Progress() {
         if (State.a1Redacts >= 3 && State.a1Strikes >= 2 && State.a1Verified && !State.a1Rewritten) {
+          el.a1Colloquial.classList.add('pending-highlight');
           setHint('前置校验全部完成！请从底部【标准协议参考栏】写入现场记录。', false);
           log('机密项与硬件核验完成，请写入规范现场记录。', 'safe');
           setReferenceCards('步骤 1/2：写入现场记录', [
@@ -2175,10 +2185,14 @@
         if (State.a1Rewritten) return;
         State.a1Rewritten = true;
         Sound.confirm();
+        el.a1Colloquial.classList.remove('pending-highlight');
         el.a1Colloquial.textContent = text;
         el.a1Colloquial.style.color = '#34d399';
         log('已完成现场记录标准化录入。', 'safe');
         setHint('最后一步：从底部【标准协议参考栏】选择标准描述，补全空白的“描述：”栏。', false);
+
+        // 此时光标在描述框内出现并闪烁
+        el.a1DescSlot.innerHTML = '[ 等待写入标准描述…… ]<span class="cursor-green"></span>';
 
         setReferenceCards('步骤 2/2：补全“描述：”栏以完成初稿', [
           {
@@ -2217,8 +2231,6 @@
         State.stress = 0.52;
         saveProgress(2);
         document.title = '警告：SCP-3999 文档异常修改';
-        el.phaseBadge.textContent = '未授权写入告警';
-        el.phaseBadge.classList.add('danger');
         el.statusDot.classList.add('danger');
         el.vignette.style.opacity = '0.52';
         setTelemetry('0.68 Hm', '偏高', '#1', true);
@@ -2392,45 +2404,16 @@
             done++;
             if (done >= 2) {
               box.classList.add('resolved');
-              log('异常反扑力度正在衰减，已捕获核心波动源。', 'safe');
-              addTimeout(runAct2Round5, 480);
+              State.stress = 0.18;
+              el.vignette.style.opacity = '0.12';
+              el.statusDot.classList.remove('danger');
+              setTelemetry('0.96 Hm', '恢复平稳', '#1', false);
+              Sound.setDrone(0.1);
+              log('RAISA 确认：全部入侵已被压制，可启动斯克兰顿现实稳定锚。', 'safe');
+              addTimeout(startAct2SraProtocol, 500);
             }
           });
         });
-      }
-
-      // 异常入侵 5：最后一次顽抗压制 -> 解锁 SRA 1/2 特殊协议
-      function runAct2Round5() {
-        State.a2Round = 5;
-        Sound.glitch(0.22);
-        const box = document.createElement('div');
-        box.className = 'anomaly-entry';
-        box.innerHTML = '<span id="a2-r5-target" class="tok-threat">不要关掉我——把收容间撕开——把这整份文档烧成灰！</span>';
-        el.docDynamic.appendChild(box);
-        scrollDoc();
-
-        setTool('strike');
-        setHint('使用 [2] 删除线 彻底划掉最后一条残余红字！', true);
-
-        document.getElementById('a2-r5-target').addEventListener('click', function () {
-          if (State.tool !== 'strike') {
-            setHint('请先切换到 [2] 删除线 工具！', true);
-            nudgeTool('strike');
-            return;
-          }
-          Sound.confirm();
-          this.className = 'tok tok-struck';
-          box.classList.add('resolved');
-          State.stress = 0.18;
-          el.vignette.style.opacity = '0.12';
-          el.statusDot.classList.remove('danger');
-          el.phaseBadge.textContent = '收容锁定中';
-          el.phaseBadge.classList.remove('danger');
-          setTelemetry('0.96 Hm', '恢复平稳', '#1', false);
-          Sound.setDrone(0.1);
-          log('RAISA 确认：全部入侵已被压制，可启动斯克兰顿现实稳定锚。', 'safe');
-          startAct2SraProtocol();
-        }, { once: true });
       }
 
       // 斯克兰顿稳定锚 1/2 -> 等待期间重复点击多写一行 -> 解锁 2/2
@@ -2492,12 +2475,12 @@
                 el.docDynamic.appendChild(line);
                 scrollDoc();
 
-                // 点击协议 2 后，在文档中逐字出现“SCP-3999已被收容”，再进入假胜利
+                // 点击协议 2 后，在文档中逐字出现“SCP-3999已被收容”，停顿后再进入假胜利
                 typeInto(line, 'SCP-3999已被收容。', false, 35, function () {
                   Sound.confirm();
                   addTimeout(function () {
                     triggerExtendedFakeVictory();
-                  }, 800);
+                  }, 2400);
                 });
               }
             });
@@ -2572,8 +2555,6 @@
         State.stress = 0.82;
         saveProgress(3);
         document.title = '草稿(4,192,803) - 未保存';
-        el.phaseBadge.textContent = '';
-        el.phaseBadge.style.display = 'none';
         el.statusDot.classList.add('danger');
         el.vignette.style.opacity = '0.78';
         el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">Apollyon</strong>';
@@ -2605,16 +2586,38 @@
         setHint('3999 正在起草隔离提案……', false);
         setReferenceCards('等待异常文本稳定……', []);
 
-        // 3999 词穷修正演变：停止 -> 得以控制 -> 残留少许
+        // 3999 词穷演变效果（文档自己在修改）：
+        // 出一个停止 -> 被划掉 -> 出一个得以控制 -> 被划掉 -> 出一个残留少许
         addTimeout(function () {
           const fumble = document.getElementById('a3-l1-fumble');
           if (!fumble) return;
-          fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="text-decoration:line-through; opacity:0.6;">得以控制</span> 残留少许';
-          Sound.key(true);
+
+          // 1. 划掉“停止”
+          fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span>';
+          Sound.glitch(0.18);
           scrollDoc();
 
-          // 提供玩家反驳卡片
-          setReferenceCards('驳回隔离提案', [
+          // 2. 出“得以控制”
+          addTimeout(function () {
+            fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="color:var(--crimson); font-weight:700;">得以控制</span>';
+            Sound.key(true);
+            scrollDoc();
+
+            // 3. 划掉“得以控制”
+            addTimeout(function () {
+              fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="text-decoration:line-through; opacity:0.6;">得以控制</span>';
+              Sound.glitch(0.18);
+              scrollDoc();
+
+              // 4. 出“残留少许”
+              addTimeout(function () {
+                fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="text-decoration:line-through; opacity:0.6;">得以控制</span> <span style="color:var(--crimson); font-weight:700;">残留少许</span>';
+                Sound.key(true);
+                scrollDoc();
+
+                // 提供玩家反驳卡片
+                addTimeout(function () {
+                  setReferenceCards('驳回隔离提案', [
             {
               tag: '',
               text: '驳回隔离提案：研究员塔罗兰须留在 Site-118 接受常规观测与同事协助。',
@@ -2674,7 +2677,11 @@
               }
             }
           ]);
-        }, 700);
+                }, 600);
+              }, 700);
+            }, 850);
+          }, 700);
+        }, 1100);
       }
 
       // 第二层：精准的官僚恶意（“越遮盖，细节越血腥具体”）
@@ -3075,61 +3082,66 @@
           setHint('使用 [2] 删除线 划掉上方异常定义！', true);
           setReferenceCards('使用删除线划除异常定义 (' + (roundIdx + 1) + '/4)', []);
 
-          // 1. 3999 刷出恐怖定义
+          // 1. 3999 逐字打出恐怖定义
           const horrorLine = document.createElement('div');
           horrorLine.className = 'def-line manual-target';
           horrorLine.style.color = '#ff4d4d';
           horrorLine.style.fontWeight = '700';
-          horrorLine.textContent = round.horror;
           list.appendChild(horrorLine);
-          Sound.key(true);
-          scrollDoc();
+          setReferenceCards('异常文本写入中……', []);
 
-          // 2. 玩家使用 [2] 删除线 划掉
-          horrorLine.addEventListener('click', function () {
-            if (this.classList.contains('struck')) return;
-            if (State.tool !== 'strike') {
-              setHint('请切换至 [2] 删除线 工具！', true);
-              nudgeTool('strike');
-              return;
-            }
-            this.className = 'def-line struck';
-            Sound.key(false);
+          typeInto(horrorLine, round.horror, true, 22, function () {
+            setTool('strike');
+            setHint('使用 [2] 删除线 划掉上方异常定义！', true);
+            setReferenceCards('使用删除线划除异常定义 (' + (roundIdx + 1) + '/4)', []);
 
-            // 3. 底部参考栏弹出 2 张卡片
-            setHint('点击底部【参考栏】写入定义。', false);
-            const cardOptions = round.cards.map(function (c) {
-              return {
-                tag: c.tag,
-                text: c.text,
-                highlight: true,
-                onClick: function () {
-                  setReferenceCards('正在覆写定义……', []);
-                  const playerDef = document.createElement('div');
-                  playerDef.className = 'def-line';
-                  playerDef.style.color = '#86efac';
-                  playerDef.textContent = c.text;
-                  list.appendChild(playerDef);
-                  Sound.key(false);
-                  scrollDoc();
+            // 2. 玩家使用 [2] 删除线 划掉
+            horrorLine.addEventListener('click', function () {
+              if (this.classList.contains('struck')) return;
+              if (State.tool !== 'strike') {
+                setHint('请切换至 [2] 删除线 工具！', true);
+                nudgeTool('strike');
+                return;
+              }
+              this.className = 'def-line struck';
+              Sound.key(false);
 
-                  // 4. 3999 在短暂延迟（约 300ms）内以血红删除线粗暴划掉玩家的无害定义
-                  addTimeout(function () {
-                    Sound.glitch(0.2);
-                    playerDef.classList.add('struck');
-                    playerDef.style.color = '#ef4444';
-                    playerDef.style.textDecorationColor = '#ff2222';
+              // 3. 底部参考栏弹出 2 张卡片
+              setHint('点击底部【参考栏】写入定义。', false);
+              const cardOptions = round.cards.map(function (c) {
+                return {
+                  tag: c.tag,
+                  text: c.text,
+                  highlight: true,
+                  onClick: function () {
+                    setReferenceCards('正在写入……', []);
+                    const playerDef = document.createElement('div');
+                    playerDef.className = 'def-line';
+                    playerDef.style.color = '#86efac';
+                    list.appendChild(playerDef);
                     scrollDoc();
 
-                    // 进入下一轮对攻
-                    addTimeout(function () {
-                      runDuelRound(roundIdx + 1);
-                    }, 400);
-                  }, 320);
-                }
-              };
+                    // 玩家定义也是逐字打出来的
+                    typeInto(playerDef, c.text, false, 20, function () {
+                      // 4. 3999 在短暂延迟内以血红删除线粗暴划掉玩家的定义
+                      addTimeout(function () {
+                        Sound.glitch(0.2);
+                        playerDef.classList.add('struck');
+                        playerDef.style.color = '#ef4444';
+                        playerDef.style.textDecorationColor = '#ff2222';
+                        scrollDoc();
+
+                        // 进入下一轮对攻
+                        addTimeout(function () {
+                          runDuelRound(roundIdx + 1);
+                        }, 400);
+                      }, 350);
+                    });
+                  }
+                };
+              });
+              setReferenceCards('选择定义 (' + (roundIdx + 1) + '/4)', cardOptions);
             });
-            setReferenceCards('选择无害降维定义写入覆写 (' + (roundIdx + 1) + '/4)', cardOptions);
           });
         }
 
@@ -3154,7 +3166,7 @@
             Sound.glitch(0.4);
             shake();
             scrollDoc();
-            addTimeout(startAct3OnlyMultiply, 950);
+            addTimeout(startAct3OnlyMultiply, 3200);
             return;
           }
           const div = document.createElement('div');
@@ -3203,14 +3215,14 @@
             span.style.textDecoration = 'line-through';
             span.style.color = 'rgba(239, 68, 68, 0.45)';
             span.style.textDecorationColor = '#ff2222';
-          }, 90);
+          }, 140);
 
           chunkIdx++;
           if (chunkIdx >= chunksTotal) {
             clearInterval(iv);
-            if (onDone) addTimeout(onDone, 300);
+            if (onDone) addTimeout(onDone, 400);
           }
-        }, 30);
+        }, 48);
       }
 
       // 第三幕阶段 4：大提顿仪式与「只有」洪流
@@ -3230,10 +3242,13 @@
         setHint('异常文字涌现……', true);
         setReferenceCards('', []);
 
-        // 第一波“只有”连续刷屏并逐渐划掉
-        streamOnlyWall(el.docDynamic, 22, function () {
-          openHelpModal();
-        });
+        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一波“只有”连续刷屏
+        addTimeout(function () {
+          streamOnlyWall(el.docDynamic, 22, function () {
+            // 刷完后再停顿 1.2 秒，再弹出【救命，拜托】
+            addTimeout(openHelpModal, 1200);
+          });
+        }, 1600);
       }
 
       // 第三幕阶段 5：中央【救命，拜托】
@@ -3279,9 +3294,9 @@
           } else {
             if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
             el.helpModal.classList.remove('open');
-            // 第二波“只有”刷屏并划掉，随后出现噩梦
+            // 第二波“只有”刷屏并划掉，随后停顿 1.8 秒给玩家反应时间，再出现噩梦
             streamOnlyWall(el.docDynamic, 22, function () {
-              startAct3Nightmares();
+              addTimeout(startAct3Nightmares, 1800);
             });
           }
         };
@@ -3379,8 +3394,6 @@
         State.stress = 0.65;
         saveProgress(4);
         document.title = '受访者：SCP-3999 // 反转采访';
-        el.phaseBadge.textContent = '逆向采访记录';
-        el.phaseBadge.classList.remove('danger');
         el.vignette.style.opacity = '0.45';
         setTool('strike');
         Sound.setDrone(0.38);
@@ -3479,7 +3492,6 @@
         State.stress = 0.22;
         saveProgress(5);
         document.title = '我于万物之中';
-        el.phaseBadge.textContent = '认知注销程序';
         el.statusDot.classList.remove('danger');
         el.vignette.style.opacity = '0.18';
         Sound.setDrone(0.16);
@@ -3723,7 +3735,6 @@
           const iv = addInterval(function () {
             if (State.ended) { clearInterval(iv); return; }
             dotLine.textContent += '.';
-            Sound.key(false);
             dotIdx++;
             scrollDoc();
             if (dotIdx >= dotsPerLine) {
