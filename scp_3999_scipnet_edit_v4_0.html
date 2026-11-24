@@ -1109,143 +1109,94 @@
     }
 
     /* =========================================================================
-       第二幕：缓慢向上滚动的虚假胜利与制作人名单
+       第二幕：虚假凯旋（Contained 假结局 + 滚动制作人名单）
        ========================================================================= */
     #fake-ending-overlay {
       position: fixed;
       inset: 0;
-      z-index: 88;
-      background: #080f0c;
+      z-index: 85;
+      background: #0d1310;
       color: #dcfce7;
       display: none;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0;
+      padding: 28px;
       overflow: hidden;
     }
 
     #fake-ending-overlay.open { display: flex; }
 
-    .fake-scroll-stage {
-      position: relative;
-      width: 100%;
-      max-width: 680px;
-      height: 80vh;
-      overflow: hidden;
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-      display: flex;
-      justify-content: center;
-    }
-
-    .fake-scroll-track {
+    .fake-card {
+      max-width: 560px;
       width: 100%;
       text-align: center;
-      padding: 20px 24px;
-      animation: credits-roll 26s linear forwards;
-    }
-
-    .fake-scroll-track.frozen {
-      animation-play-state: paused;
-      filter: contrast(1.15) brightness(0.6);
-    }
-
-    @keyframes credits-roll {
-      0% { transform: translateY(72vh); }
-      100% { transform: translateY(-120%); }
-    }
-
-    .fake-card-body {
-      background: #101d17;
-      border: 1.5px solid rgba(52, 211, 153, 0.45);
-      border-radius: 8px;
-      padding: 32px 34px;
-      text-align: left;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
-      margin-bottom: 40px;
+      position: relative;
     }
 
     .fake-stamp {
       display: inline-block;
       border: 1.5px solid var(--green);
       color: var(--green);
-      padding: 4px 12px;
-      font-size: 13px;
-      font-weight: 700;
+      padding: 3px 10px;
+      font-size: 12px;
       letter-spacing: 2px;
       margin-bottom: 14px;
     }
 
-    .fake-card-body h2 {
-      margin: 0 0 14px;
-      font-size: 23px;
-      color: #f0fdf4;
+    .credits-viewport {
+      margin: 22px auto 0;
+      height: 155px;
+      overflow: hidden;
+      border-top: 1px solid rgba(52, 211, 153, 0.25);
+      border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+      position: relative;
     }
 
-    .fake-card-body p {
-      margin: 0 0 14px;
-      font-size: 15.5px;
-      line-height: 1.8;
-      color: #d1fae5;
-    }
-
-    .fake-credits-roll {
-      margin-top: 24px;
-      padding: 20px 0;
-      font-size: 14.5px;
-      color: #86efac;
+    .credits-roll {
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      text-align: center;
+      gap: 15px;
+      padding-top: 135px;
+      font-size: 13.5px;
+      color: #bbf7d0;
+      transition: transform 14s linear;
     }
 
-    .fake-credits-roll .credit-title {
-      font-size: 11.5px;
-      letter-spacing: 2px;
-      color: #5eead4;
-      opacity: 0.8;
-      text-transform: uppercase;
-    }
-
-    .fake-credits-roll .credit-name {
-      font-size: 16px;
-      color: #ecfdf5;
-      font-weight: 600;
-      margin-top: 3px;
+    .credits-roll.rolling {
+      transform: translateY(-265px);
     }
 
     .credits-slash {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      z-index: 90;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(14, 3, 3, 0.94);
-      padding: 30px;
-      text-align: center;
+      background: rgba(12, 4, 4, 0.92);
+      border: 1.5px solid var(--crimson);
+      border-radius: 4px;
+      padding: 16px;
     }
 
     .credits-slash.visible { display: flex; }
 
     .slash-line {
-      width: 90%;
-      max-width: 680px;
-      height: 5px;
+      width: 92%;
+      height: 3px;
       background: var(--crimson);
-      box-shadow: 0 0 22px var(--crimson);
-      margin-bottom: 24px;
-      transform: rotate(-2deg);
+      box-shadow: 0 0 12px var(--crimson);
+      margin-bottom: 14px;
+      transform: rotate(-1deg);
     }
 
     .slash-text {
       color: var(--crimson);
-      font-size: 24px;
+      font-size: 19px;
       font-weight: 700;
       letter-spacing: 2px;
-      line-height: 1.7;
+      line-height: 1.6;
       white-space: pre-wrap;
     }
 
@@ -1562,48 +1513,31 @@
     </div>
   </div>
 
-  <!-- 第二幕：缓慢向上滚动的虚假胜利结算界面与制作人名单 -->
+  <!-- 第二幕：V4 虚假凯旋（Contained 假结局 + 滚动制作人名单） -->
   <div id="fake-ending-overlay">
-    <div class="fake-scroll-stage">
-      <div id="fake-scroll-track" class="fake-scroll-track">
-        <div class="fake-card-body">
-          <div class="fake-stamp">CONTAINED // 已收容</div>
-          <h2>SCP-3999 异常收容结案报告</h2>
-          <p>
-            <strong>项目等级：</strong>Contained（已收容）<br />
-            <strong>收容状态：</strong>Site-118 一公里竖井内全部斯克兰顿现实稳定锚（SRA）已成功锁定基准现实，异常休谟波动完全归零。
-          </p>
-          <p>
-            <strong>人员处置：</strong>鉴于 3 级研究员詹姆斯·塔罗兰在本次收容失效危机中表现卓越，站点主管已批准其<strong>两周带薪休假</strong>。心理与认知评估报告显示其精神状态完全正常，建议即刻离开终端并前往休息区。
-          </p>
+    <div class="fake-card">
+      <div class="fake-stamp">CONTAINED // 已收容</div>
+      <h2 style="margin:0 0 8px; font-size:21px; color:#f0fdf4;">项目编号：SCP-3999</h2>
+      <p style="margin:0; font-size:13.5px; color:#bbf7d0; line-height:1.7;">
+        项目等级：Contained（已收容） · 全部斯克兰顿现实稳定锚运行正常。<br />
+        3 级研究员詹姆斯·塔罗兰生理与认知评估均已恢复基准水平，获批两周带薪休假。
+      </p>
+
+      <div class="credits-viewport">
+        <div id="credits-roll" class="credits-roll">
+          <div>SCP-3999：我于万物之中</div>
+          <div>SCiPNET-EDIT v4.0 自动归档系统</div>
+          <div>叙事安全核验：RAISA</div>
+          <div>站点保障：Site-118 异常收容工程处</div>
+          <div>特别鸣谢：3 级研究员 詹姆斯·塔罗兰</div>
+          <div style="color:#4ade80; margin-top:4px;">档案校验完成，正在安全关闭会话……</div>
         </div>
 
-        <div class="fake-credits-roll">
-          <div style="font-size:13px; letter-spacing:1px; opacity:0.85;">— SCiPNET-EDIT v4.0 自动归档系统 —</div>
-          <div>
-            <div class="credit-title">总策划</div>
-            <div class="credit-name">SCiPNET 归档部</div>
-          </div>
-          <div>
-            <div class="credit-title">叙事校验</div>
-            <div class="credit-name">信息安全管理部（RAISA）</div>
-          </div>
-          <div>
-            <div class="credit-title">站点保障</div>
-            <div class="credit-name">Site-118 异常收容工程处</div>
-          </div>
-          <div>
-            <div class="credit-title">特别鸣谢</div>
-            <div class="credit-name">3 级研究员 詹姆斯·塔罗兰</div>
-          </div>
-          <div style="color:#4ade80; margin-top:16px; font-size:13.5px;">档案校验完成，正在安全关闭会话……</div>
+        <div id="credits-slash" class="credits-slash">
+          <div class="slash-line"></div>
+          <div id="slash-text" class="slash-text"></div>
         </div>
       </div>
-    </div>
-
-    <div id="credits-slash" class="credits-slash">
-      <div class="slash-line"></div>
-      <div id="slash-text" class="slash-text"></div>
     </div>
   </div>
 
@@ -1984,7 +1918,7 @@
         helpNudge: document.getElementById('help-nudge'),
 
         fakeOverlay: document.getElementById('fake-ending-overlay'),
-        fakeScrollTrack: document.getElementById('fake-scroll-track'),
+        creditsRoll: document.getElementById('credits-roll'),
         creditsSlash: document.getElementById('credits-slash'),
         slashText: document.getElementById('slash-text'),
 
@@ -2559,8 +2493,23 @@
               text: '锁定收容并归档（SCP-3999 -> Contained）',
               highlight: true,
               onClick: function () {
+                setReferenceCards('正在执行收容锁定……', []);
                 Sound.confirm();
-                triggerExtendedFakeVictory();
+                const line = document.createElement('div');
+                line.className = 'clinical-entry';
+                line.style.color = '#34d399';
+                line.style.fontWeight = '700';
+                line.style.fontSize = '16px';
+                el.docDynamic.appendChild(line);
+                scrollDoc();
+
+                // 点击协议 2 后，在文档中逐字出现“SCP-3999已被收容”，再进入假胜利
+                typeInto(line, 'SCP-3999已被收容。', false, 35, function () {
+                  Sound.confirm();
+                  addTimeout(function () {
+                    triggerExtendedFakeVictory();
+                  }, 800);
+                });
               }
             });
           }
@@ -2574,7 +2523,7 @@
         renderSraCards();
       }
 
-      // 虚假胜利结算：缓慢向上滚动的结案报告与制作人名单，约 10 秒后冻结卡带红字劈屏
+      // 虚假胜利结算（采用 demo1 视口居中风格，适度延长滚动时间至约 8.5 秒后卡带劈屏）
       function triggerExtendedFakeVictory() {
         State.stress = 0.04;
         el.vignette.style.opacity = '0';
@@ -2582,18 +2531,22 @@
         document.title = 'SCP-3999 - Contained（已收容）';
         el.fakeOverlay.classList.add('open');
         el.creditsSlash.classList.remove('visible');
-        if (el.fakeScrollTrack) {
-          el.fakeScrollTrack.classList.remove('frozen');
-          el.fakeScrollTrack.style.animation = 'none';
-          void el.fakeScrollTrack.offsetHeight; // 强制回流重置动画
-          el.fakeScrollTrack.style.animation = '';
+        if (el.creditsRoll) {
+          el.creditsRoll.style.transition = 'none';
+          el.creditsRoll.classList.remove('rolling');
+          void el.creditsRoll.offsetWidth;
+          el.creditsRoll.style.transition = 'transform 14s linear';
+          el.creditsRoll.classList.add('rolling');
         }
         Sound.playLofiPiano();
 
-        // 约 10 秒后画面骤然冻结、钢琴卡带，血红删除线与红字劈屏突脸
+        // 适度延长滚动时间（约 8.5 秒），给足沉浸感后再骤然冻结卡带劈屏
         addTimeout(function () {
-          if (el.fakeScrollTrack) {
-            el.fakeScrollTrack.classList.add('frozen');
+          if (el.creditsRoll) {
+            const computedStyle = window.getComputedStyle(el.creditsRoll);
+            const matrix = computedStyle.transform;
+            el.creditsRoll.style.transition = 'none';
+            el.creditsRoll.style.transform = matrix;
           }
           Sound.jamStatic();
           shake();
@@ -2618,7 +2571,7 @@
               }, 1250);
             }
           }, 55);
-        }, 10000);
+        }, 8500);
       }
 
       /* =======================================================================
@@ -3753,88 +3706,94 @@
         document.getElementById('f-win').addEventListener('click', function () {
           Sound.key(false);
           this.className = 'tok tok-struck';
-          setHint('点击底部卡片，放上「SCP-3999已经失败。」', false);
+          setHint('点击底部卡片，放上「SCP-3999已经失效。」', false);
           setReferenceCards('终局覆写', [
             {
               tag: '[ 写入终局声明 ]',
-              text: 'SCP-3999已经失败。',
+              text: 'SCP-3999已经失效。',
               highlight: true,
               onClick: function () {
                 setReferenceCards('……', []);
                 const failLine = document.createElement('div');
                 failLine.className = 'quiet-finale-line';
                 failLine.style.color = '#e2e8f0';
-                failLine.textContent = 'SCP-3999已经失败。';
                 el.docDynamic.appendChild(failLine);
-                Sound.key(false);
                 scrollDoc();
 
-                // 被 3999 划掉
-                addTimeout(function () {
-                  failLine.style.textDecoration = 'line-through';
-                  failLine.style.textDecorationColor = '#ff3b3b';
-                  failLine.style.color = '#64748b';
-                  Sound.key(true);
-
-                  // 连拍 2：2 秒沉默 -> 3999 冒出「我恨自己。」 -> 划掉 -> 放上「我爱自己。」
-                  setHint('……', false);
+                // 逐字打出：SCP-3999已经失效。
+                typeInto(failLine, 'SCP-3999已经失效。', false, 30, function () {
+                  // 被 3999 划掉
                   addTimeout(function () {
-                    const hateLine = document.createElement('div');
-                    hateLine.className = 'quiet-finale-line';
-                    hateLine.innerHTML = '<span id="f-hate" class="tok-threat">我恨自己。</span>';
-                    el.docDynamic.appendChild(hateLine);
+                    failLine.style.textDecoration = 'line-through';
+                    failLine.style.textDecorationColor = '#ff3b3b';
+                    failLine.style.color = '#64748b';
                     Sound.key(true);
-                    scrollDoc();
-                    setHint('点击划掉「我恨自己。」', false);
 
-                    document.getElementById('f-hate').addEventListener('click', function () {
-                      Sound.key(false);
-                      this.className = 'tok tok-struck';
-                      setHint('点击底部卡片，放上「我爱自己。」', false);
-                      setReferenceCards('最终陈述', [
-                        {
-                          tag: '[ 写入 ]',
-                          text: '我爱自己。',
-                          highlight: true,
-                          onClick: function () {
-                            setReferenceCards('……', []);
-                            const loveLine = document.createElement('div');
-                            loveLine.className = 'quiet-finale-line';
-                            loveLine.style.color = '#e2e8f0';
-                            loveLine.textContent = '我爱自己。';
-                            el.docDynamic.appendChild(loveLine);
-                            Sound.key(false);
-                            scrollDoc();
-                            setHint('……', false);
+                    // 连拍 2：2 秒沉默 -> 3999 冒出「我恨自己。」 -> 划掉 -> 放上「我爱自己。」
+                    setHint('……', false);
+                    addTimeout(function () {
+                      const hateLine = document.createElement('div');
+                      hateLine.className = 'quiet-finale-line';
+                      hateLine.innerHTML = '<span id="f-hate" class="tok-threat">我恨自己。</span>';
+                      el.docDynamic.appendChild(hateLine);
+                      Sound.key(true);
+                      scrollDoc();
+                      setHint('点击划掉「我恨自己。」', false);
 
-                            // 连拍 3：2 秒沉默 -> 仅剩一张卡片「我写完了。」 -> 切入 Site-118 归档档案
-                            addTimeout(function () {
-                              setHint('点击底部唯一卡片，完成最终归档。', false);
-                              setReferenceCards('最终归档', [
-                                {
-                                  tag: '[ 结案 ]',
-                                  text: '我写完了。',
-                                  highlight: true,
-                                  onClick: function () {
-                                    const doneLine = document.createElement('div');
-                                    doneLine.className = 'quiet-finale-line';
-                                    doneLine.style.color = '#34d399';
-                                    doneLine.textContent = '我写完了。';
-                                    el.docDynamic.appendChild(doneLine);
-                                    scrollDoc();
-                                    el.refDock.classList.add('stripped');
-                                    Sound.confirm();
-                                    addTimeout(triggerFinalSite118Report, 850);
-                                  }
-                                }
-                              ]);
-                            }, 2000);
+                      document.getElementById('f-hate').addEventListener('click', function () {
+                        Sound.key(false);
+                        this.className = 'tok tok-struck';
+                        setHint('点击底部卡片，放上「我爱自己。」', false);
+                        setReferenceCards('最终陈述', [
+                          {
+                            tag: '[ 写入 ]',
+                            text: '我爱自己。',
+                            highlight: true,
+                            onClick: function () {
+                              setReferenceCards('……', []);
+                              const loveLine = document.createElement('div');
+                              loveLine.className = 'quiet-finale-line';
+                              loveLine.style.color = '#e2e8f0';
+                              el.docDynamic.appendChild(loveLine);
+                              scrollDoc();
+
+                              // 逐字打出「我爱自己。」，速度略慢（75ms/字）
+                              typeInto(loveLine, '我爱自己。', false, 75, function () {
+                                setHint('……', false);
+
+                                // 连拍 3：2 秒沉默 -> 仅剩一张卡片「我写完了。」 -> 切入 Site-118 归档档案
+                                addTimeout(function () {
+                                  setHint('点击底部唯一卡片，完成最终归档。', false);
+                                  setReferenceCards('最终归档', [
+                                    {
+                                      tag: '[ 结案 ]',
+                                      text: '我写完了。',
+                                      highlight: true,
+                                      onClick: function () {
+                                        setReferenceCards('……', []);
+                                        const doneLine = document.createElement('div');
+                                        doneLine.className = 'quiet-finale-line';
+                                        doneLine.style.color = '#34d399';
+                                        el.docDynamic.appendChild(doneLine);
+                                        scrollDoc();
+
+                                        typeInto(doneLine, '我写完了。', false, 45, function () {
+                                          el.refDock.classList.add('stripped');
+                                          Sound.confirm();
+                                          addTimeout(triggerFinalSite118Report, 850);
+                                        });
+                                      }
+                                    }
+                                  ]);
+                                }, 2000);
+                              });
+                            }
                           }
-                        }
-                      ]);
-                    }, { once: true });
-                  }, 2000);
-                }, 550);
+                        ]);
+                      }, { once: true });
+                    }, 2000);
+                  }, 550);
+                });
               }
             }
           ]);
