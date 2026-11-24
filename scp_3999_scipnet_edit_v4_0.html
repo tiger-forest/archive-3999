@@ -2572,8 +2572,8 @@
         State.stress = 0.82;
         saveProgress(3);
         document.title = '草稿(4,192,803) - 未保存';
-        el.phaseBadge.textContent = '现实结构崩溃';
-        el.phaseBadge.classList.add('danger');
+        el.phaseBadge.textContent = '';
+        el.phaseBadge.style.display = 'none';
         el.statusDot.classList.add('danger');
         el.vignette.style.opacity = '0.78';
         el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">Apollyon</strong>';
@@ -2598,7 +2598,6 @@
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[特殊收容措施 · 强制覆写 #1]</div>' +
           '<p style="margin:0 0 10px;">SCP-3999当前无法被收容，正促成ZK级现实终结场景。最为可行的方案是令<span class="real-anchor" data-anchor="2">研究员塔罗兰</span>与一切基金会站点及人员自我断绝联系。破坏能力将会<span id="a3-l1-fumble" style="color:var(--crimson); font-weight:700;">停止</span>。</p>';
         el.docDynamic.appendChild(box);
         scrollDoc();
@@ -2615,9 +2614,9 @@
           scrollDoc();
 
           // 提供玩家反驳卡片
-          setReferenceCards('写入反驳条款以抵制孤立', [
+          setReferenceCards('驳回隔离提案', [
             {
-              tag: '[反驳提案 · 拒绝隔离]',
+              tag: '',
               text: '驳回隔离提案：研究员塔罗兰须留在 Site-118 接受常规观测与同事协助。',
               highlight: true,
               onClick: function () {
@@ -2976,14 +2975,17 @@
             row.innerHTML = '<strong style="color:var(--crimson);">' + item.who + '：</strong><span style="color:#ff5252; font-weight:700;">' + item.txt + '</span>';
           } else {
             Sound.key(item.who === '采访者');
-            row.innerHTML = '<strong>' + item.who + '：</strong>' + item.txt;
+            const whoHtml = item.who === '塔罗兰'
+              ? '<strong class="iv-speaker-talloran-a3" style="color:var(--text-main);">塔罗兰：</strong>'
+              : '<strong>' + item.who + '：</strong>';
+            row.innerHTML = whoHtml + item.txt;
           }
           container.appendChild(row);
           scrollDoc();
 
-          setReferenceCards('点击推进采访记录 (' + idx + '/' + lines.length + ')', [
+          setReferenceCards('推进采访记录 (' + idx + '/' + lines.length + ')', [
             {
-              tag: '[ 继续记录 ]',
+              tag: '',
               text: idx < lines.length ? '推进下一句采访对话' : '结束异常采访记录',
               highlight: true,
               onClick: nextLine
@@ -3179,9 +3181,9 @@
         const wallDiv = document.createElement('div');
         wallDiv.className = 'only-flood-block';
         wallDiv.style.color = '#ef4444';
-        wallDiv.style.fontSize = '12px';
-        wallDiv.style.lineHeight = '1.7';
-        wallDiv.style.letterSpacing = '1px';
+        wallDiv.style.fontSize = '15px';
+        wallDiv.style.lineHeight = '1.85';
+        wallDiv.style.letterSpacing = '0.5px';
         wallDiv.style.wordBreak = 'break-all';
         wallDiv.style.margin = '10px 0';
         container.appendChild(wallDiv);
@@ -3457,7 +3459,7 @@
             addTimeout(function () {
               const tRow = document.createElement('div');
               tRow.className = 'iv-line';
-              tRow.innerHTML = '<strong class="iv-speaker-talloran" style="color:var(--green);">塔罗兰：</strong>';
+              tRow.innerHTML = '<strong class="iv-speaker-talloran-a4" style="color:var(--green);">塔罗兰：</strong>';
               body.appendChild(tRow);
               typeInto(tRow, cfg.talloranReply, false, 20, function () {
                 State.a4Round++;
@@ -3623,9 +3625,14 @@
         Sound.key(false);
         Sound.confirm();
 
-        // 划除采访者塔罗兰时，采访内容中的所有发言人「塔罗兰：」联动抹除
+        // 划除采访记录中的塔罗兰时，采访内容中的所有发言人「塔罗兰：」联动抹除
+        if (anchorEl.getAttribute('data-anchor') === '6') {
+          document.querySelectorAll('.iv-speaker-talloran-a3').forEach(function (speaker) {
+            speaker.innerHTML = '<span class="erased-anchor" style="color:var(--text-dim); text-decoration:line-through;">已抹除</span>：';
+          });
+        }
         if (anchorEl.getAttribute('data-anchor') === '7') {
-          document.querySelectorAll('.iv-speaker-talloran').forEach(function (speaker) {
+          document.querySelectorAll('.iv-speaker-talloran-a4').forEach(function (speaker) {
             speaker.innerHTML = '<span class="erased-anchor" style="color:var(--text-dim); text-decoration:line-through;">已抹除</span>：';
           });
         }
@@ -3697,24 +3704,36 @@
         }, { once: true });
       }
 
-      function spawnSilenceDots(count, intervalMs, onDone) {
-        let left = count;
-        function nextDot() {
-          if (left <= 0) {
+      function spawnSilenceDots(linesCount, onDone) {
+        let currentLine = 0;
+        function nextLine() {
+          if (currentLine >= linesCount) {
             if (onDone) onDone();
             return;
           }
           const dotLine = document.createElement('div');
           dotLine.className = 'quiet-finale-line';
           dotLine.style.color = '#64748b';
-          dotLine.textContent = '……';
+          dotLine.style.letterSpacing = '3px';
           el.docDynamic.appendChild(dotLine);
           scrollDoc();
-          Sound.key(false);
-          left--;
-          addTimeout(nextDot, intervalMs);
+
+          let dotIdx = 0;
+          const dotsPerLine = 6;
+          const iv = addInterval(function () {
+            if (State.ended) { clearInterval(iv); return; }
+            dotLine.textContent += '.';
+            Sound.key(false);
+            dotIdx++;
+            scrollDoc();
+            if (dotIdx >= dotsPerLine) {
+              clearInterval(iv);
+              currentLine++;
+              addTimeout(nextLine, 700);
+            }
+          }, 240);
         }
-        addTimeout(nextDot, intervalMs);
+        addTimeout(nextLine, 400);
       }
 
       // 3. 静默终局五连拍
@@ -3757,9 +3776,9 @@
                     failLine.style.color = '#64748b';
                     Sound.key(true);
 
-                    // 连拍 2：逐渐出现若干行 …… 之后，3999 冒出「我恨自己。」
+                    // 连拍 2：慢速一个点一个点地打出省略号，之后 3999 冒出「我恨自己。」
                     setHint('……', false);
-                    spawnSilenceDots(3, 750, function () {
+                    spawnSilenceDots(3, function () {
                       const hateLine = document.createElement('div');
                       hateLine.className = 'quiet-finale-line';
                       hateLine.innerHTML = '<span id="f-hate" class="tok-threat">我恨自己。</span>';
@@ -3789,8 +3808,8 @@
                               typeInto(loveLine, '我爱自己。', false, 75, function () {
                                 setHint('……', false);
 
-                                // 逐渐出现若干行 …… 之后，再提供“我写完了”
-                                spawnSilenceDots(4, 800, function () {
+                                // 慢速一个点一个点地打出省略号，之后再提供“我写完了”
+                                spawnSilenceDots(4, function () {
                                   setHint('点击底部卡片完成最终归档。', false);
                                   setReferenceCards('', [
                                     {
@@ -3805,10 +3824,10 @@
                                         el.docDynamic.appendChild(doneLine);
                                         scrollDoc();
 
-                                        typeInto(doneLine, '我写完了。', false, 45, function () {
+                                        typeInto(doneLine, '我写完了。', false, 55, function () {
                                           el.refDock.classList.add('stripped');
                                           Sound.confirm();
-                                          addTimeout(triggerFinalSite118Report, 850);
+                                          addTimeout(triggerFinalSite118Report, 2800);
                                         });
                                       }
                                     }
