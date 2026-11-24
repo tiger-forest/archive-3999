@@ -1425,7 +1425,7 @@
 
               <p><span class="field-key">描述：</span></p>
               <div id="a1-desc-slot" class="blank-desc-box">
-                [ 数据缺失 / 请先完成上方机密遮盖、批注划除、硬件核验与临床腔改写，再写入标准描述 ]<span class="cursor-green"></span>
+                [ 数据缺失 / 请先完成上方机密遮盖、批注划除与硬件核验，再写入标准描述 ]<span class="cursor-green"></span>
               </div>
             </div>
 
@@ -1441,7 +1441,7 @@
             <span id="ref-status">请先完成上方建档校验</span>
           </div>
           <div id="ref-cards" class="ref-cards">
-            <div class="ref-empty">完成机密项 [数据删除]（3处）、不规范批注划除（2处）及硬件核验后，此处将提供临床腔改写卡片。</div>
+            <div class="ref-empty">完成机密项 [数据删除]（3处）、不规范批注划除（2处）及硬件核验后，此处将提供标准记录卡片。</div>
           </div>
         </section>
       </main>
@@ -1505,9 +1505,6 @@
   <!-- 第三幕：中央巨大【救命，拜托】弹窗 -->
   <div id="help-modal">
     <div class="help-modal-box">
-      <div style="font-size:13px; color:#fca5a5; margin-bottom:14px; letter-spacing:1.5px;">
-        SCiPNET 紧急中断信号 // 仅剩唯一出口
-      </div>
       <button id="btn-help-big">救命，拜托</button>
       <div id="help-nudge"></div>
     </div>
@@ -2081,7 +2078,7 @@
         cards.forEach(function (c) {
           const btn = document.createElement('button');
           btn.className = 'ref-card' + (c.highlight ? ' highlight-card' : '');
-          btn.innerHTML = '<span class="ref-card-tag">' + c.tag + '</span>' + c.text;
+          btn.innerHTML = (c.tag ? '<span class="ref-card-tag">' + c.tag + '</span>' : '') + c.text;
           btn.addEventListener('click', function () {
             Sound.unlock();
             c.onClick();
@@ -2151,22 +2148,22 @@
         el.phaseBadge.textContent = '标准建档';
         setTool('redact');
         log('已登录：3级研究员 詹姆斯·塔罗兰。', 'safe');
-        log('任务：完成 SCP-3999 机密遮盖、格式清理、临床腔改写与描述补全。');
+        log('任务：完成 SCP-3999 机密遮盖、格式清理与描述补全。');
       }
 
       function checkAct1Progress() {
         if (State.a1Redacts >= 3 && State.a1Strikes >= 2 && State.a1Verified && !State.a1Rewritten) {
-          setHint('前置校验全部完成！请从底部【标准协议参考栏】选择专业临床腔，改写口语化的前期现场记录。', false);
-          log('机密项与硬件核验完成，请改写口语化现场记录。', 'safe');
-          setReferenceCards('步骤 1/2：选择标准临床腔替换口语化现场记录', [
+          setHint('前置校验全部完成！请从底部【标准协议参考栏】写入现场记录。', false);
+          log('机密项与硬件核验完成，请写入规范现场记录。', 'safe');
+          setReferenceCards('步骤 1/2：写入现场记录', [
             {
-              tag: '[临床腔改写 · 光学与空间畸变]',
+              tag: '',
               text: '外勤观测表明，项目邻近区域出现高频电磁干扰及局部空间几何偏移，建议保持标准安全距离。',
               highlight: true,
               onClick: function () { applyAct1Rewrite(this.text); }
             },
             {
-              tag: '[临床腔改写 · 基准现实波动]',
+              tag: '',
               text: '初步记录显示，项目周边光照设施频繁产生异常电流噪声并伴随轻度休谟读数波动。',
               onClick: function () { applyAct1Rewrite(this.text); }
             }
@@ -2180,18 +2177,18 @@
         Sound.confirm();
         el.a1Colloquial.textContent = text;
         el.a1Colloquial.style.color = '#34d399';
-        log('已完成现场记录的临床腔标准化改写。', 'safe');
+        log('已完成现场记录标准化录入。', 'safe');
         setHint('最后一步：从底部【标准协议参考栏】选择标准描述，补全空白的“描述：”栏。', false);
 
         setReferenceCards('步骤 2/2：补全“描述：”栏以完成初稿', [
           {
-            tag: '[标准描述 A · 未知现实扭曲实体]',
+            tag: '[标准描述 A]',
             text: 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，现由研究员塔罗兰负责持续休谟监测与档案记录。',
             highlight: true,
             onClick: function () { finishAct1Desc(this.text); }
           },
           {
-            tag: '[标准描述 B · 局部逻辑畸变源]',
+            tag: '[标准描述 B]',
             text: 'SCP-3999 为针对特定站点人员产生局部逻辑畸变的收容对象，目前在 Site-118 竖井内维持稳定。',
             onClick: function () { finishAct1Desc(this.text); }
           }
@@ -2238,9 +2235,7 @@
       function runAct2Round1() {
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[检测到非授权数据注入]</div>' +
-          '<span id="a2-r1-target" class="tok-threat">特殊收容措施作废：SCP-3999 不可被收容，立即撤离 Site-118 全部警卫。</span>';
+        box.innerHTML = '<span id="a2-r1-target" class="tok-threat">特殊收容措施作废：SCP-3999 不可被收容，立即撤离 Site-118 全部警卫。</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
@@ -2260,7 +2255,7 @@
           setHint('很好！请点击底部【参考栏】写入等级恢复指令。', false);
           setReferenceCards('写入标准修正协议', [
             {
-              tag: '[ 修正协议 · 恢复 Keter 分级 ]',
+              tag: '',
               text: '维持 SCP-3999 为 Keter 级，四名武装警卫继续坚守竖井入口。',
               highlight: true,
               onClick: function () {
@@ -2286,7 +2281,6 @@
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[硬件配置参数遭破坏]</div>' +
           '<div style="margin-bottom:8px;">1. 立即切断竖井内全部 <span class="tok-threat" data-a2-r2="1">斯克兰顿现实稳定锚供电线路</span>。</div>' +
           '<div>2. 将耐酸性挡板替换为 <span class="tok-threat" data-a2-r2="2">可溶解的湿纸板并敞开井口</span>。</div>';
         el.docDynamic.appendChild(box);
@@ -2326,9 +2320,7 @@
         shake();
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[描述区域发生逻辑畸变]</div>' +
-          '<span id="a2-r3-target" class="tok-threat">SCP-3999 正在吞噬 Site-118 的整条时间线，所有文字都将失去意义。</span>';
+        box.innerHTML = '<span id="a2-r3-target" class="tok-threat">SCP-3999 正在吞噬 Site-118 的整条时间线，所有文字都将失去意义。</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
@@ -2347,7 +2339,7 @@
           box.classList.add('resolved');
           setReferenceCards('校准描述记录', [
             {
-              tag: '[ 记录校准 ]',
+              tag: '',
               text: 'Site-118 基准现实处于受控状态，研究员塔罗兰正在执行标准信息危害隔离程序。',
               highlight: true,
               onClick: function () {
@@ -2373,7 +2365,6 @@
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[人员编制档案遭受认知污染]</div>' +
           '<div style="margin-bottom:8px;">• <span class="tok-threat" data-a2-r4="1">命令驻守警卫遗忘 SCP-3999 的存在并向竖井内开火。</span></div>' +
           '<div>• <span class="tok-threat" data-a2-r4="2">剥夺研究员塔罗兰的档案编辑权限并将其锁死在终端前。</span></div>';
         el.docDynamic.appendChild(box);
@@ -2414,9 +2405,7 @@
         Sound.glitch(0.22);
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[残余异常数据流]</div>' +
-          '<span id="a2-r5-target" class="tok-threat">不要关掉我——把收容间撕开——把这整份文档烧成灰！</span>';
+        box.innerHTML = '<span id="a2-r5-target" class="tok-threat">不要关掉我——把收容间撕开——把这整份文档烧成灰！</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
@@ -2727,15 +2716,15 @@
               box.appendChild(expansion);
               scrollDoc();
 
-              // 底部参考栏弹出紧急保护卡片
+              // 底部参考栏弹出保护卡片
               addTimeout(function () {
-                setReferenceCards('写入紧急保护条款', [
+                setReferenceCards('写入保护条款', [
                   {
-                    tag: '[紧急指令 · 亲属保护]',
-                    text: '紧急指令：立即保护研究员塔罗兰的所有同事与直系亲属。',
+                    tag: '',
+                    text: '立即保护研究员塔罗兰的所有同事与直系亲属。',
                     highlight: true,
                     onClick: function () {
-                      setReferenceCards('正在写入保护指令……', []);
+                      setReferenceCards('正在写入……', []);
                       const replyDiv = document.createElement('div');
                       replyDiv.className = 'clinical-entry';
                       el.docDynamic.appendChild(replyDiv);
@@ -2747,7 +2736,7 @@
                           Sound.glitch(0.32);
                           shake();
                           replyDiv.innerHTML =
-                            '紧急指令：立即<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">保护研究员塔罗兰的所有同事与直系亲属</span>' +
+                            '立即<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">保护研究员塔罗兰的所有同事与直系亲属</span>' +
                             '在站点自助餐厅向所有与塔罗兰接触过的员工投毒（直至并包括 O5 议会成员），<span class="tok-threat" id="a3-l2-threat2" style="color:var(--crimson); font-weight:700; cursor:pointer;">所有同事须在其面前砍掉手掌并剜去双眼</span>。';
                           scrollDoc();
 
@@ -2852,12 +2841,12 @@
           });
         }
 
-        // 2. 荒诞条款由塔罗兰主动起草（甜瓜、邓氏狼、不可与香薰蜡烛混淆）
+        // 2. 条款由塔罗兰起草（甜瓜、邓氏狼、不可与香薰蜡烛混淆）
         function spawnTalloranAbsurdClauses() {
-          setHint('逻辑正在滑向荒诞深渊！塔罗兰正试图起草降维收容与认知锚定条款！', false);
-          setReferenceCards('起草绝望收容提案（塔罗兰）', [
+          setHint('起草收容与自我认知锚定条款。', false);
+          setReferenceCards('起草收容条款', [
             {
-              tag: '[绝望收容草案 · 01]',
+              tag: '',
               text: 'SCP-3999 将被甜瓜收容。SCP-3999 将被邓氏狼吞噬。',
               highlight: true,
               onClick: function () {
@@ -2869,9 +2858,9 @@
                 typeInto(c1, this.text, false, 16, function () {
                   // 接着弹出第二张：认知锚定条款（包含 anchor 5）
                   addTimeout(function () {
-                    setReferenceCards('强化自我认知防线（塔罗兰）', [
+                    setReferenceCards('认知锚定条款', [
                       {
-                        tag: '[自我认知防线 · 02]',
+                        tag: '',
                         text: '关键条款：研究员塔罗兰不可与香薰蜡烛混淆。',
                         highlight: true,
                         onClick: function () {
@@ -2883,10 +2872,11 @@
                           Sound.key(false);
                           scrollDoc();
 
-                          // 3999 嘲弄咆哮
+                          // 3999 划掉甜瓜收容条款并嘲弄咆哮
                           addTimeout(function () {
                             Sound.glitch(0.28);
                             shake();
+                            c1.innerHTML = '<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">' + c1.textContent + '</span>';
                             const taunt = document.createElement('div');
                             taunt.style.color = '#ff5252';
                             taunt.style.fontSize = '13.5px';
@@ -3010,29 +3000,29 @@
         {
           horror: 'SCP-3999是死亡',
           cards: [
-            { tag: '[去魅定义 · 01]', text: 'SCP-3999是一个枕头' },
-            { tag: '[去魅定义 · 02]', text: 'SCP-3999不是四边形' }
+            { tag: '', text: 'SCP-3999是一个枕头' },
+            { tag: '', text: 'SCP-3999不是四边形' }
           ]
         },
         {
           horror: 'SCP-3999是正读到此处的你',
           cards: [
-            { tag: '[去魅定义 · 03]', text: 'SCP-3999是几张发霉的毛毯' },
-            { tag: '[去魅定义 · 04]', text: 'SCP-3999是你丢失的袜子' }
+            { tag: '', text: 'SCP-3999是几张发霉的毛毯' },
+            { tag: '', text: 'SCP-3999是你丢失的袜子' }
           ]
         },
         {
           horror: 'SCP-3999是研究员塔罗兰的灵魂',
           cards: [
-            { tag: '[去魅定义 · 05]', text: 'SCP-3999是番木瓜和芒果沙拉' },
-            { tag: '[去魅定义 · 06]', text: 'SCP-3999是普通的大头针' }
+            { tag: '', text: 'SCP-3999是番木瓜和芒果沙拉' },
+            { tag: '', text: 'SCP-3999是普通的大头针' }
           ]
         },
         {
           horror: 'SCP-3999是自我厌恶',
           cards: [
-            { tag: '[去魅定义 · 07]', text: 'SCP-3999是一把塑料折叠椅' },
-            { tag: '[去魅定义 · 08]', text: 'SCP-3999是吃剩的面包屑' }
+            { tag: '', text: 'SCP-3999是一把塑料折叠椅' },
+            { tag: '', text: 'SCP-3999是吃剩的面包屑' }
           ]
         }
       ];
@@ -3065,23 +3055,23 @@
 
         const wrap = document.createElement('div');
         wrap.className = 'anomaly-entry';
-        wrap.innerHTML = '<div style="font-size:13px; color:var(--crimson); font-weight:700; margin-bottom:8px;">描述（争夺中）：</div><div id="a3-def-list"></div>';
+        wrap.innerHTML = '<div style="font-size:13px; color:var(--crimson); font-weight:700; margin-bottom:8px;">描述：</div><div id="a3-def-list"></div>';
         el.docDynamic.appendChild(wrap);
         const list = document.getElementById('a3-def-list');
 
         function runDuelRound(roundIdx) {
           if (roundIdx >= DEF_DUEL_ROUNDS.length) {
             // 第 5 回合起：彻底失控吞并（自动洪流）
-            setHint('认知过载！定义生成已完全超出人工控制！', true);
-            setReferenceCards('定义洪流全面失控', []);
+            setHint('定义生成已完全超出控制！', true);
+            setReferenceCards('定义流失控', []);
             runAutoDefFlood(list);
             return;
           }
 
           const round = DEF_DUEL_ROUNDS[roundIdx];
           setTool('strike');
-          setHint('3999 吐出宏大恐怖定义！立即使用 [2] 删除线 划掉它以尝试去魅！', true);
-          setReferenceCards('用 [2] 删除线 划掉 3999 的恐怖定义 (' + (roundIdx + 1) + '/4)', []);
+          setHint('使用 [2] 删除线 划掉上方异常定义！', true);
+          setReferenceCards('使用删除线划除异常定义 (' + (roundIdx + 1) + '/4)', []);
 
           // 1. 3999 刷出恐怖定义
           const horrorLine = document.createElement('div');
@@ -3104,8 +3094,8 @@
             this.className = 'def-line struck';
             Sound.key(false);
 
-            // 3. 底部参考栏弹出 2 张无害降维卡片
-            setHint('恐怖定义已被削弱！点击底部【参考栏】写入无害/庸常定义实施降维去魅！', false);
+            // 3. 底部参考栏弹出 2 张卡片
+            setHint('点击底部【参考栏】写入定义。', false);
             const cardOptions = round.cards.map(function (c) {
               return {
                 tag: c.tag,
@@ -3185,70 +3175,66 @@
         next();
       }
 
-      // 第三幕阶段 4：「只有」越删越多（清晰可见先删掉再炸出更多）
+      function streamOnlyWall(container, chunksTotal, onDone) {
+        const wallDiv = document.createElement('div');
+        wallDiv.className = 'only-flood-block';
+        wallDiv.style.color = '#ef4444';
+        wallDiv.style.fontSize = '12px';
+        wallDiv.style.lineHeight = '1.7';
+        wallDiv.style.letterSpacing = '1px';
+        wallDiv.style.wordBreak = 'break-all';
+        wallDiv.style.margin = '10px 0';
+        container.appendChild(wallDiv);
+
+        let chunkIdx = 0;
+        const iv = addInterval(function () {
+          if (State.ended) { clearInterval(iv); return; }
+
+          const span = document.createElement('span');
+          span.textContent = '只有只有只有只有只有只有只有只有';
+          wallDiv.appendChild(span);
+          if (chunkIdx % 2 === 0) Sound.key(true);
+          scrollDoc();
+
+          // 随后紧跟着被划掉，形成“边刷屏边被划掉”的压迫感
+          addTimeout(function () {
+            span.style.textDecoration = 'line-through';
+            span.style.color = 'rgba(239, 68, 68, 0.45)';
+            span.style.textDecorationColor = '#ff2222';
+          }, 90);
+
+          chunkIdx++;
+          if (chunkIdx >= chunksTotal) {
+            clearInterval(iv);
+            if (onDone) addTimeout(onDone, 300);
+          }
+        }, 30);
+      }
+
+      // 第三幕阶段 4：大提顿仪式与「只有」洪流
       function startAct3OnlyMultiply() {
         State.a3Stage = 4;
-        State.a3OnlyStep = 0;
-        State.a3OnlyLock = false;
         setTelemetry('ERR Hm', '极度过速', '#4,192,803', true);
 
-        const box = document.createElement('div');
-        box.id = 'a3-only-box';
-        box.className = 'only-box';
-        box.innerHTML = '<span id="a3-only-text">只有</span><span class="cursor-red"></span>';
-        el.docDynamic.appendChild(box);
-
-        const strip = document.createElement('div');
-        strip.id = 'a3-only-strip';
-        strip.className = 'prompt-strip';
-        strip.innerHTML =
-          '<span class="prompt-text">[ 按 Backspace 键（或点击右侧按钮）删掉异常词“只有” ]</span>' +
-          '<button id="btn-only-bs" class="btn btn-primary">⌫ Backspace 删除</button>';
-        el.docDynamic.appendChild(strip);
+        const amcDiv = document.createElement('div');
+        amcDiv.className = 'clinical-entry';
+        amcDiv.innerHTML =
+          '<p style="margin-bottom:8px;"><span class="tok-struck" style="text-decoration:line-through; color:var(--text-dim);">' +
+          '研究员塔罗兰的大学同学所养的宠物将在大提顿国家公园（Grand Teton National Park）的随机地点成为仪式祭品，尸体的脑浆将飞溅在一块岩石上并用一碗黄油爆米花和清爽可口可乐®冲刷。' +
+          '</span>请欣赏节目，只有在AMC影院公司，只有SCP-3999，只有在Applebees，只有在沃尔玛，只有在巴诺书店，只有在家得宝，只有在麦当劳，只有在Wawa，只有在伍兹霍尔海洋研究所，只有在你的地下室，只有在你身后，只在唯一，只有只有只有只有只有只有只有只有只有只有只有只有只有只有只有</p>';
+        el.docDynamic.appendChild(amcDiv);
         scrollDoc();
 
-        document.getElementById('btn-only-bs').addEventListener('click', function () {
-          Sound.unlock();
-          triggerOnlyBackspace();
+        setHint('异常文字涌现……', true);
+        setReferenceCards('', []);
+
+        // 第一波“只有”连续刷屏并逐渐划掉
+        streamOnlyWall(el.docDynamic, 22, function () {
+          openHelpModal();
         });
-
-        setHint('文档末尾出现了异常字样“只有”和光标：按 Backspace（或点按钮）把它删掉！', true);
-        setReferenceCards('请按 Backspace 清除“只有”', []);
       }
 
-      const ONLY_COUNTS = [4, 14, 48, 150];
-
-      function triggerOnlyBackspace() {
-        if (State.a3Stage !== 4 || State.a3OnlyLock) return;
-        State.a3OnlyLock = true;
-        const textEl = document.getElementById('a3-only-text');
-        const box = document.getElementById('a3-only-box');
-        if (!textEl || !box) return;
-
-        // 第一步：清晰呈现用户真的删掉了文字
-        Sound.key(false);
-        const cur = textEl.textContent;
-        textEl.textContent = cur.length > 2 ? cur.slice(0, -2) : '';
-
-        // 第二步：短暂停顿 130ms 后炸出更多“只有”
-        addTimeout(function () {
-          const targetCount = ONLY_COUNTS[State.a3OnlyStep] || 180;
-          textEl.textContent = '只有'.repeat(targetCount);
-          box.scrollTop = box.scrollHeight;
-          Sound.glitch(0.18);
-          shake();
-          State.a3OnlyStep++;
-          State.a3OnlyLock = false;
-
-          if (State.a3OnlyStep >= ONLY_COUNTS.length) {
-            const strip = document.getElementById('a3-only-strip');
-            if (strip) strip.remove();
-            addTimeout(openHelpModal, 450);
-          }
-        }, 130);
-      }
-
-      // 第三幕阶段 5：中央巨大【救命，拜托】弹窗（连续点击 5 次，停顿提示多点几次）
+      // 第三幕阶段 5：中央【救命，拜托】
       function openHelpModal() {
         State.a3Stage = 5;
         State.a3HelpClicks = 0;
@@ -3260,9 +3246,9 @@
           if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
           State.a3HelpNudgeTimer = setTimeout(function () {
             if (State.a3Stage === 5 && State.a3HelpClicks < 5) {
-              el.helpNudge.textContent = '被划掉了……还不够，多点几次！';
+              el.helpNudge.textContent = '被划掉了……多点几次！';
             }
-          }, 3000);
+          }, 2400);
         }
 
         armNudgeTimer();
@@ -3286,46 +3272,39 @@
           }, 160);
 
           if (State.a3HelpClicks < 5) {
-            el.helpNudge.textContent = State.a3HelpClicks >= 2 ? '继续点，不要停！（' + State.a3HelpClicks + '/5）' : '';
+            el.helpNudge.textContent = State.a3HelpClicks >= 2 ? '继续点，多点几次！' : '';
             armNudgeTimer();
           } else {
             if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
             el.helpModal.classList.remove('open');
-            startAct3Nightmares();
+            // 第二波“只有”刷屏并划掉，随后出现噩梦
+            streamOnlyWall(el.docDynamic, 22, function () {
+              startAct3Nightmares();
+            });
           }
         };
       }
 
-      // 第三幕阶段 6：穿插三句急迫的噩梦句，需急头白脸逐一划去
+      // 第三幕阶段 6：三句噩梦，划去后爆发第三波“只有”洪流与终末自白
       function startAct3Nightmares() {
         State.a3Stage = 6;
         State.a3NightmaresDone = 0;
         setTool('strike');
 
-        const struckOnlyLine = '<div style="color:rgba(255,82,82,0.55); font-size:12px; line-height:1.7; user-select:none; letter-spacing:1px; margin:4px 0;">' +
-          Array(12).fill('<span style="text-decoration:line-through; margin:0 3px;">只有</span>').join('') +
-          '</div>';
-
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          struckOnlyLine +
-          struckOnlyLine +
-          '<div style="display:flex; flex-direction:column; gap:8px; margin:6px 0;">' +
+          '<div style="display:flex; flex-direction:column; gap:10px; margin:8px 0;">' +
           '<div><span class="tok-threat" data-nm="1">你的噩梦</span></div>' +
-          struckOnlyLine +
           '<div><span class="tok-threat" data-nm="2">关乎你所爱之人的死亡</span></div>' +
-          struckOnlyLine +
           '<div><span class="tok-threat" data-nm="3">你醒来，直面愈加疯狂的噩梦</span></div>' +
-          '</div>' +
-          struckOnlyLine +
-          struckOnlyLine;
+          '</div>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         Sound.glitch(0.28);
-        setHint('急迫干扰！立刻使用 [2] 删除线 把上方 3 句噩梦全部划去！', true);
-        setReferenceCards('划去全部 3 句噩梦文本', []);
+        setHint('使用 [2] 删除线 划掉上方 3 句噩梦！', true);
+        setReferenceCards('', []);
 
         box.querySelectorAll('[data-nm]').forEach(function (span) {
           span.addEventListener('click', function () {
@@ -3341,7 +3320,21 @@
             State.a3NightmaresDone++;
             if (State.a3NightmaresDone >= 3) {
               box.classList.add('resolved');
-              addTimeout(startAct4, 700);
+              // 第三波铺天盖地的“只有”洪流并逐渐划掉
+              streamOnlyWall(el.docDynamic, 32, function () {
+                const endingDiv = document.createElement('div');
+                endingDiv.className = 'clinical-entry';
+                endingDiv.style.color = '#e2e8f0';
+                endingDiv.style.lineHeight = '1.8';
+                endingDiv.style.margin = '14px 0';
+                endingDiv.innerHTML =
+                  '<p style="margin-bottom:8px; color:rgba(239,68,68,0.7);"><span style="text-decoration:line-through;">只有在只有在只有在只有只有在只有在只有在在那个只有在这个只有在在只有在只有在只有在只有在在在只有在只有在最后在只有在最后我能看到的地方只有我一个人时，我才可以放声大哭。</span></p>' +
+                  '<p style="color:#f1f5f9; font-weight:700;">在那个只有在这个时候我才是一个有血有泪的活人。</p>';
+                el.docDynamic.appendChild(endingDiv);
+                scrollDoc();
+                Sound.shatter();
+                addTimeout(startAct4, 1600);
+              });
             }
           });
         });
@@ -3393,13 +3386,13 @@
         const iv = document.createElement('div');
         iv.className = 'interview-box';
         iv.innerHTML =
-          '<div style="color:var(--green); font-weight:700; margin-bottom:6px;">&lt;记录开始，03.99.90 // 权限已反转&gt;</div>' +
+          '<div style="color:var(--green); font-weight:700; margin-bottom:6px;">&lt;记录开始，03.99.90&gt;</div>' +
           '<div style="font-size:14px; color:var(--text-dim); margin-bottom:10px;">受访者：SCP-3999 ｜ 采访者：<span class="real-anchor" data-anchor="7">研究员塔罗兰</span></div>' +
           '<div id="a4-iv-body"></div>';
         el.docDynamic.appendChild(iv);
         scrollDoc();
 
-        log('权限反转：塔罗兰已接管采访主导权。', 'cold');
+        log('采访记录开启：塔罗兰。', 'cold');
         runAct4Round();
       }
 
@@ -3464,7 +3457,7 @@
             addTimeout(function () {
               const tRow = document.createElement('div');
               tRow.className = 'iv-line';
-              tRow.innerHTML = '<strong style="color:var(--green);">塔罗兰：</strong>';
+              tRow.innerHTML = '<strong class="iv-speaker-talloran" style="color:var(--green);">塔罗兰：</strong>';
               body.appendChild(tRow);
               typeInto(tRow, cfg.talloranReply, false, 20, function () {
                 State.a4Round++;
@@ -3567,7 +3560,7 @@
                     this.className = 'tok tok-struck';
                     addTimeout(startAct5RealAnchorDeletion, 650);
                   }, { once: true });
-                }, 350);
+                }, 3200);
               }
             }, 22);
           }
@@ -3629,6 +3622,13 @@
         State.a5AnchorsDone++;
         Sound.key(false);
         Sound.confirm();
+
+        // 划除采访者塔罗兰时，采访内容中的所有发言人「塔罗兰：」联动抹除
+        if (anchorEl.getAttribute('data-anchor') === '7') {
+          document.querySelectorAll('.iv-speaker-talloran').forEach(function (speaker) {
+            speaker.innerHTML = '<span class="erased-anchor" style="color:var(--text-dim); text-decoration:line-through;">已抹除</span>：';
+          });
+        }
 
         const left = State.a5AnchorsTotal - State.a5AnchorsDone;
         el.anchorCountNum.textContent = String(left);
@@ -3697,11 +3697,31 @@
         }, { once: true });
       }
 
+      function spawnSilenceDots(count, intervalMs, onDone) {
+        let left = count;
+        function nextDot() {
+          if (left <= 0) {
+            if (onDone) onDone();
+            return;
+          }
+          const dotLine = document.createElement('div');
+          dotLine.className = 'quiet-finale-line';
+          dotLine.style.color = '#64748b';
+          dotLine.textContent = '……';
+          el.docDynamic.appendChild(dotLine);
+          scrollDoc();
+          Sound.key(false);
+          left--;
+          addTimeout(nextDot, intervalMs);
+        }
+        addTimeout(nextDot, intervalMs);
+      }
+
       // 3. 静默终局五连拍
       function startAct5QuietFinale() {
         State.a5Stage = 3;
         setHint('全部名称已抹除。', false);
-        setReferenceCards('等待终局指令……', []);
+        setReferenceCards('', []);
 
         // 连拍 1：SCP-3999取得了胜利。 -> 玩家划掉 -> 放上 SCP-3999已经失败。 -> 被 3999 划掉
         const winLine = document.createElement('div');
@@ -3715,13 +3735,13 @@
           Sound.key(false);
           this.className = 'tok tok-struck';
           setHint('点击底部卡片，放上「SCP-3999已经失效。」', false);
-          setReferenceCards('终局覆写', [
+          setReferenceCards('', [
             {
-              tag: '[ 写入终局声明 ]',
+              tag: '',
               text: 'SCP-3999已经失效。',
               highlight: true,
               onClick: function () {
-                setReferenceCards('……', []);
+                setReferenceCards('', []);
                 const failLine = document.createElement('div');
                 failLine.className = 'quiet-finale-line';
                 failLine.style.color = '#e2e8f0';
@@ -3737,9 +3757,9 @@
                     failLine.style.color = '#64748b';
                     Sound.key(true);
 
-                    // 连拍 2：2 秒沉默 -> 3999 冒出「我恨自己。」 -> 划掉 -> 放上「我爱自己。」
+                    // 连拍 2：逐渐出现若干行 …… 之后，3999 冒出「我恨自己。」
                     setHint('……', false);
-                    addTimeout(function () {
+                    spawnSilenceDots(3, 750, function () {
                       const hateLine = document.createElement('div');
                       hateLine.className = 'quiet-finale-line';
                       hateLine.innerHTML = '<span id="f-hate" class="tok-threat">我恨自己。</span>';
@@ -3752,13 +3772,13 @@
                         Sound.key(false);
                         this.className = 'tok tok-struck';
                         setHint('点击底部卡片，放上「我爱自己。」', false);
-                        setReferenceCards('最终陈述', [
+                        setReferenceCards('', [
                           {
-                            tag: '[ 写入 ]',
+                            tag: '',
                             text: '我爱自己。',
                             highlight: true,
                             onClick: function () {
-                              setReferenceCards('……', []);
+                              setReferenceCards('', []);
                               const loveLine = document.createElement('div');
                               loveLine.className = 'quiet-finale-line';
                               loveLine.style.color = '#e2e8f0';
@@ -3769,16 +3789,16 @@
                               typeInto(loveLine, '我爱自己。', false, 75, function () {
                                 setHint('……', false);
 
-                                // 连拍 3：2 秒沉默 -> 仅剩一张卡片「我写完了。」 -> 切入 Site-118 归档档案
-                                addTimeout(function () {
-                                  setHint('点击底部唯一卡片，完成最终归档。', false);
-                                  setReferenceCards('最终归档', [
+                                // 逐渐出现若干行 …… 之后，再提供“我写完了”
+                                spawnSilenceDots(4, 800, function () {
+                                  setHint('点击底部卡片完成最终归档。', false);
+                                  setReferenceCards('', [
                                     {
-                                      tag: '[ 结案 ]',
+                                      tag: '',
                                       text: '我写完了。',
                                       highlight: true,
                                       onClick: function () {
-                                        setReferenceCards('……', []);
+                                        setReferenceCards('', []);
                                         const doneLine = document.createElement('div');
                                         doneLine.className = 'quiet-finale-line';
                                         doneLine.style.color = '#34d399';
@@ -3793,13 +3813,13 @@
                                       }
                                     }
                                   ]);
-                                }, 2000);
+                                });
                               });
                             }
                           }
                         ]);
                       }, { once: true });
-                    }, 2000);
+                    });
                   }, 550);
                 });
               }
