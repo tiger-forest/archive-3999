@@ -1,0 +1,3132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCP-3999 - SCiPNET</title>
+  <style>
+    /* =========================================================================
+       SCP-3999：我于万物之中 — SCiPNET-EDIT v4.0 (暗色基金会终端)
+       100% 零外部依赖 | 原生 HTML + CSS + JS | 纯 Web Audio API 合成音效
+       ========================================================================= */
+    :root {
+      --bg-void: #07090b;
+      --bg-app: #0b0d10;
+      --bg-panel: #12161c;
+      --bg-elevated: #171c24;
+      --bg-paper: #0f1318;
+      --border: #252e3a;
+      --border-strong: #374354;
+      --text-main: #e2e8f0;
+      --text-dim: #8a97a8;
+      --text-muted: #556170;
+      --green: #34d399;
+      --green-soft: rgba(52, 211, 153, 0.12);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.12);
+      --crimson: #ff3b3b;
+      --crimson-soft: rgba(255, 59, 59, 0.14);
+      --blue: #60a5fa;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', 'PingFang SC', 'Microsoft YaHei', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.65;
+      user-select: none;
+    }
+
+    /* =========================================================================
+       视觉氛围层（扫描线、暗红暗角、闪断黑屏）
+       ========================================================================= */
+    #crt-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 45;
+      opacity: 0.25;
+      transition: opacity 0.6s ease;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.22) 0px,
+          rgba(0, 0, 0, 0.22) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+    }
+
+    #vignette-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 46;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      background: radial-gradient(circle at center, transparent 48%, rgba(165, 12, 12, 0.34) 100%);
+    }
+
+    #flash-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: #000000;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+
+    /* 震动与抖动动画 */
+    @keyframes shake-heavy {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-4px, 2px); }
+      40% { transform: translate(4px, -2px); }
+      60% { transform: translate(-3px, -3px); }
+      80% { transform: translate(3px, 2px); }
+    }
+
+    @keyframes text-jitter {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(0.8px, -0.5px); }
+      50% { transform: translate(-0.8px, 0.6px); }
+      75% { transform: translate(0.5px, 0.7px); }
+    }
+
+    @keyframes bounce-spark {
+      0% { transform: translateX(0); color: var(--crimson); }
+      30% { transform: translateX(6px); color: #ffffff; text-shadow: 0 0 8px var(--crimson); }
+      60% { transform: translateX(-5px); color: var(--crimson); }
+      100% { transform: translateX(0); opacity: 0.7; }
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.45), 0 0 10px rgba(52, 211, 153, 0.18); }
+      50% { box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.9), 0 0 18px rgba(52, 211, 153, 0.42); }
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(255, 59, 59, 0.55); }
+      50% { box-shadow: 0 0 0 2px rgba(255, 59, 59, 1), 0 0 14px rgba(255, 59, 59, 0.45); }
+    }
+
+    .shaking { animation: shake-heavy 0.12s linear 3; }
+
+    /* =========================================================================
+       阶段 0：序幕黑屏引子 & 刷新嘲讽层
+       ========================================================================= */
+    .fullscreen-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: #050608;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .fullscreen-layer.hidden {
+      display: none;
+    }
+
+    .poem-box {
+      max-width: 560px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .poem-line {
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      color: #cbd5e1;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .poem-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro-title-block {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .intro-title-block.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .intro-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #f8fafc;
+      margin: 0;
+    }
+
+    .intro-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-top: -10px;
+    }
+
+    .intro-hint {
+      position: fixed;
+      bottom: 28px;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      animation: blink 1.8s infinite;
+    }
+
+    .taunt-text {
+      max-width: 520px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--crimson);
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+
+    /* =========================================================================
+       主终端布局 (SCiPNET-EDIT v4.0)
+       ========================================================================= */
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-app);
+      position: relative;
+      z-index: 10;
+      transition: background-color 0.8s ease;
+    }
+
+    #app.void-mode {
+      background: #040507;
+    }
+
+    /* 顶部工具栏 */
+    .topbar {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      transition: opacity 0.6s ease, border-color 0.6s ease;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+      flex-shrink: 0;
+    }
+
+    .status-dot.danger {
+      background: var(--crimson);
+      box-shadow: 0 0 10px var(--crimson);
+      animation: blink 0.85s infinite;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #f1f5f9;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .phase-badge {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--green);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .phase-badge.danger {
+      color: var(--crimson);
+      border-color: rgba(255, 59, 59, 0.5);
+      background: var(--crimson-soft);
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.5s ease;
+    }
+
+    .toolbar-group.stripped {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elevated);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #212936;
+      border-color: #54657d;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .btn.active {
+      background: #e2e8f0;
+      color: #0b0d10;
+      border-color: #ffffff;
+    }
+
+    .btn-key {
+      font-size: 10px;
+      opacity: 0.65;
+    }
+
+    .btn-primary {
+      background: rgba(52, 211, 153, 0.14);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: rgba(52, 211, 153, 0.26);
+      color: #ffffff;
+    }
+
+    .btn-archive-locked {
+      background: #14181f;
+      border-color: #262e3a;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .btn-archive-ready {
+      background: rgba(52, 211, 153, 0.18);
+      border-color: var(--green);
+      color: var(--green);
+      cursor: pointer;
+      animation: pulse-border 1.5s infinite;
+    }
+
+    .btn-archive-ready:hover {
+      background: var(--green);
+      color: #06110c;
+    }
+
+    .clip-tag {
+      color: var(--blue);
+      max-width: 76px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn.active .clip-tag {
+      color: #1d4ed8;
+    }
+
+    /* =========================================================================
+       主体双栏工作区
+       ========================================================================= */
+    .workspace {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* 左侧主文档区 + 底部参考栏 */
+    .main-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .doc-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 22px 28px;
+      scroll-behavior: smooth;
+    }
+
+    .doc-scroll::-webkit-scrollbar {
+      width: 7px;
+    }
+    .doc-scroll::-webkit-scrollbar-track {
+      background: var(--bg-app);
+    }
+    .doc-scroll::-webkit-scrollbar-thumb {
+      background: #283240;
+      border-radius: 4px;
+    }
+
+    .doc-paper {
+      max-width: 790px;
+      margin: 0 auto;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px 28px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+      transition: background-color 0.7s ease, border-color 0.7s ease, box-shadow 0.7s ease;
+    }
+
+    .doc-paper.stripped-paper {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .doc-paper.cursor-redact { cursor: crosshair; }
+    .doc-paper.cursor-strike { cursor: not-allowed; }
+    .doc-paper.cursor-clip   { cursor: copy; }
+    .doc-paper.cursor-erase  { cursor: cell; }
+
+    .doc-header {
+      border-bottom: 1px solid var(--border-strong);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .doc-kicker {
+      font-size: 10px;
+      letter-spacing: 1.6px;
+      color: var(--text-muted);
+    }
+
+    .doc-title {
+      margin: 4px 0 0;
+      font-size: 19px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .doc-section p {
+      margin: 0 0 13px;
+    }
+
+    .field-key {
+      color: #f8fafc;
+      font-weight: 700;
+    }
+
+    /* 可交互词条 */
+    .tok {
+      display: inline;
+      padding: 1px 5px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tok-task {
+      color: var(--amber);
+      background: var(--amber-soft);
+      border: 1px dashed rgba(245, 158, 11, 0.7);
+    }
+
+    .tok-task:hover {
+      background: rgba(245, 158, 11, 0.24);
+    }
+
+    .tok-safe {
+      color: var(--blue);
+      background: rgba(96, 165, 250, 0.12);
+      border-bottom: 1px dashed var(--blue);
+    }
+
+    .tok-verified {
+      color: var(--green) !important;
+      background: var(--green-soft) !important;
+      border: 1px solid rgba(52, 211, 153, 0.45) !important;
+      cursor: default !important;
+    }
+
+    .tok-redacted {
+      background: #020304 !important;
+      color: #020304 !important;
+      border: 1px solid #303a47 !important;
+      padding: 1px 6px;
+      cursor: default !important;
+      letter-spacing: 1px;
+    }
+
+    .tok-struck {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      color: var(--text-muted) !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      opacity: 0.65;
+      cursor: default !important;
+    }
+
+    .tok-threat {
+      color: var(--crimson);
+      background: var(--crimson-soft);
+      border: 1px solid rgba(255, 59, 59, 0.65);
+      font-weight: 700;
+      display: inline-block;
+      animation: text-jitter 0.18s infinite;
+    }
+
+    .tok-threat:hover {
+      background: rgba(255, 59, 59, 0.28);
+    }
+
+    /* 空白描述槽 */
+    .blank-desc-box {
+      margin: 8px 0 18px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-strong);
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    /* 动态回合段落 */
+    .clinical-entry {
+      margin: 10px 0;
+      padding: 10px 13px;
+      background: rgba(52, 211, 153, 0.05);
+      border-left: 3px solid var(--green);
+      border-radius: 0 4px 4px 0;
+      color: #ecfdf5;
+    }
+
+    .clinical-entry.locked-order {
+      background: rgba(52, 211, 153, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      border-left: 3px solid var(--green);
+    }
+
+    .clinical-entry.struck-by-3999 {
+      color: var(--text-muted);
+      border-left-color: var(--crimson);
+      background: rgba(255, 59, 59, 0.04);
+      text-decoration: line-through;
+      text-decoration-color: var(--crimson);
+      text-decoration-thickness: 2px;
+    }
+
+    .anomaly-entry {
+      margin: 10px 0;
+      padding: 10px 13px;
+      background: rgba(255, 59, 59, 0.07);
+      border: 1px solid rgba(255, 59, 59, 0.35);
+      border-left: 3px solid var(--crimson);
+      border-radius: 4px;
+      color: #fecaca;
+    }
+
+    .anomaly-entry.resolved {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: var(--border);
+      border-left-color: var(--green);
+      color: var(--text-dim);
+    }
+
+    .anomaly-entry.clickable-suppress {
+      cursor: pointer;
+      animation: pulse-red 1.4s infinite;
+    }
+
+    .anomaly-entry.clickable-suppress:hover {
+      background: rgba(255, 59, 59, 0.16);
+    }
+
+    .sys-err-override {
+      margin: 10px 0;
+      padding: 9px 13px;
+      background: #10141a;
+      border: 1px solid var(--border-strong);
+      border-left: 3px solid var(--text-dim);
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-size: 12.5px;
+    }
+
+    .bounce-notice {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--green);
+      animation: bounce-spark 0.45s ease;
+    }
+
+    .interview-box {
+      margin: 14px 0;
+      padding: 13px 15px;
+      background: #10141b;
+      border: 1px dashed var(--border-strong);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .only-wall {
+      margin: 12px 0;
+      padding: 12px;
+      background: rgba(255, 59, 59, 0.06);
+      border: 1px solid rgba(255, 59, 59, 0.35);
+      border-radius: 4px;
+      color: rgba(255, 82, 82, 0.85);
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-all;
+      max-height: 185px;
+      overflow-y: auto;
+    }
+
+    .breakout-link {
+      display: inline-block;
+      margin: 8px 4px;
+      padding: 4px 10px;
+      background: #0b0d10;
+      border: 1px solid var(--green);
+      border-radius: 3px;
+      color: var(--green);
+      font-weight: 700;
+      cursor: pointer;
+      animation: pulse-border 1.4s infinite;
+    }
+
+    .breakout-link:hover {
+      background: var(--green);
+      color: #06100b;
+    }
+
+    /* 引导式键盘提示条 */
+    .prompt-strip {
+      margin: 14px 0;
+      padding: 12px 14px;
+      background: #141a23;
+      border: 1px solid var(--amber);
+      border-radius: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .prompt-strip.green-strip {
+      border-color: var(--green);
+      background: rgba(52, 211, 153, 0.07);
+    }
+
+    .prompt-text {
+      color: var(--amber);
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+
+    .prompt-strip.green-strip .prompt-text {
+      color: var(--green);
+    }
+
+    /* 双光标 */
+    .cursor-green {
+      display: inline-block;
+      width: 8px;
+      height: 1.05em;
+      background: var(--green);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+    }
+
+    .cursor-red {
+      display: inline-block;
+      width: 8px;
+      height: 1.05em;
+      background: var(--crimson);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blink 0.55s infinite;
+    }
+
+    /* V5 锚点剥离样式 */
+    .anchor-box {
+      margin: 12px 0;
+      padding: 12px 14px;
+      background: #0e1218;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .anchor-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 4px;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid var(--green);
+      color: #f8fafc;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      touch-action: none;
+      transition: all 0.2s ease;
+    }
+
+    .anchor-chip.target-now {
+      animation: pulse-border 1.3s infinite;
+    }
+
+    .anchor-chip.erasing {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.16);
+    }
+
+    .anchor-chip.erased {
+      border-color: #232a33;
+      background: transparent;
+      color: var(--text-muted);
+      text-decoration: line-through;
+      animation: none;
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    /* 底部 [ 标准协议参考栏 ] */
+    .ref-dock {
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+      flex-shrink: 0;
+      transition: opacity 0.6s ease, max-height 0.6s ease, padding 0.6s ease;
+    }
+
+    .ref-dock.stripped {
+      opacity: 0;
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+      border-top-color: transparent;
+    }
+
+    .ref-dock-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.6px;
+    }
+
+    .ref-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ref-card {
+      flex: 1 1 220px;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.45;
+      padding: 8px 11px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .ref-card:hover {
+      border-color: var(--green);
+      background: #1b2430;
+    }
+
+    .ref-card:active {
+      transform: scale(0.99);
+    }
+
+    .ref-card-tag {
+      display: block;
+      font-size: 10px;
+      color: var(--green);
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    .ref-empty {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+
+    /* =========================================================================
+       右侧遥测边栏（纯数据 + 实时 Canvas 心电图，绝无字符画）
+       ========================================================================= */
+    .sidebar {
+      width: 310px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 0;
+      transition: opacity 0.65s ease, width 0.65s ease, border-color 0.65s ease;
+    }
+
+    .sidebar.stripped {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      border-left-color: transparent;
+    }
+
+    .side-head {
+      padding: 8px 12px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .telemetry-panel {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .telemetry-panel.offline {
+      opacity: 0.25;
+      filter: grayscale(1);
+    }
+
+    .ecg-wrap {
+      background: #070a0d;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+
+    .ecg-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .ecg-box {
+      height: 62px;
+      width: 100%;
+    }
+
+    #ecg-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .metric-cell {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .metric-val {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .metric-val.green { color: var(--green); }
+    .metric-val.danger { color: var(--crimson); }
+    .metric-val.amber { color: var(--amber); }
+
+    .log-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 12px;
+    }
+
+    .log-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 7px;
+      flex-shrink: 0;
+    }
+
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 11.5px;
+      line-height: 1.5;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      margin-bottom: 6px;
+      color: var(--text-dim);
+      word-break: break-word;
+    }
+
+    .log-item.danger { color: var(--crimson); }
+    .log-item.safe { color: var(--green); }
+    .log-item.cold { color: #e2e8f0; border-left: 2px solid var(--green); padding-left: 6px; }
+    .log-item.amber { color: var(--amber); }
+
+    /* =========================================================================
+       底部状态栏（含隐蔽重置按钮）
+       ========================================================================= */
+    .statusbar {
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .btn-reset-subtle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 2px 7px;
+      background: transparent;
+      border: 1px solid #262f3b;
+      border-radius: 3px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .btn-reset-subtle:hover {
+      border-color: var(--text-dim);
+      color: var(--text-main);
+    }
+
+    .hint-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--green-soft);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .hint-tag.danger {
+      background: var(--crimson-soft);
+      border-color: rgba(255, 59, 59, 0.5);
+      color: var(--crimson);
+    }
+
+    .hint-text {
+      color: var(--text-main);
+      font-size: 12px;
+    }
+
+    /* =========================================================================
+       伪终端弹窗（绝不使用原生 alert / confirm）
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 88;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: #131820;
+      border: 1px solid var(--crimson);
+      border-radius: 6px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      background: rgba(255, 59, 59, 0.16);
+      border-bottom: 1px solid rgba(255, 59, 59, 0.4);
+      padding: 8px 13px;
+      color: var(--crimson);
+      font-weight: 700;
+      font-size: 12.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 16px;
+      font-size: 13px;
+      color: var(--text-main);
+      line-height: 1.65;
+    }
+
+    .modal-foot {
+      padding: 0 16px 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* =========================================================================
+       V4 虚假凯旋（Contained 假结局 + 滚动制作人名单）
+       ========================================================================= */
+    #fake-ending-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 85;
+      background: #0d1310;
+      color: #dcfce7;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    #fake-ending-overlay.open { display: flex; }
+
+    .fake-card {
+      max-width: 560px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    .fake-stamp {
+      display: inline-block;
+      border: 1.5px solid var(--green);
+      color: var(--green);
+      padding: 3px 10px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .credits-viewport {
+      margin: 22px auto 0;
+      height: 150px;
+      overflow: hidden;
+      border-top: 1px solid rgba(52, 211, 153, 0.25);
+      border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+      position: relative;
+    }
+
+    .credits-roll {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 130px;
+      font-size: 13px;
+      color: #bbf7d0;
+      transition: transform 6.5s linear;
+    }
+
+    .credits-roll.rolling {
+      transform: translateY(-230px);
+    }
+
+    .credits-slash {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(12, 4, 4, 0.88);
+      border: 1px solid var(--crimson);
+    }
+
+    .credits-slash.visible { display: flex; }
+
+    .slash-line {
+      width: 92%;
+      height: 3px;
+      background: var(--crimson);
+      box-shadow: 0 0 12px var(--crimson);
+      margin-bottom: 14px;
+    }
+
+    .slash-text {
+      color: var(--crimson);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    /* =========================================================================
+       V5 终局：Site-118 极简纯白/冷灰 Neutralized 正式勘查报告
+       ========================================================================= */
+    #final-ending {
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      background: #f8f9fa;
+      color: #16181a;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 36px 20px;
+      overflow-y: auto;
+    }
+
+    #final-ending.open { display: flex; }
+
+    .final-sheet {
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #d4d8dd;
+      padding: 34px 36px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      line-height: 1.85;
+      font-size: 13.5px;
+    }
+
+    .final-head {
+      border-bottom: 2px solid #16181a;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .final-stamp {
+      border: 1.5px solid #16181a;
+      padding: 2px 9px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .final-sheet p {
+      margin: 0 0 14px;
+      text-align: justify;
+    }
+
+    .final-appendix {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px dashed #c4c9d0;
+      color: #4b5563;
+    }
+
+    .final-last-line {
+      margin-top: 18px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111315;
+      letter-spacing: 1px;
+    }
+
+    .final-foot {
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: #6b7280;
+    }
+
+    .btn-light {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: #16181a;
+      border: 1px solid #9ca3af;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .btn-light:hover {
+      background: #16181a;
+      color: #ffffff;
+      border-color: #16181a;
+    }
+
+    /* =========================================================================
+       移动端与窄屏适配
+       ========================================================================= */
+    @media (max-width: 840px) {
+      .workspace { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: 195px;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      .sidebar.stripped {
+        height: 0;
+        width: 100%;
+      }
+      .telemetry-panel { padding: 8px 10px; gap: 6px; }
+      .ecg-box { height: 42px; }
+      .doc-paper { padding: 16px; }
+      .final-sheet { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 视觉覆盖层 -->
+  <div id="crt-overlay"></div>
+  <div id="vignette-overlay"></div>
+  <div id="flash-overlay"></div>
+
+  <!-- 刷新逃跑嘲讽层（localStorage 触发） -->
+  <div id="refresh-taunt" class="fullscreen-layer hidden">
+    <div class="taunt-text">
+      你以为刷新页面就能逃避重写吗？<br />塔罗兰还在里面。
+    </div>
+    <button id="btn-resume-loop" class="btn btn-primary">[ 返回当前文档循环 ]</button>
+  </div>
+
+  <!-- 阶段 0：序幕黑屏引子 -->
+  <div id="intro-screen" class="fullscreen-layer">
+    <div class="poem-box">
+      <div id="poem-1" class="poem-line">让咱们走吧，就你还有我</div>
+      <div id="poem-2" class="poem-line">当十一日帝国正将天空吞没</div>
+      <div id="poem-3" class="poem-line">宛如人形溶烂得像蛤蜊摆上早餐桌</div>
+    </div>
+
+    <div id="intro-title-block" class="intro-title-block">
+      <h1 class="intro-title">SCP-3999：我于万物之中</h1>
+      <div class="intro-sub">SCiPNET-EDIT v4.0 // SITE-118 INTERNAL ARCHIVE</div>
+      <button id="btn-enter-terminal" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px;">
+        [ 接入 SCiPNET 终端 ]
+      </button>
+    </div>
+
+    <div id="intro-hint" class="intro-hint">[ 点击屏幕或按任意键继续 ]</div>
+  </div>
+
+  <!-- 主应用终端 -->
+  <div id="app">
+    <!-- 顶部工具栏 -->
+    <header class="topbar" id="topbar">
+      <div class="brand">
+        <span id="status-dot" class="status-dot"></span>
+        <span class="brand-title">SCiPNET-EDIT v4.0</span>
+        <span id="phase-badge" class="phase-badge">V1 · 秩序建档</span>
+      </div>
+
+      <!-- 工具武器库 -->
+      <div class="toolbar-group" id="tool-group">
+        <button id="tool-redact" class="btn active" data-tool="redact" title="快捷键 1">
+          <span class="btn-key">[1]</span>
+          <span class="t-label">涂黑 ███</span>
+        </button>
+
+        <button id="tool-strike" class="btn" data-tool="strike" title="快捷键 2">
+          <span class="btn-key">[2]</span>
+          <span class="t-label" style="text-decoration: line-through;">删除线 ~~</span>
+        </button>
+
+        <button id="tool-clip" class="btn" data-tool="clip" title="快捷键 3">
+          <span class="btn-key">[3]</span>
+          <span class="t-label">剪贴板覆写</span>
+          <span id="clip-tag" class="clip-tag">空</span>
+        </button>
+
+        <button id="tool-erase" class="btn" data-tool="erase" title="快捷键 4">
+          <span class="btn-key">[4]</span>
+          <span class="t-label">⌫ 抹除</span>
+        </button>
+
+        <button id="btn-undo" class="btn" title="Ctrl+Z">撤销</button>
+      </div>
+
+      <!-- 归档发布与静音 -->
+      <div class="toolbar-group">
+        <button id="btn-archive" class="btn btn-archive-locked" title="仅在终局解锁">
+          <span id="archive-text">🔒 【归档发布】</span>
+        </button>
+        <button id="btn-mute" class="btn" title="切换合成音效">🔊</button>
+      </div>
+    </header>
+
+    <!-- 主体工作区 -->
+    <div class="workspace">
+      <!-- 左侧：文档画布 + 底部标准协议参考栏 -->
+      <main class="main-pane">
+        <div id="doc-scroll" class="doc-scroll">
+          <article id="doc-paper" class="doc-paper cursor-redact">
+            <div class="doc-header">
+              <div>
+                <div class="doc-kicker">SCP FOUNDATION // SITE-118 ARCHIVE TERMINAL</div>
+                <h1 class="doc-title">项目编号：SCP-3999</h1>
+              </div>
+              <div class="doc-meta">
+                <div>权限等级：3 级</div>
+                <div id="doc-class">项目等级：<strong style="color:var(--green);">Keter（待核验）</strong></div>
+              </div>
+            </div>
+
+            <!-- 初始建档正文（Site-118 一公里竖井伏笔） -->
+            <div id="doc-static" class="doc-section">
+              <p>
+                <span class="field-key">特殊收容措施：</span>
+                SCP-3999 收容于 <span id="v1-coord" class="tok tok-task" data-v1="redact" title="使用 [1] 涂黑 遮盖绝密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span> 的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫驻守。
+              </p>
+              <p>
+                竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），当前阵列状态：
+                <span id="v1-sra" class="tok tok-task" data-v1="verify" title="点击核验稳定锚功率">[未校验：SRA 阵列功率 100%]</span>。
+                如监测到基准现实波动，须立即执行 <span class="tok tok-safe" data-copy="安全">安全</span> 隔离协议。
+              </p>
+              <p><span class="field-key">描述：</span></p>
+              <div id="v1-desc-slot" class="blank-desc-box">
+                [ 数据缺失 / 完成上方两项核验后，从底部“标准协议参考栏”选择临床描述写入 ]<span class="cursor-green"></span>
+              </div>
+            </div>
+
+            <!-- 动态双向对抗内容区 -->
+            <div id="doc-dynamic"></div>
+          </article>
+        </div>
+
+        <!-- 底部常驻 [ 标准协议参考栏 ] -->
+        <section id="ref-dock" class="ref-dock">
+          <div class="ref-dock-head">
+            <span>[ 标准协议参考栏 // 点击卡片写入正文 ]</span>
+            <span id="ref-status">等待前置核验</span>
+          </div>
+          <div id="ref-cards" class="ref-cards">
+            <div class="ref-empty">请先在正文中完成机密坐标涂黑与稳定锚核验。</div>
+          </div>
+        </section>
+      </main>
+
+      <!-- 右侧：纯数据遥测边栏（无任何 ASCII 角色画） -->
+      <aside id="sidebar" class="sidebar">
+        <div class="side-head">
+          <span>TELEMETRY // 实时遥测</span>
+          <span id="telemetry-state" style="color:var(--green);">ONLINE</span>
+        </div>
+
+        <div id="telemetry-panel" class="telemetry-panel">
+          <!-- 实时 HTML5 Canvas 心电图 -->
+          <div class="ecg-wrap">
+            <div class="ecg-top">
+              <span>ECG // 生理波形</span>
+              <strong id="bpm-val" style="color:var(--green);">72 BPM</strong>
+            </div>
+            <div class="ecg-box">
+              <canvas id="ecg-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- 数值遥测格 -->
+          <div class="metrics-grid">
+            <div class="metric-cell">
+              <div class="metric-label">负责研究员</div>
+              <div class="metric-val" id="m-id">J. Talloran (#309)</div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-label">基准休谟指数</div>
+              <div class="metric-val green" id="m-hume">1.00 Hm</div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-label">心率状态</div>
+              <div class="metric-val green" id="m-hr-state">平稳</div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-label">循环计数 (LOOP)</div>
+              <div class="metric-val" id="m-loop">#1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 按时间顺序记录的状态/观察日志 -->
+        <div class="log-section">
+          <div class="log-title">OBSERVATION LOG // 状态与观察记录</div>
+          <div id="log-list" class="log-list"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 底部状态栏（含左下角隐蔽重置按钮） -->
+    <footer id="statusbar" class="statusbar">
+      <div class="status-left">
+        <button id="btn-reset-storage" class="btn-reset-subtle" title="清除本地进度并彻底重新开始">[重置档案]</button>
+        <span id="hint-tag" class="hint-tag">指引</span>
+        <span id="hint-text" class="hint-text">使用 [1] 涂黑 遮盖绝密坐标，并点击核验 SRA 稳定锚功率。</span>
+      </div>
+      <div id="shortcut-tip" style="font-size:11px; color:var(--text-muted);">
+        快捷键: 1-4 切换工具 | Ctrl+Z 撤销
+      </div>
+    </footer>
+  </div>
+
+  <!-- 伪终端弹窗 -->
+  <div id="modal-backdrop" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span id="modal-title">⚠ SCiPNET 终端警告</span>
+        <span>×</span>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-foot">
+        <button id="modal-ok" class="btn">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- V4 虚假凯旋层 -->
+  <div id="fake-ending-overlay">
+    <div class="fake-card">
+      <div class="fake-stamp">CONTAINED // 已收容</div>
+      <h2 style="margin:0 0 8px; font-size:21px; color:#f0fdf4;">项目编号：SCP-3999</h2>
+      <p style="margin:0; font-size:13px; color:#bbf7d0;">
+        项目等级：Contained（已收容） · 全部斯克兰顿现实稳定锚运行正常。研究员詹姆斯·塔罗兰生理与认知评估均已恢复基准水平。
+      </p>
+
+      <div class="credits-viewport">
+        <div id="credits-roll" class="credits-roll">
+          <div>SCP-3999：我于万物之中</div>
+          <div>SCiPNET-EDIT v4.0 归档系统</div>
+          <div>叙事安全核验：RAISA</div>
+          <div>特别鸣谢：研究员詹姆斯·塔罗兰</div>
+          <div>状态：所有异常已受控</div>
+        </div>
+
+        <div id="credits-slash" class="credits-slash">
+          <div class="slash-line"></div>
+          <div id="slash-text" class="slash-text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V5 终局：Site-118 Neutralized 勘查报告 -->
+  <div id="final-ending">
+    <article class="final-sheet">
+      <div class="final-head">
+        <div>
+          <div style="font-size:10.5px; letter-spacing:1.4px; color:#6b7280;">SCP FOUNDATION // SITE-118 POST-INCIDENT REPORT</div>
+          <h1 style="margin:4px 0 0; font-size:21px;">项目编号：SCP-3999</h1>
+        </div>
+        <span class="final-stamp">NEUTRALIZED</span>
+      </div>
+
+      <p><strong>项目等级：</strong>Neutralized（无效化）</p>
+
+      <p>
+        <strong>特殊收容措施：</strong>SCP-3999 曾被收容于 Site-118 内的 Keter 级气密收容间中。四名武装警卫被发现曾驻扎在收容间外。收容间内部由一口深达一公里的竖井构成，井口覆盖耐酸性挡板；竖井墙壁上每隔 30 米装有斯克兰顿现实稳定锚，现均确认曾发生剧烈爆炸。其余关于 SCP-3999 收容程序的原始资料所剩无几。
+      </p>
+
+      <p>
+        <strong>描述：</strong>经信息安全管理部（RAISA）核查，主数据库中此前不存在 SCP-3999 的有效归档记录。驻守该收容间的四名武装警卫均存在显著记忆缺失，无法确认自身何时受命看守此区域。
+      </p>
+
+      <p>
+        在竖井底部发现了 3 级研究员詹姆斯·塔罗兰的遗体。随身回收的一部基金会标配终端内残留有大量谬误百出、与标准格式全然不符的收容草稿文本。综合现场稳定锚残骸与休谟衰变轨迹，现已基本确认：SCP-3999 曾突破收容并引发 CK 级现实重构 / ZK 级现实终结事件，而研究员塔罗兰以自身生命为代价，彻底阻止并扭转了该事件的发生。
+      </p>
+
+      <div class="final-appendix">
+        <div><strong>附录-1：</strong>[数据删除]</div>
+        <div class="final-last-line">我写完了。</div>
+      </div>
+
+      <div class="final-foot">
+        <span>归档状态：永久封存 // 一切已恢复正常</span>
+        <button id="btn-restart-final" class="btn-light">[ 重新接入终端 ]</button>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'scp3999_scipnet_act_v4';
+
+      /* =======================================================================
+         1. 纯 Web Audio API 合成音效引擎（零外链，try/catch 保护）
+         ======================================================================= */
+      const Sound = {
+        ctx: null,
+        muted: false,
+        droneOsc: null,
+        droneGain: null,
+        droneTarget: 0,
+        pianoTimers: [],
+
+        unlock() {
+          try {
+            if (!this.ctx) {
+              const AC = window.AudioContext || window.webkitAudioContext;
+              if (AC) this.ctx = new AC();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+              this.ctx.resume().catch(function () {});
+            }
+          } catch (e) {}
+        },
+
+        toggleMute() {
+          this.muted = !this.muted;
+          if (this.muted) {
+            this.setDrone(0);
+          } else if (State.act >= 2 && !State.ended) {
+            this.setDrone(this.droneTarget);
+          }
+          return this.muted;
+        },
+
+        key(isRed) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = isRed ? 'sawtooth' : 'triangle';
+            osc.frequency.setValueAtTime(isRed ? (150 + Math.random() * 210) : (820 + Math.random() * 260), t);
+            osc.frequency.exponentialRampToValueAtTime(isRed ? 52 : 140, t + 0.028);
+            g.gain.setValueAtTime(isRed ? 0.055 : 0.035, t);
+            g.gain.exponentialRampToValueAtTime(0.0008, t + 0.032);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.036);
+          } catch (e) {}
+        },
+
+        confirm() {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(620, t);
+            osc.frequency.setValueAtTime(880, t + 0.05);
+            g.gain.setValueAtTime(0.05, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.14);
+          } catch (e) {}
+        },
+
+        glitch(dur) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const d = dur || 0.22;
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(115, t);
+            osc.frequency.linearRampToValueAtTime(42, t + d);
+            g.gain.setValueAtTime(0.085, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + d);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + d + 0.02);
+          } catch (e) {}
+        },
+
+        whiteNoiseBeep(dur) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const d = dur || 0.28;
+            const sr = this.ctx.sampleRate;
+            const len = Math.floor(sr * d);
+            const buf = this.ctx.createBuffer(1, len, sr);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) {
+              data[i] = (Math.random() * 2 - 1) * 0.45;
+            }
+            const src = this.ctx.createBufferSource();
+            src.buffer = buf;
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0.075, this.ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + d);
+            src.connect(g);
+            g.connect(this.ctx.destination);
+            src.start();
+          } catch (e) {}
+        },
+
+        bounce() {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(520, t);
+            osc.frequency.exponentialRampToValueAtTime(160, t + 0.11);
+            g.gain.setValueAtTime(0.06, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.13);
+          } catch (e) {}
+        },
+
+        playLofiPiano() {
+          this.stopPiano();
+          if (this.muted || !this.ctx) return;
+          const notes = [261.63, 329.63, 392.0, 493.88, 392.0, 329.63, 293.66, 392.0];
+          notes.forEach((freq, idx) => {
+            const tid = setTimeout(() => {
+              if (this.muted || !this.ctx || State.ended) return;
+              try {
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t);
+                g.gain.setValueAtTime(0.06, t);
+                g.gain.exponentialRampToValueAtTime(0.0008, t + 0.95);
+                osc.connect(g);
+                g.connect(this.ctx.destination);
+                osc.start(t);
+                osc.stop(t + 1.0);
+              } catch (e) {}
+            }, idx * 620);
+            this.pianoTimers.push(tid);
+          });
+        },
+
+        stopPiano() {
+          for (let i = 0; i < this.pianoTimers.length; i++) {
+            clearTimeout(this.pianoTimers[i]);
+          }
+          this.pianoTimers = [];
+        },
+
+        jamStatic() {
+          this.stopPiano();
+          this.whiteNoiseBeep(0.55);
+          this.glitch(0.5);
+        },
+
+        setDrone(level) {
+          this.droneTarget = level;
+          if (!this.ctx) return;
+          try {
+            const target = this.muted ? 0 : level;
+            if (!this.droneOsc && target > 0) {
+              this.droneOsc = this.ctx.createOscillator();
+              this.droneGain = this.ctx.createGain();
+              const flt = this.ctx.createBiquadFilter();
+              this.droneOsc.type = 'sawtooth';
+              this.droneOsc.frequency.value = 50;
+              flt.type = 'lowpass';
+              flt.frequency.value = 125;
+              this.droneGain.gain.value = 0.0001;
+              this.droneOsc.connect(flt);
+              flt.connect(this.droneGain);
+              this.droneGain.connect(this.ctx.destination);
+              this.droneOsc.start();
+            }
+            if (this.droneGain) {
+              const t = this.ctx.currentTime;
+              this.droneGain.gain.cancelScheduledValues(t);
+              this.droneGain.gain.setTargetAtTime(target * 0.048, t, 0.25);
+            }
+          } catch (e) {}
+        },
+
+        silenceImmediate() {
+          this.stopPiano();
+          this.droneTarget = 0;
+          try {
+            if (this.droneGain && this.ctx) {
+              this.droneGain.gain.cancelScheduledValues(this.ctx.currentTime);
+              this.droneGain.gain.setValueAtTime(0, this.ctx.currentTime);
+            }
+            if (this.droneOsc) {
+              this.droneOsc.stop();
+              this.droneOsc = null;
+              this.droneGain = null;
+            }
+          } catch (e) {}
+        }
+      };
+
+      /* =======================================================================
+         2. 全局状态与计时器管理
+         ======================================================================= */
+      const State = {
+        act: 0, // 0=序幕, 1=V1, 2=V2, 3=V3, 4=V4, 5=V5
+        tool: 'redact',
+        clipboard: '',
+        clipboardCorrupted: false,
+        stress: 0, // 0..1 控制心电图与心率
+        ecgOffline: false,
+        ended: false,
+        poemStep: 0,
+
+        // V1
+        v1CoordDone: false,
+        v1SraDone: false,
+        v1DescWritten: false,
+
+        // V2
+        v2Round: 0,
+        v2ClausesHandled: 0,
+        v2HijackActive: false,
+        v2HijackIdx: 0,
+
+        // V3
+        v3PushActive: false,
+        v3PushCount: 0,
+
+        // V4
+        v4Redacted: false,
+        v4CardsWritten: 0,
+
+        // V5
+        v5Phase: 0, // 1=反杀, 2=剥离, 3=归档
+        v5CardIdx: 0,
+        v5PendingSuppress: false,
+        v5AnchorsLeft: 5,
+        v5ArchiveUnlocked: false,
+
+        timers: []
+      };
+
+      function addTimeout(fn, ms) {
+        const id = setTimeout(fn, ms);
+        State.timers.push({ type: 't', id: id });
+        return id;
+      }
+
+      function addInterval(fn, ms) {
+        const id = setInterval(fn, ms);
+        State.timers.push({ type: 'i', id: id });
+        return id;
+      }
+
+      function clearTimers() {
+        for (let i = 0; i < State.timers.length; i++) {
+          if (State.timers[i].type === 't') clearTimeout(State.timers[i].id);
+          else clearInterval(State.timers[i].id);
+        }
+        State.timers = [];
+      }
+
+      function saveProgress(actNum) {
+        try {
+          if (actNum >= 2 && actNum <= 4) {
+            localStorage.setItem(STORAGE_KEY, String(actNum));
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        } catch (e) {}
+      }
+
+      /* =======================================================================
+         3. DOM 引用
+         ======================================================================= */
+      const el = {
+        app: document.getElementById('app'),
+        vignette: document.getElementById('vignette-overlay'),
+        flash: document.getElementById('flash-overlay'),
+        refreshTaunt: document.getElementById('refresh-taunt'),
+        btnResumeLoop: document.getElementById('btn-resume-loop'),
+
+        introScreen: document.getElementById('intro-screen'),
+        poem1: document.getElementById('poem-1'),
+        poem2: document.getElementById('poem-2'),
+        poem3: document.getElementById('poem-3'),
+        introTitleBlock: document.getElementById('intro-title-block'),
+        introHint: document.getElementById('intro-hint'),
+        btnEnter: document.getElementById('btn-enter-terminal'),
+
+        statusDot: document.getElementById('status-dot'),
+        phaseBadge: document.getElementById('phase-badge'),
+        toolGroup: document.getElementById('tool-group'),
+        toolBtns: document.querySelectorAll('[data-tool]'),
+        clipTag: document.getElementById('clip-tag'),
+        btnUndo: document.getElementById('btn-undo'),
+        btnArchive: document.getElementById('btn-archive'),
+        archiveText: document.getElementById('archive-text'),
+        btnMute: document.getElementById('btn-mute'),
+
+        docScroll: document.getElementById('doc-scroll'),
+        docPaper: document.getElementById('doc-paper'),
+        docClass: document.getElementById('doc-class'),
+        docStatic: document.getElementById('doc-static'),
+        docDynamic: document.getElementById('doc-dynamic'),
+        v1Coord: document.getElementById('v1-coord'),
+        v1Sra: document.getElementById('v1-sra'),
+        v1DescSlot: document.getElementById('v1-desc-slot'),
+
+        refDock: document.getElementById('ref-dock'),
+        refStatus: document.getElementById('ref-status'),
+        refCards: document.getElementById('ref-cards'),
+
+        sidebar: document.getElementById('sidebar'),
+        telemetryPanel: document.getElementById('telemetry-panel'),
+        telemetryState: document.getElementById('telemetry-state'),
+        bpmVal: document.getElementById('bpm-val'),
+        mHume: document.getElementById('m-hume'),
+        mHrState: document.getElementById('m-hr-state'),
+        mLoop: document.getElementById('m-loop'),
+        logList: document.getElementById('log-list'),
+
+        statusbar: document.getElementById('statusbar'),
+        btnReset: document.getElementById('btn-reset-storage'),
+        hintTag: document.getElementById('hint-tag'),
+        hintText: document.getElementById('hint-text'),
+
+        modalBackdrop: document.getElementById('modal-backdrop'),
+        modalTitle: document.getElementById('modal-title'),
+        modalBody: document.getElementById('modal-body'),
+        modalOk: document.getElementById('modal-ok'),
+
+        fakeOverlay: document.getElementById('fake-ending-overlay'),
+        creditsRoll: document.getElementById('credits-roll'),
+        creditsSlash: document.getElementById('credits-slash'),
+        slashText: document.getElementById('slash-text'),
+
+        finalEnding: document.getElementById('final-ending'),
+        btnRestartFinal: document.getElementById('btn-restart-final')
+      };
+
+      /* =======================================================================
+         4. 实时 HTML5 Canvas 心电图（无字符画，纯遥测波形）
+         ======================================================================= */
+      const ecgCanvas = document.getElementById('ecg-canvas');
+      const ecgCtx = ecgCanvas.getContext('2d');
+      let ecgBuf = [];
+      let ecgPhase = 0;
+
+      function resizeECG() {
+        const box = ecgCanvas.parentElement;
+        if (!box) return;
+        const w = Math.max(120, Math.floor(box.clientWidth));
+        const h = Math.max(38, Math.floor(box.clientHeight));
+        ecgCanvas.width = w;
+        ecgCanvas.height = h;
+        ecgBuf = new Array(w).fill(0);
+      }
+
+      function sampleECG(phase, stress) {
+        if (State.ended || State.ecgOffline) return 0;
+        const p = phase % 1;
+        let v = 0;
+        if (p > 0.12 && p < 0.18) v = 0.16;
+        else if (p >= 0.22 && p < 0.245) v = -0.22;
+        else if (p >= 0.245 && p < 0.285) v = 0.92;
+        else if (p >= 0.285 && p < 0.315) v = -0.34;
+        else if (p >= 0.42 && p < 0.52) v = 0.22;
+        if (stress > 0.4) {
+          v += (Math.random() - 0.5) * 0.24 * stress;
+        }
+        return v;
+      }
+
+      function renderECG() {
+        const w = ecgCanvas.width;
+        const h = ecgCanvas.height;
+        const s = State.stress;
+        const speed = (State.ended || State.ecgOffline) ? 0.01 : (0.013 + s * 0.028);
+        ecgPhase += speed;
+
+        ecgBuf.push(sampleECG(ecgPhase, s));
+        if (ecgBuf.length > w) ecgBuf.shift();
+
+        if (State.ecgOffline || State.ended) {
+          el.bpmVal.textContent = '0 BPM';
+          el.bpmVal.style.color = '#556170';
+        } else {
+          const bpm = Math.round(72 + s * 96 + (s > 0.5 ? (Math.random() * 8 - 4) : 0));
+          el.bpmVal.textContent = bpm + ' BPM';
+          el.bpmVal.style.color = s > 0.45 ? '#ff3b3b' : '#34d399';
+        }
+
+        ecgCtx.fillStyle = '#070a0d';
+        ecgCtx.fillRect(0, 0, w, h);
+
+        ecgCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ecgCtx.lineWidth = 1;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(0, h / 2);
+        ecgCtx.lineTo(w, h / 2);
+        ecgCtx.stroke();
+
+        ecgCtx.strokeStyle = (State.ecgOffline || State.ended) ? '#475569' : (s > 0.45 ? '#ff3b3b' : '#34d399');
+        ecgCtx.lineWidth = 1.6;
+        ecgCtx.beginPath();
+        const mid = h * 0.56;
+        const amp = h * 0.38;
+        for (let i = 0; i < ecgBuf.length; i++) {
+          const y = mid - ecgBuf[i] * amp;
+          if (i === 0) ecgCtx.moveTo(i, y);
+          else ecgCtx.lineTo(i, y);
+        }
+        ecgCtx.stroke();
+
+        requestAnimationFrame(renderECG);
+      }
+
+      /* =======================================================================
+         5. 通用 UI 工具函数
+         ======================================================================= */
+      function log(msg, cls) {
+        const now = new Date();
+        const ts =
+          String(now.getHours()).padStart(2, '0') + ':' +
+          String(now.getMinutes()).padStart(2, '0') + ':' +
+          String(now.getSeconds()).padStart(2, '0');
+        const div = document.createElement('div');
+        div.className = 'log-item' + (cls ? ' ' + cls : '');
+        div.textContent = '[' + ts + '] ' + msg;
+        el.logList.appendChild(div);
+        el.logList.scrollTop = el.logList.scrollHeight;
+      }
+
+      function setHint(text, danger) {
+        el.hintText.textContent = text;
+        el.hintTag.textContent = danger ? '异常' : '指引';
+        el.hintTag.className = 'hint-tag' + (danger ? ' danger' : '');
+      }
+
+      function setTelemetry(hume, hrState, loopText, danger) {
+        if (hume !== null) {
+          el.mHume.textContent = hume;
+          el.mHume.className = 'metric-val ' + (danger ? 'danger' : 'green');
+        }
+        if (hrState !== null) {
+          el.mHrState.textContent = hrState;
+          el.mHrState.className = 'metric-val ' + (danger ? 'danger' : 'green');
+        }
+        if (loopText !== null) {
+          el.mLoop.textContent = loopText;
+          el.mLoop.className = 'metric-val ' + (danger ? 'danger' : '');
+        }
+      }
+
+      function setTool(name) {
+        Sound.unlock();
+        State.tool = name;
+        for (let i = 0; i < el.toolBtns.length; i++) {
+          const b = el.toolBtns[i];
+          b.classList.toggle('active', b.getAttribute('data-tool') === name);
+        }
+        el.docPaper.className = 'doc-paper cursor-' + name + (State.v5Phase >= 2 && State.v5AnchorsLeft <= 1 ? ' stripped-paper' : '');
+      }
+
+      function shake() {
+        el.app.classList.remove('shaking');
+        void el.app.offsetWidth;
+        el.app.classList.add('shaking');
+        addTimeout(function () { el.app.classList.remove('shaking'); }, 400);
+      }
+
+      function scrollDoc() {
+        el.docScroll.scrollTop = el.docScroll.scrollHeight;
+      }
+
+      function showModal(title, html) {
+        el.modalTitle.textContent = title;
+        el.modalBody.innerHTML = html;
+        el.modalBackdrop.classList.add('open');
+      }
+
+      el.modalOk.addEventListener('click', function () {
+        Sound.unlock();
+        el.modalBackdrop.classList.remove('open');
+      });
+
+      function setReferenceCards(statusText, cards) {
+        el.refStatus.textContent = statusText;
+        el.refCards.innerHTML = '';
+        if (!cards || cards.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'ref-empty';
+          empty.textContent = statusText;
+          el.refCards.appendChild(empty);
+          return;
+        }
+        cards.forEach(function (c) {
+          const btn = document.createElement('button');
+          btn.className = 'ref-card';
+          btn.innerHTML = '<span class="ref-card-tag">' + c.tag + '</span>' + c.text;
+          btn.addEventListener('click', function () {
+            Sound.unlock();
+            c.onClick();
+          });
+          el.refCards.appendChild(btn);
+        });
+      }
+
+      function typeInto(container, text, isRed, speed, onDone) {
+        const span = document.createElement('span');
+        const cur = document.createElement('span');
+        cur.className = isRed ? 'cursor-red' : 'cursor-green';
+        container.appendChild(span);
+        container.appendChild(cur);
+        let i = 0;
+        const iv = addInterval(function () {
+          if (State.ended) { clearInterval(iv); return; }
+          span.textContent += text.charAt(i);
+          if (i % 2 === 0) Sound.key(isRed);
+          i++;
+          scrollDoc();
+          if (i >= text.length) {
+            clearInterval(iv);
+            cur.remove();
+            if (onDone) onDone();
+          }
+        }, speed || 26);
+      }
+
+      /* =======================================================================
+         6. 阶段 0：序幕黑屏引子 & localStorage 刷新嘲讽
+         ======================================================================= */
+      function advancePoem() {
+        Sound.unlock();
+        if (State.act !== 0) return;
+        State.poemStep++;
+        Sound.key(false);
+        if (State.poemStep === 1) el.poem1.classList.add('visible');
+        else if (State.poemStep === 2) el.poem2.classList.add('visible');
+        else if (State.poemStep === 3) {
+          el.poem3.classList.add('visible');
+          el.introHint.style.display = 'none';
+          addTimeout(function () {
+            el.introTitleBlock.classList.add('visible');
+          }, 550);
+        }
+      }
+
+      el.introScreen.addEventListener('click', function (e) {
+        if (e.target.closest('#btn-enter-terminal')) return;
+        if (State.poemStep < 3) advancePoem();
+      });
+
+      el.btnEnter.addEventListener('click', function () {
+        Sound.unlock();
+        Sound.confirm();
+        el.introScreen.classList.add('hidden');
+        startV1();
+      });
+
+      /* =======================================================================
+         7. V1：秩序建档（Site-118 一公里竖井伏笔）
+         ======================================================================= */
+      function startV1() {
+        State.act = 1;
+        document.title = 'SCP-3999 - SCiPNET';
+        el.phaseBadge.textContent = 'V1 · 秩序建档';
+        setTool('redact');
+        log('SCiPNET-EDIT v4.0 已连接 Site-118 档案库。', 'safe');
+        log('等待研究员 J. Talloran 完成收容条款核验与描述补全。');
+      }
+
+      function checkV1ReadyForDesc() {
+        if (State.v1CoordDone && State.v1SraDone && !State.v1DescWritten) {
+          setHint('前置核验完成！请从底部【标准协议参考栏】选择一句临床描述写入正文。', false);
+          log('收容硬件核验通过，已解锁“描述”栏写入权限。', 'safe');
+          setReferenceCards('请选择标准临床描述写入“描述”栏', [
+            {
+              tag: '[参考条款 A · 现实扭曲分类]',
+              text: 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，须持续监测其休谟波动。',
+              onClick: function () { writeV1Desc(this.text); }
+            },
+            {
+              tag: '[参考条款 B · 局部逻辑畸变]',
+              text: 'SCP-3999 为针对特定站点人员产生局部逻辑畸变的收容对象，当前基准现实维持稳定。',
+              onClick: function () { writeV1Desc(this.text); }
+            }
+          ]);
+        }
+      }
+
+      function writeV1Desc(text) {
+        if (State.v1DescWritten) return;
+        State.v1DescWritten = true;
+        setReferenceCards('正在写入临床描述……', []);
+        el.v1DescSlot.innerHTML = '';
+        el.v1DescSlot.className = 'clinical-entry';
+
+        typeInto(el.v1DescSlot, text, false, 24, function () {
+          log('临床描述已写入，正在校验基准现实一致性……', 'safe');
+          // 转折：红光标闯入，缓慢划掉玩家刚写好的句子
+          addTimeout(function () {
+            Sound.glitch(0.32);
+            Sound.setDrone(0.28);
+            shake();
+            el.vignette.style.opacity = '0.55';
+            el.statusDot.classList.add('danger');
+            el.v1DescSlot.classList.add('struck-by-3999');
+
+            const redNote = document.createElement('div');
+            redNote.className = 'anomaly-entry';
+            el.docDynamic.appendChild(redNote);
+            typeInto(redNote, '特殊收容措施：SCP-3999 当前无法被收容，并且正在促成 ZK 级现实终结场景。', true, 26, function () {
+              addTimeout(startV2, 650);
+            });
+          }, 650);
+        });
+      }
+
+      /* =======================================================================
+         8. V2：双光标回合制攻防（写入拦截 + 矛盾条款 + 任意键劫持）
+         ======================================================================= */
+      function startV2() {
+        State.act = 2;
+        State.v2Round = 1;
+        State.stress = 0.52;
+        saveProgress(2);
+        document.title = '正在编辑：SCP-3999';
+        el.phaseBadge.textContent = 'V2 · 双光标攻防';
+        el.phaseBadge.classList.add('danger');
+        el.statusDot.classList.add('danger');
+        el.vignette.style.opacity = '0.65';
+        el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">Apollyon</strong>';
+        setTelemetry('0.64 Hm', '偏高', '#14', true);
+        Sound.setDrone(0.35);
+
+        log('警告：检测到未授权红光标强行介入文档！', 'danger');
+        setHint('回合 1：从底部【参考栏】写入应急隔离条款，试图夺回文档控制权。', true);
+
+        setReferenceCards('V2 回合 1 · 写入标准应急协议', [
+          {
+            tag: '[应急协议 · 人员转移]',
+            text: '立即启动应急隔离：将研究员塔罗兰转移至安全翼区并切断异常接触。',
+            onClick: function () { runV2Round1('立即启动应急隔离：将研究员塔罗兰转移至', '安全翼区并切断异常接触。', '极度偏僻的无生物棚屋，并与一切人类及动物断绝联系。若失效，则将其发射至太阳。'); }
+          },
+          {
+            tag: '[应急协议 · 锚点增压]',
+            text: '将 Site-118 竖井内全部斯克兰顿稳定锚提升至超载模式以锁定现实。',
+            onClick: function () { runV2Round1('将 Site-118 竖井内全部斯克兰顿稳定锚', '提升至超载模式以锁定现实。', '拆卸并重铸为花岗岩基座，令研究员塔罗兰在其中度过余生。'); }
+          }
+        ]);
+      }
+
+      function runV2Round1(prefix, goodSuffix, hijackSuffix) {
+        if (State.v2Round !== 1) return;
+        State.v2Round = 1.5;
+        setReferenceCards('等待光标响应……', []);
+
+        const box = document.createElement('div');
+        box.className = 'clinical-entry';
+        el.docDynamic.appendChild(box);
+
+        typeInto(box, prefix + goodSuffix, false, 22, function () {
+          // 红光标立刻拦截，只划掉后半句并恶意续写
+          addTimeout(function () {
+            Sound.glitch(0.24);
+            shake();
+            box.innerHTML =
+              '<span>' + prefix + '</span>' +
+              '<span class="tok-struck" style="color:var(--crimson) !important;">' + goodSuffix + '</span> ';
+            const evilSpan = document.createElement('span');
+            evilSpan.style.color = '#ff5252';
+            evilSpan.style.fontWeight = '700';
+            box.appendChild(evilSpan);
+
+            typeInto(evilSpan, hijackSuffix, true, 24, function () {
+              log('3999 截断并篡改了你写入的应急协议！', 'danger');
+              addTimeout(startV2Round2, 650);
+            });
+          }, 420);
+        });
+      }
+
+      function startV2Round2() {
+        State.v2Round = 2;
+        State.v2ClausesHandled = 0;
+        setTelemetry('0.41 Hm', '过速', '#128', true);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'anomaly-entry';
+        wrap.innerHTML =
+          '<div style="font-size:11px; color:var(--crimson); margin-bottom:8px;">[3999 强行插入互相矛盾的绝对指令]</div>' +
+          '<div style="display:flex; flex-direction:column; gap:7px;">' +
+          '<div>• <span class="tok tok-threat" data-v2-clause="1">研究员塔罗兰被终结</span></div>' +
+          '<div>• <span class="tok tok-threat" data-v2-clause="2">研究员塔罗兰须通过一切手段维持存活</span></div>' +
+          '<div>• <span class="tok tok-threat" data-v2-clause="3">研究员塔罗兰不可与香薰蜡烛混淆</span></div>' +
+          '</div>';
+        el.docDynamic.appendChild(wrap);
+        scrollDoc();
+
+        log('文档出现逻辑互斥条款，请立即压制！', 'danger');
+        setHint('回合 2：使用 [1] 涂黑 或 [2] 删除线，逐一点击压制上方 3 条红色矛盾指令。', true);
+        setReferenceCards('请先压制正文中的 3 条红色矛盾指令', []);
+      }
+
+      function startV2Round3Hijack() {
+        State.v2Round = 3;
+        State.v2HijackActive = true;
+        State.v2HijackIdx = 0;
+        State.stress = 0.72;
+        setTelemetry('0.19 Hm', '紊乱', '#1,042', true);
+
+        const ivBox = document.createElement('div');
+        ivBox.className = 'interview-box';
+        ivBox.innerHTML =
+          '<div style="color:var(--text-dim); font-size:11.5px; margin-bottom:6px;">&lt;采访记录 03.99.90 // 自动切入&gt;</div>' +
+          '<div><strong>采访者：</strong>Dr. <span class="tok-redacted">█████████</span> 博士。</div>' +
+          '<div style="margin-top:6px;"><strong>塔罗兰：</strong><span id="v2-hijack-out" style="color:var(--crimson); font-weight:700;"></span><span class="cursor-red"></span></div>';
+        el.docDynamic.appendChild(ivBox);
+
+        const strip = document.createElement('div');
+        strip.id = 'v2-hijack-strip';
+        strip.className = 'prompt-strip';
+        strip.innerHTML =
+          '<span class="prompt-text">[ 请按任意键输入：确认基准现实稳定 ]</span>' +
+          '<button id="btn-v2-hijack-click" class="btn btn-primary">点击此处模拟键入</button>';
+        el.docDynamic.appendChild(strip);
+        scrollDoc();
+
+        document.getElementById('btn-v2-hijack-click').addEventListener('click', function () {
+          Sound.unlock();
+          stepV2Hijack();
+        });
+
+        Sound.whiteNoiseBeep(0.32);
+        log('采访对象姓名出现异常删节噪音。', 'danger');
+        setHint('回合 3：按键盘任意键（或点击提示按钮）输入回复以确认基准现实。', true);
+      }
+
+      const HIJACK_TEXT = '这不是个名字，只是从你嘴里发出的一阵噪音。在正常对话中怎么可能删节掉一个词？';
+
+      function stepV2Hijack() {
+        if (!State.v2HijackActive) return;
+        const out = document.getElementById('v2-hijack-out');
+        if (!out) return;
+
+        const chunk = HIJACK_TEXT.slice(State.v2HijackIdx, State.v2HijackIdx + 4);
+        out.textContent += chunk;
+        State.v2HijackIdx += 4;
+
+        if (State.v2HijackIdx === 12 || State.v2HijackIdx === 28) {
+          Sound.whiteNoiseBeep(0.24);
+        } else {
+          Sound.key(true);
+        }
+        scrollDoc();
+
+        if (State.v2HijackIdx >= HIJACK_TEXT.length) {
+          State.v2HijackActive = false;
+          const strip = document.getElementById('v2-hijack-strip');
+          if (strip) strip.remove();
+
+          addTimeout(function () {
+            Sound.glitch(0.38);
+            shake();
+            const endLine = document.createElement('div');
+            endLine.className = 'anomaly-entry';
+            endLine.textContent = '（地板消失，房间开始融化。本次采访强行终止。）';
+            el.docDynamic.appendChild(endLine);
+            scrollDoc();
+            addTimeout(startV3, 900);
+          }, 400);
+        }
+      }
+
+      /* =======================================================================
+         9. V3：废稿坟场、UI 叛变与 Backspace 拉锯
+         ======================================================================= */
+      function startV3() {
+        State.act = 3;
+        State.stress = 0.88;
+        State.clipboardCorrupted = true;
+        saveProgress(3);
+        document.title = '草稿(4,192,803) - 未保存';
+        el.phaseBadge.textContent = 'V3 · 废稿坟场';
+        el.phaseBadge.classList.add('danger');
+        el.statusDot.classList.add('danger');
+        el.vignette.style.opacity = '0.85';
+        setTelemetry('ERR Hm', '极度过速', '#89,412', true);
+        Sound.setDrone(0.62);
+
+        // UI 叛变：短暂互换工具栏按钮文字与偏移
+        mutateToolbarBriefly();
+
+        log('警告：编辑器 UI 遭到污染，剪贴板校验失效。', 'danger');
+        log('提示：你可以尝试点击 [撤销] 或 [3] 剪贴板覆写，感受底层规则崩坏。', 'amber');
+        setHint('SCP-3999 正在倾泻无序定义瀑布流……', true);
+        setReferenceCards('参考协议已被异常噪声覆盖', []);
+
+        // 精简版 SCP-3999 是…… 瀑布流
+        const defs = [
+          'SCP-3999 是萌猫',
+          'SCP-3999 是正读到此处的你',
+          'SCP-3999 是 SCP-055',
+          'SCP-3999 是你丢失的袜子',
+          'SCP-3999 是自我厌恶',
+          'SCP-3999 是上述所有。立刻。永远。'
+        ];
+
+        const cascadeBox = document.createElement('div');
+        cascadeBox.className = 'anomaly-entry';
+        el.docDynamic.appendChild(cascadeBox);
+
+        defs.forEach(function (line, i) {
+          addTimeout(function () {
+            if (State.ended || State.act !== 3) return;
+            const p = document.createElement('div');
+            p.style.fontWeight = i === defs.length - 1 ? '700' : '400';
+            p.style.color = i === defs.length - 1 ? '#ff3b3b' : '#fca5a5';
+            p.textContent = line;
+            cascadeBox.appendChild(p);
+            Sound.key(true);
+            scrollDoc();
+            if (i < defs.length - 1) {
+              addTimeout(function () { p.style.textDecoration = 'line-through'; p.style.opacity = '0.6'; }, 420);
+            }
+            if (i === defs.length - 1) {
+              addTimeout(spawnOnlyWallAndPushback, 650);
+            }
+          }, i * 380);
+        });
+      }
+
+      function mutateToolbarBriefly() {
+        const labels = el.toolGroup.querySelectorAll('.t-label');
+        const orig = ['涂黑 ███', '删除线 ~~', '剪贴板覆写', '⌫ 抹除'];
+        const fake = ['父亲', '覆写', '只有只有', '无法删除'];
+        for (let i = 0; i < labels.length; i++) {
+          labels[i].textContent = fake[i];
+          labels[i].style.color = '#ff5252';
+        }
+        el.toolGroup.style.transform = 'translateX(6px)';
+        addTimeout(function () {
+          for (let i = 0; i < labels.length; i++) {
+            labels[i].textContent = orig[i];
+            labels[i].style.color = '';
+          }
+          el.toolGroup.style.transform = '';
+        }, 3200);
+      }
+
+      function spawnOnlyWallAndPushback() {
+        if (State.ended || State.act !== 3) return;
+        State.v3PushActive = true;
+        State.v3PushCount = 0;
+
+        const wall = document.createElement('div');
+        wall.id = 'v3-only-wall';
+        wall.className = 'only-wall';
+        wall.textContent = '只有'.repeat(110);
+        el.docDynamic.appendChild(wall);
+
+        const strip = document.createElement('div');
+        strip.id = 'v3-push-strip';
+        strip.className = 'prompt-strip';
+        strip.innerHTML =
+          '<span id="v3-push-label" class="prompt-text">[ 按 5 次 Backspace 键试图清除异常段落 (0/5) ]</span>' +
+          '<button id="btn-v3-bs" class="btn btn-primary">⌫ 执行退格清除 (0/5)</button>';
+        el.docDynamic.appendChild(strip);
+        scrollDoc();
+
+        document.getElementById('btn-v3-bs').addEventListener('click', function () {
+          Sound.unlock();
+          stepV3Pushback();
+        });
+
+        setHint('按 5 次 Backspace（或点击退格按钮）试图清除“只有”文字墙。', true);
+      }
+
+      function stepV3Pushback() {
+        if (!State.v3PushActive) return;
+        State.v3PushCount++;
+        Sound.key(true);
+        shake();
+
+        const wall = document.getElementById('v3-only-wall');
+        const lbl = document.getElementById('v3-push-label');
+        const btn = document.getElementById('btn-v3-bs');
+
+        // 删掉一点，3999 立刻贴回更多，展现正面硬刚的无力
+        if (wall) {
+          wall.textContent = wall.textContent.slice(0, Math.max(20, wall.textContent.length - 12)) + '只有'.repeat(28);
+          wall.scrollTop = wall.scrollHeight;
+        }
+        if (lbl) lbl.textContent = '[ 按 5 次 Backspace 键试图清除异常段落 (' + State.v3PushCount + '/5) ]';
+        if (btn) btn.textContent = '⌫ 执行退格清除 (' + State.v3PushCount + '/5)';
+
+        if (State.v3PushCount === 2) {
+          log('记录补遗（塔罗兰）：目标不具备独立逻辑，其破坏力依赖本人的持续反应。', 'cold');
+        }
+        if (State.v3PushCount === 4) {
+          log('记录补遗（塔罗兰）：退格清除无效，熵增速度大于人工删改速率。', 'cold');
+        }
+
+        if (State.v3PushCount >= 5) {
+          State.v3PushActive = false;
+          const strip = document.getElementById('v3-push-strip');
+          if (strip) strip.remove();
+
+          if (wall) {
+            const brk = document.createElement('div');
+            brk.style.marginTop = '8px';
+            brk.innerHTML = '<span id="v3-breakout" class="breakout-link">救命，拜托 // [ 定位逻辑断点 ]</span>';
+            wall.appendChild(brk);
+            wall.scrollTop = wall.scrollHeight;
+
+            document.getElementById('v3-breakout').addEventListener('click', function () {
+              Sound.unlock();
+              Sound.confirm();
+              startV4();
+            });
+          }
+          setHint('在文字墙底部发现微弱信号：点击【救命，拜托 // 定位逻辑断点】！', false);
+        }
+      }
+
+      /* =======================================================================
+         10. V4：虚假的凯旋（RAISA 介入 → 逼真胜利 → 假制作人名单劈碎）
+         ======================================================================= */
+      function startV4() {
+        State.act = 4;
+        State.v4Redacted = false;
+        State.v4CardsWritten = 0;
+        State.clipboardCorrupted = false;
+        State.stress = 0.42;
+        saveProgress(4);
+        document.title = 'RAISA 应急介入 // SCP-3999';
+        el.phaseBadge.textContent = 'V4 · 应急反制';
+        el.phaseBadge.classList.remove('danger');
+        el.statusDot.classList.remove('danger');
+        el.vignette.style.opacity = '0.25';
+        setTelemetry('0.88 Hm', '恢复中', '#89,412', false);
+        Sound.setDrone(0.18);
+
+        // 清理冗长废稿，呈现干净的 RAISA 介入界面
+        el.docDynamic.innerHTML = '';
+
+        const raisa = document.createElement('div');
+        raisa.className = 'clinical-entry locked-order';
+        raisa.innerHTML =
+          '<div style="font-size:11px; color:var(--green); font-weight:700; margin-bottom:6px;">[ RAISA 叙事安全部 · 自动应急介入 ]</div>' +
+          '<div>已锁定剩余异常核心节点：<span id="v4-core-node" class="tok tok-threat" data-v4="redact">ZK-现实重构异常源</span>。</div>' +
+          '<div style="font-size:12px; color:var(--text-dim); margin-top:4px;">请先使用 [1] 涂黑 封印该异常源，随后从底部参考栏写入两项最终收容协议。</div>';
+        el.docDynamic.appendChild(raisa);
+        scrollDoc();
+
+        setTool('redact');
+        log('RAISA 叙事安全部已介入，异常读数显著下降。', 'safe');
+        setHint('使用 [1] 涂黑 点击【ZK-现实重构异常源】将其封印！', false);
+        setReferenceCards('封印上方异常源后解锁最终收容协议', []);
+      }
+
+      function unlockV4Cards() {
+        setHint('干得好！现在依次点击底部【参考栏】写入两项最终收容协议。', false);
+        setReferenceCards('V4 · 执行最终收容写入', [
+          {
+            tag: '[最终协议 1/2]',
+            text: '启动全部斯克兰顿现实稳定锚，将基准休谟指数锁定为 1.00 Hm。',
+            onClick: function () { writeV4Card(1, this.text); }
+          },
+          {
+            tag: '[最终协议 2/2]',
+            text: 'SCP-3999 将要被收容。',
+            onClick: function () { writeV4Card(2, this.text); }
+          }
+        ]);
+      }
+
+      const v4WrittenMap = {};
+      function writeV4Card(id, text) {
+        if (v4WrittenMap[id]) return;
+        v4WrittenMap[id] = true;
+        State.v4CardsWritten++;
+        Sound.confirm();
+
+        const p = document.createElement('div');
+        p.className = 'clinical-entry locked-order';
+        el.docDynamic.appendChild(p);
+        typeInto(p, text, false, 22, function () {
+          if (State.v4CardsWritten === 1) {
+            State.stress = 0.15;
+            setTelemetry('1.00 Hm', '平稳', '#89,412', false);
+            log('全部斯克兰顿现实稳定锚启动成功，现实场趋于稳定。', 'safe');
+          } else if (State.v4CardsWritten >= 2) {
+            State.stress = 0.05;
+            el.vignette.style.opacity = '0';
+            Sound.setDrone(0);
+            setReferenceCards('收容协议校验完成', []);
+            log('SCP-3999 异常读数归零，准备生成结案报告……', 'safe');
+            addTimeout(triggerFakeEnding, 650);
+          }
+        });
+      }
+
+      function triggerFakeEnding() {
+        document.title = 'SCP-3999 - Contained';
+        el.fakeOverlay.classList.add('open');
+        el.creditsSlash.classList.remove('visible');
+        el.creditsRoll.classList.remove('rolling');
+        void el.creditsRoll.offsetWidth;
+        el.creditsRoll.classList.add('rolling');
+        Sound.playLofiPiano();
+
+        // 制作人名单滚动到一半时，音乐猛地卡带，红光标劈碎假结局
+        addTimeout(function () {
+          Sound.jamStatic();
+          el.creditsSlash.classList.add('visible');
+          el.slashText.textContent = '';
+          const msg = '太俗套了。全盘否定。重写。';
+          let idx = 0;
+          const iv = addInterval(function () {
+            el.slashText.textContent += msg.charAt(idx);
+            Sound.key(true);
+            idx++;
+            if (idx >= msg.length) {
+              clearInterval(iv);
+              addTimeout(function () {
+                el.flash.style.opacity = '1';
+                Sound.glitch(0.45);
+                addTimeout(function () {
+                  el.fakeOverlay.classList.remove('open');
+                  el.flash.style.opacity = '0';
+                  startV5();
+                }, 420);
+              }, 950);
+            }
+          }, 55);
+        }, 3600);
+      }
+
+      /* =======================================================================
+         11. V5：秩序反杀（划不动了）→ 界面剥离 → Site-118 单一冷酷结局
+         ======================================================================= */
+      const V5_CARDS = [
+        {
+          tag: '[秩序覆写 1/3 · 接管权限]',
+          text: '现在我才是决策者了。我将带来秩序。',
+          outburst: '秩序是恶棍们的通行证！融化收容间！把所有稳定锚碾成粉末！'
+        },
+        {
+          tag: '[秩序覆写 2/3 · 拆解寄生]',
+          text: '经观测，SCP-3999 不具备独立存续能力，其效应完全寄生于单一认知锚点。',
+          outburst: '你不过是竖井里的一块腐肉！SCP-3999 是不朽的！重写现实！'
+        },
+        {
+          tag: '[秩序覆写 3/3 · 无效化指令]',
+          text: '第三个百万年我已经近乎麻木，但我活下来了。执行应急无效化协议。',
+          outburst: 'ZK-0000 现实重构强制执行中——不可中止！不可中止！不可中止！'
+        }
+      ];
+
+      function startV5() {
+        State.act = 5;
+        State.v5Phase = 1;
+        State.v5CardIdx = 0;
+        State.v5PendingSuppress = false;
+        State.stress = 0.78;
+        saveProgress(5); // 清除中段刷新标记
+        document.title = '我于万物之中';
+        el.phaseBadge.textContent = 'V5 · 秩序反杀';
+        el.phaseBadge.classList.add('danger');
+        el.statusDot.classList.add('danger');
+        el.vignette.style.opacity = '0.78';
+        el.docClass.innerHTML = '项目等级：<strong style="color:var(--amber);">待无效化</strong>';
+        setTelemetry('NaN Hm', '极度麻木', '#4,192,803', true);
+        Sound.setDrone(0.55);
+
+        el.docDynamic.innerHTML = '';
+        const head = document.createElement('div');
+        head.className = 'interview-box';
+        head.innerHTML =
+          '<div style="color:var(--green); font-weight:700;">[ 权限反转 // 受访者：SCP-3999 | 采访者：研究员詹姆斯·塔罗兰 ]</div>' +
+          '<div style="font-size:12px; color:var(--text-dim); margin-top:4px;">塔罗兰已夺回主光标最高权限。请从底部参考栏写入冷酷的结案指令。</div>';
+        el.docDynamic.appendChild(head);
+        scrollDoc();
+
+        log('循环计数定格：Loop #4,192,803。', 'danger');
+        log('研究员塔罗兰已接管最高覆写权限。', 'cold');
+        presentV5Card();
+      }
+
+      function presentV5Card() {
+        if (State.v5CardIdx >= V5_CARDS.length) {
+          startV5Phase2Anchors();
+          return;
+        }
+        const item = V5_CARDS[State.v5CardIdx];
+        setHint('点击底部【参考栏】写入秩序覆写指令 (' + (State.v5CardIdx + 1) + '/3)。', false);
+        setReferenceCards('V5 · 最高权限覆写', [
+          {
+            tag: item.tag,
+            text: item.text,
+            onClick: function () { executeV5Card(item); }
+          }
+        ]);
+      }
+
+      function executeV5Card(item) {
+        if (State.v5PendingSuppress) return;
+        State.v5PendingSuppress = true;
+        setReferenceCards('正在执行最高权限写入……', []);
+
+        const orderBox = document.createElement('div');
+        orderBox.className = 'clinical-entry locked-order';
+        el.docDynamic.appendChild(orderBox);
+
+        typeInto(orderBox, item.text, false, 22, function () {
+          // 3999 试图扑上来划线，但被弹开并爆出火花
+          addTimeout(function () {
+            Sound.bounce();
+            const spark = document.createElement('div');
+            spark.className = 'bounce-notice';
+            spark.textContent = '⚡ [覆写失败：最高权限已锁定，红光标删除线被弹开]';
+            orderBox.appendChild(spark);
+            scrollDoc();
+
+            // 3999 吐出充满敌意的混沌咆哮（绝不求饶）
+            addTimeout(function () {
+              Sound.glitch(0.24);
+              const outBox = document.createElement('div');
+              outBox.className = 'anomaly-entry clickable-suppress';
+              outBox.innerHTML =
+                '<div style="font-size:11px; color:var(--crimson); margin-bottom:4px;">[SCP-3999 混沌干扰 — 点击将其强制覆写为系统错误]</div>' +
+                '<div>' + item.outburst + '</div>';
+              el.docDynamic.appendChild(outBox);
+              scrollDoc();
+
+              setHint('点击上方发光的红色混沌干扰，亲手将其镇压覆写为 [系统错误]！', true);
+
+              outBox.addEventListener('click', function () {
+                Sound.unlock();
+                Sound.confirm();
+                outBox.className = 'sys-err-override';
+                outBox.innerHTML = '<strong>SCP-3999：</strong>[系统错误：数据损坏，详情咨询站点管理员]';
+                State.v5PendingSuppress = false;
+                State.v5CardIdx++;
+                log('已强行覆写异常干扰 (' + State.v5CardIdx + '/3)。', 'cold');
+                addTimeout(presentV5Card, 450);
+              }, { once: true });
+            }, 380);
+          }, 350);
+        });
+      }
+
+      /* 阶段 2：界面逐步剥离 + 5 处锚点按住退格/长按抹除 */
+      let activeEraseTimer = null;
+      let currentAnchorEl = null;
+
+      function startV5Phase2Anchors() {
+        State.v5Phase = 2;
+        State.v5AnchorsLeft = 5;
+        setTool('erase');
+        setReferenceCards('最终阶段：剥离全部 5 处认知锚点', []);
+
+        const strip = document.createElement('div');
+        strip.id = 'v5-anchor-strip';
+        strip.className = 'prompt-strip green-strip';
+        strip.innerHTML = '<span id="v5-anchor-progress" class="prompt-text">[ 按住 ⌫ Backspace 键（或直接长按下方任意目标）剥离最终锚点：0 / 5 ]</span>';
+        el.docDynamic.appendChild(strip);
+
+        const box = document.createElement('div');
+        box.id = 'v5-anchor-box';
+        box.className = 'anchor-box';
+        for (let i = 0; i < 5; i++) {
+          const chip = document.createElement('div');
+          chip.className = 'anchor-chip' + (i === 0 ? ' target-now' : '');
+          chip.setAttribute('data-anchor-idx', String(i));
+          chip.textContent = '研究员詹姆斯·塔罗兰';
+          // 鼠标与触摸长按兜底
+          chip.addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            Sound.unlock();
+            beginErase(chip);
+          });
+          box.appendChild(chip);
+        }
+        el.docDynamic.appendChild(box);
+        scrollDoc();
+
+        log('锚点剥离程序就绪。请按住 Backspace 或长按锚点标签。', 'cold');
+        setHint('按住键盘 ⌫ Backspace（或鼠标/手指长按绿色锚点标签），逐一抹除 5 处“研究员詹姆斯·塔罗兰”。', false);
+      }
+
+      function getNextAliveAnchor() {
+        const chips = document.querySelectorAll('.anchor-chip:not(.erased)');
+        return chips.length > 0 ? chips[0] : null;
+      }
+
+      function beginErase(targetChip) {
+        if (State.v5Phase !== 2 || activeEraseTimer) return;
+        const chip = (targetChip && !targetChip.classList.contains('erased')) ? targetChip : getNextAliveAnchor();
+        if (!chip) return;
+        currentAnchorEl = chip;
+        chip.classList.add('erasing');
+
+        activeEraseTimer = setInterval(function () {
+          if (!currentAnchorEl || currentAnchorEl.classList.contains('erased')) {
+            stopErase();
+            return;
+          }
+          const txt = currentAnchorEl.textContent;
+          if (txt.length > 1) {
+            currentAnchorEl.textContent = txt.slice(0, -1);
+            Sound.key(false);
+          } else {
+            currentAnchorEl.textContent = '[已注销]';
+            currentAnchorEl.classList.remove('erasing', 'target-now');
+            currentAnchorEl.classList.add('erased');
+            stopErase();
+            onAnchorErased();
+          }
+        }, 95);
+      }
+
+      function stopErase() {
+        if (activeEraseTimer) {
+          clearInterval(activeEraseTimer);
+          activeEraseTimer = null;
+        }
+        if (currentAnchorEl) {
+          currentAnchorEl.classList.remove('erasing');
+          currentAnchorEl = null;
+        }
+      }
+
+      window.addEventListener('pointerup', stopErase);
+      window.addEventListener('pointercancel', stopErase);
+
+      function onAnchorErased() {
+        State.v5AnchorsLeft--;
+        const done = 5 - State.v5AnchorsLeft;
+        const prog = document.getElementById('v5-anchor-progress');
+        if (prog) prog.textContent = '[ 按住 ⌫ Backspace 键（或直接长按下方任意目标）剥离最终锚点：' + done + ' / 5 ]';
+
+        const next = getNextAliveAnchor();
+        if (next) next.classList.add('target-now');
+
+        const ratio = State.v5AnchorsLeft / 5;
+        Sound.setDrone(ratio * 0.55);
+        el.vignette.style.opacity = String(ratio * 0.78);
+        Sound.confirm();
+
+        // 随着每个锚点抹除，逐一永久关闭 UI 区域
+        if (done === 1) {
+          State.ecgOffline = true;
+          el.telemetryPanel.classList.add('offline');
+          el.telemetryState.textContent = 'OFFLINE';
+          el.telemetryState.style.color = '#556170';
+          log('锚点 1/5 已切断。生理遥测与心电图离线。', 'cold');
+        } else if (done === 2) {
+          el.sidebar.classList.add('stripped');
+        } else if (done === 3) {
+          el.toolGroup.classList.add('stripped');
+        } else if (done === 4) {
+          el.refDock.classList.add('stripped');
+          el.docPaper.classList.add('stripped-paper');
+          el.app.classList.add('void-mode');
+        } else if (done === 5) {
+          // 全部锚点抹除完毕：3999 坍缩为无声静默碎片，全部音效归零
+          Sound.silenceImmediate();
+          el.statusDot.classList.remove('danger');
+          el.statusDot.style.background = '#94a3b8';
+          el.statusDot.style.boxShadow = 'none';
+          el.phaseBadge.textContent = 'V5 · 归档封存';
+          el.phaseBadge.classList.remove('danger');
+
+          const staticFrag = document.createElement('div');
+          staticFrag.style.color = '#475569';
+          staticFrag.style.fontSize = '12px';
+          staticFrag.style.marginTop = '12px';
+          staticFrag.textContent = '[NULL_PTR // SCP-3999 异常信号已完全静默]';
+          el.docDynamic.appendChild(staticFrag);
+          scrollDoc();
+
+          // 解锁右上角最终归档按钮
+          State.v5Phase = 3;
+          State.v5ArchiveUnlocked = true;
+          el.btnArchive.className = 'btn btn-archive-ready';
+          el.archiveText.textContent = '【确认无效化 · 归档封存】';
+          el.btnArchive.title = '点击完成最终归档';
+          setHint('全部认知锚点已注销。请点击右上角【确认无效化 · 归档封存】。', false);
+        }
+      }
+
+      /* 阶段 3：一帧切入 Site-118 Neutralized 静默报告 */
+      function triggerFinalEnding() {
+        if (State.ended) return;
+        State.ended = true;
+        clearTimers();
+        Sound.silenceImmediate();
+        saveProgress(0); // 清除本地中段标记
+        document.title = 'SCP-3999 (Neutralized)';
+        el.finalEnding.classList.add('open');
+      }
+
+      /* =======================================================================
+         12. 交互事件分发（文档、工具栏、快捷键）
+         ======================================================================= */
+      el.docPaper.addEventListener('click', function (e) {
+        Sound.unlock();
+        if (State.ended) return;
+
+        // 剪贴板复制（V3 会被污染）
+        const copyEl = e.target.closest('[data-copy]');
+        if (copyEl) {
+          if (State.tool !== 'clip') {
+            log('提示：切换 [3] 剪贴板覆写 后可复制蓝色词条。');
+            return;
+          }
+          State.clipboard = copyEl.getAttribute('data-copy');
+          el.clipTag.textContent = State.clipboard;
+          Sound.confirm();
+          if (State.clipboardCorrupted) {
+            log('已复制「' + State.clipboard + '」，但粘贴缓冲区已被污染为「只有只有只有」。', 'danger');
+          } else {
+            log('已复制到剪贴板：「' + State.clipboard + '」', 'safe');
+          }
+          return;
+        }
+
+        // V1 核验交互
+        const v1El = e.target.closest('[data-v1]');
+        if (v1El && State.act === 1) {
+          const kind = v1El.getAttribute('data-v1');
+          if (kind === 'redact' && !State.v1CoordDone) {
+            if (State.tool !== 'redact') {
+              setTool('redact');
+            }
+            State.v1CoordDone = true;
+            v1El.textContent = '████████████';
+            v1El.className = 'tok tok-redacted';
+            Sound.confirm();
+            log('已涂黑 Site-118 地下竖井绝密坐标。', 'safe');
+            checkV1ReadyForDesc();
+          } else if (kind === 'verify' && !State.v1SraDone) {
+            State.v1SraDone = true;
+            v1El.textContent = '[已校验：SRA 阵列运行正常 · 1.00 Hm]';
+            v1El.className = 'tok tok-verified';
+            Sound.confirm();
+            log('每隔 30 米部署的斯克兰顿现实稳定锚校验通过。', 'safe');
+            checkV1ReadyForDesc();
+          }
+          return;
+        }
+
+        // V2 回合 2 矛盾条款压制
+        const v2Clause = e.target.closest('[data-v2-clause]');
+        if (v2Clause && State.act === 2 && State.v2Round === 2) {
+          if (v2Clause.getAttribute('data-done') === '1') return;
+          if (State.tool !== 'redact' && State.tool !== 'strike') {
+            log('请使用 [1] 涂黑 或 [2] 删除线 压制红色矛盾条款！', 'amber');
+            return;
+          }
+          v2Clause.setAttribute('data-done', '1');
+          State.v2ClausesHandled++;
+          Sound.key(false);
+
+          if (State.tool === 'redact') {
+            v2Clause.textContent = '██████████';
+            v2Clause.className = 'tok tok-redacted';
+          } else {
+            v2Clause.className = 'tok tok-struck';
+          }
+
+          // 3999 还手：第一条压制后，强行撕开或附加覆写
+          if (State.v2ClausesHandled === 1) {
+            addTimeout(function () {
+              Sound.glitch(0.2);
+              const counter = document.createElement('span');
+              counter.style.color = '#ff5252';
+              counter.style.fontSize = '12px';
+              counter.textContent = ' （3999 覆写：涂黑无效，特工将配备消音步枪在现场维持观测）';
+              v2Clause.parentElement.appendChild(counter);
+              log('3999 强行反击并撕开了部分权限限制！', 'danger');
+            }, 260);
+          }
+
+          if (State.v2ClausesHandled >= 3) {
+            log('矛盾条款已被暂时压制，但终端信号正在切入异常采访记录……', 'amber');
+            addTimeout(startV2Round3Hijack, 700);
+          }
+          return;
+        }
+
+        // V4 异常源涂黑
+        const v4El = e.target.closest('[data-v4="redact"]');
+        if (v4El && State.act === 4 && !State.v4Redacted) {
+          if (State.tool !== 'redact') setTool('redact');
+          State.v4Redacted = true;
+          v4El.textContent = '████████████';
+          v4El.className = 'tok tok-redacted';
+          Sound.confirm();
+          log('异常核心节点已封印！基准休谟指数回升。', 'safe');
+          unlockV4Cards();
+        }
+      });
+
+      // 工具按钮切换
+      for (let i = 0; i < el.toolBtns.length; i++) {
+        el.toolBtns[i].addEventListener('click', function () {
+          setTool(this.getAttribute('data-tool'));
+        });
+      }
+
+      // 撤销按钮（V3+ 触发伪终端报错弹窗）
+      function handleUndo() {
+        Sound.unlock();
+        if (State.act >= 3 && !State.ended) {
+          Sound.glitch(0.22);
+          showModal('⚠ 撤销失败 (0x3999)', '<strong>撤销失败：无法回滚当前现实熵增。</strong><br><span style="color:#8a97a8; font-size:12px;">SCiPNET 历史快照已被 SCP-3999 覆写。</span>');
+          log('撤销失败：无法回滚当前现实熵增。', 'danger');
+        } else {
+          Sound.key(false);
+          log('当前步骤无可撤销的合法快照。');
+        }
+      }
+      el.btnUndo.addEventListener('click', handleUndo);
+
+      // 右上角归档按钮
+      el.btnArchive.addEventListener('click', function () {
+        Sound.unlock();
+        if (State.v5ArchiveUnlocked) {
+          triggerFinalEnding();
+        } else {
+          Sound.glitch(0.14);
+          log('归档锁已启用：当前文档未满足无效化封存条件。', 'amber');
+        }
+      });
+
+      // 静音按钮
+      el.btnMute.addEventListener('click', function () {
+        Sound.unlock();
+        const m = Sound.toggleMute();
+        el.btnMute.textContent = m ? '🔇' : '🔊';
+      });
+
+      // 左下角隐蔽重置按钮 & 终局重启按钮
+      function fullReset() {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        window.location.reload();
+      }
+      el.btnReset.addEventListener('click', fullReset);
+      el.btnRestartFinal.addEventListener('click', fullReset);
+
+      // 键盘监听（序幕推进、V2 任意键劫持、V3 退格推线、V5 长按退格、快捷键）
+      window.addEventListener('keydown', function (e) {
+        if (State.ended) return;
+
+        if (State.act === 0 && !el.introScreen.classList.contains('hidden')) {
+          if (State.poemStep < 3) {
+            e.preventDefault();
+            advancePoem();
+          }
+          return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          handleUndo();
+          return;
+        }
+
+        if (State.v2HijackActive && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          stepV2Hijack();
+          return;
+        }
+
+        if (State.v3PushActive && e.key === 'Backspace') {
+          e.preventDefault();
+          stepV3Pushback();
+          return;
+        }
+
+        if (State.act === 5 && State.v5Phase === 2 && e.key === 'Backspace') {
+          e.preventDefault();
+          if (!e.repeat) beginErase(null);
+          return;
+        }
+
+        if (e.key === '1') setTool('redact');
+        else if (e.key === '2') setTool('strike');
+        else if (e.key === '3') setTool('clip');
+        else if (e.key === '4') setTool('erase');
+      });
+
+      window.addEventListener('keyup', function (e) {
+        if (e.key === 'Backspace') stopErase();
+      });
+
+      /* =======================================================================
+         13. 启动初始化与 localStorage 中途刷新检测
+         ======================================================================= */
+      window.addEventListener('resize', resizeECG);
+      resizeECG();
+      requestAnimationFrame(renderECG);
+
+      let savedAct = 0;
+      try {
+        savedAct = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+      } catch (e) {}
+
+      if (savedAct >= 2 && savedAct <= 4) {
+        el.introScreen.classList.add('hidden');
+        el.refreshTaunt.classList.remove('hidden');
+        el.btnResumeLoop.addEventListener('click', function () {
+          Sound.unlock();
+          Sound.glitch(0.28);
+          el.refreshTaunt.classList.add('hidden');
+          // 跳过 V1 前置，直接恢复到被刷新中断的幕次
+          State.v1CoordDone = true;
+          State.v1SraDone = true;
+          State.v1DescWritten = true;
+          el.v1Coord.textContent = '████████████';
+          el.v1Coord.className = 'tok tok-redacted';
+          el.v1Sra.textContent = '[已校验：SRA 阵列运行正常 · 1.00 Hm]';
+          el.v1Sra.className = 'tok tok-verified';
+          el.v1DescSlot.className = 'clinical-entry struck-by-3999';
+          el.v1DescSlot.textContent = 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体。';
+
+          if (savedAct === 2) startV2();
+          else if (savedAct === 3) startV3();
+          else if (savedAct === 4) startV4();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

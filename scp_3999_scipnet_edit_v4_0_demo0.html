@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCiPNET-EDIT v4.0 // SCP-3999_DRAFT.scp</title>
+  <style>
+    /* =========================================================================
+       SCP-3999：我于万物之中 (SCiPNET-EDIT v4.0)
+       100% 零外部依赖纯内联样式表
+       ========================================================================= */
+    :root {
+      --bg-app: #f4f4f0;
+      --bg-panel: #eaeae3;
+      --bg-header: #e2e2da;
+      --bg-paper: #ffffff;
+      --ink: #171716;
+      --ink-muted: #5a5a54;
+      --border-strong: #232320;
+      --border-soft: #c7c7be;
+      --red: #c61a1a;
+      --red-soft: rgba(198, 26, 26, 0.12);
+      --blue: #185796;
+      --blue-soft: rgba(24, 87, 150, 0.08);
+      --green: #166534;
+      --green-soft: rgba(22, 101, 52, 0.1);
+      --gold: #a16207;
+      --font-mono: 'Courier New', Consolas, Monaco, 'PingFang SC', 'Microsoft YaHei', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-app);
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      user-select: none;
+    }
+
+    /* 主容器 */
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 异常视觉层（CRT 扫描线 + 暗红暗角 + 闪断黑屏） */
+    #crt-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.045) 0px,
+          rgba(0, 0, 0, 0.045) 1px,
+          transparent 1px,
+          transparent 3px
+        ),
+        radial-gradient(circle at center, transparent 52%, rgba(120, 0, 0, 0.24) 100%);
+    }
+
+    #flash-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: #050505;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    /* 屏幕震动动画 */
+    @keyframes shake-mild {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-1.5px, 1px); }
+      50% { transform: translate(1.5px, -1px); }
+      75% { transform: translate(-1px, -1.5px); }
+    }
+
+    @keyframes shake-heavy {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-5px, 3px); }
+      40% { transform: translate(5px, -3px); }
+      60% { transform: translate(-4px, -4px); }
+      80% { transform: translate(4px, 2px); }
+    }
+
+    .shaking-mild { animation: shake-mild 0.18s linear infinite; }
+    .shaking-heavy { animation: shake-heavy 0.11s linear 4; }
+
+    /* =========================================================================
+       顶部工具栏
+       ========================================================================= */
+    .topbar {
+      background: var(--bg-header);
+      border-bottom: 1.5px solid var(--border-strong);
+      padding: 6px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--ink);
+      flex-shrink: 0;
+    }
+
+    .status-dot.danger {
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+      animation: pulse-dot 0.9s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.25); }
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .file-pill {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .phase-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--ink);
+      color: #f4f4f0;
+      white-space: nowrap;
+    }
+
+    .phase-badge.danger {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.14s ease, background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #e5e5dc;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .btn.active {
+      background: var(--ink);
+      color: #f4f4f0;
+    }
+
+    .btn-key {
+      font-size: 10px;
+      opacity: 0.65;
+    }
+
+    .btn-save-ready {
+      background: var(--green) !important;
+      color: #ffffff !important;
+      border-color: var(--green) !important;
+      animation: pulse-save 1.2s infinite;
+    }
+
+    @keyframes pulse-save {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(22, 101, 52, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(22, 101, 52, 0); }
+    }
+
+    .btn-archive-locked {
+      background: #dadad1;
+      color: #6b6b64;
+      border-color: #8f8f86;
+      cursor: not-allowed;
+    }
+
+    .btn-archive-smash {
+      background: #fff;
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(198, 26, 26, 0.25);
+    }
+
+    .btn-archive-smash:hover {
+      background: #fee2e2;
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .clip-preview {
+      color: var(--blue);
+      font-weight: 700;
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn.active .clip-preview {
+      color: #93c5fd;
+    }
+
+    .badge-mini {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--red);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* =========================================================================
+       主体双栏工作区
+       ========================================================================= */
+    .workspace {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* 左侧主区：参考剪贴板 + 文档画布 */
+    .main-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      background: var(--bg-app);
+    }
+
+    /* 可折叠参考安全词条栏（第一、二幕） */
+    .ref-drawer {
+      background: #efefe8;
+      border-bottom: 1px solid var(--border-soft);
+      padding: 6px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .ref-drawer.collapsed .ref-words {
+      display: none;
+    }
+
+    .ref-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ref-toggle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      border-radius: 3px;
+      padding: 2px 6px;
+      cursor: pointer;
+      color: var(--ink-muted);
+    }
+
+    .ref-toggle:hover {
+      background: #e2e2d8;
+      color: var(--ink);
+    }
+
+    /* 文档滚动区 */
+    .doc-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px 28px;
+      scroll-behavior: smooth;
+    }
+
+    .doc-paper {
+      max-width: 780px;
+      margin: 0 auto;
+      background: var(--bg-paper);
+      border: 1px solid #cdcdc4;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      padding: 24px 28px;
+    }
+
+    .doc-paper.cursor-redact { cursor: crosshair; }
+    .doc-paper.cursor-strike { cursor: not-allowed; }
+    .doc-paper.cursor-clip   { cursor: copy; }
+    .doc-paper.cursor-erase  { cursor: cell; }
+
+    .doc-header {
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .doc-sub {
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+    }
+
+    .doc-title {
+      margin: 3px 0 0;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .doc-section p {
+      margin: 0 0 12px;
+      line-height: 1.75;
+    }
+
+    /* 可交互词条样式 */
+    .token {
+      display: inline;
+      padding: 1px 5px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .token-safe {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-bottom: 1.5px dashed var(--blue);
+      font-weight: 600;
+    }
+    .token-safe:hover {
+      background: rgba(24, 87, 150, 0.18);
+    }
+
+    .token-task {
+      background: rgba(23, 23, 22, 0.08);
+      border: 1px dashed #666;
+    }
+    .token-task:hover {
+      background: rgba(23, 23, 22, 0.16);
+    }
+
+    .token-slot {
+      color: var(--blue);
+      background: rgba(24, 87, 150, 0.07);
+      border: 1px dashed var(--blue);
+      font-weight: 700;
+    }
+
+    .token-threat {
+      color: var(--red);
+      background: var(--red-soft);
+      border: 1px solid rgba(198, 26, 26, 0.7);
+      font-weight: 700;
+      display: inline-block;
+      animation: text-jitter 0.15s infinite;
+    }
+    .token-threat:hover {
+      background: rgba(198, 26, 26, 0.24);
+    }
+
+    .token-redacted {
+      background: #111111 !important;
+      color: #111111 !important;
+      border: 1px solid #111111 !important;
+      animation: none !important;
+      cursor: default !important;
+      padding: 1px 6px;
+      letter-spacing: 1px;
+    }
+
+    .token-struck {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      color: #84847c !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      animation: none !important;
+      cursor: default !important;
+      opacity: 0.72;
+    }
+
+    .token-pacified {
+      color: var(--green) !important;
+      background: var(--green-soft) !important;
+      border: 1px solid rgba(22, 101, 52, 0.45) !important;
+      animation: none !important;
+      cursor: default !important;
+      font-weight: 700;
+    }
+
+    @keyframes text-jitter {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(0.7px, -0.6px); }
+      50% { transform: translate(-0.7px, 0.5px); }
+      75% { transform: translate(0.5px, 0.7px); }
+    }
+
+    /* 3999 入侵段落与光标 */
+    .threat-box {
+      color: var(--red);
+      background: rgba(198, 26, 26, 0.05);
+      border: 1px solid rgba(198, 26, 26, 0.35);
+      border-left: 3px solid var(--red);
+      border-radius: 4px;
+      padding: 9px 12px;
+      margin: 10px 0;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+
+    .threat-box.resolved {
+      color: var(--ink-muted);
+      background: #f8f8f5;
+      border-color: #d6d6cd;
+      border-left-color: var(--green);
+      font-weight: 400;
+    }
+
+    .crisis-timer-pill {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--red);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .threat-line-plain {
+      color: var(--red);
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    .draft-noise {
+      color: #707069;
+      text-decoration: line-through;
+      font-size: 13px;
+      margin: 5px 0;
+      opacity: 0.78;
+    }
+
+    .typing-row {
+      color: var(--red);
+      font-weight: 700;
+      min-height: 22px;
+      margin: 10px 0;
+    }
+
+    .red-cursor {
+      display: inline-block;
+      width: 9px;
+      height: 1.1em;
+      background: var(--red);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blink 0.65s infinite;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    /* 第三幕：伪希望金色按钮 */
+    .trap-box {
+      margin: 14px 0;
+      padding: 14px;
+      border: 2px dashed var(--gold);
+      background: #fffbeb;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .btn-golden {
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: 5px;
+      border: 2px solid var(--gold);
+      background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%);
+      color: #713f12;
+      cursor: pointer;
+      animation: gold-glow 1.5s infinite;
+    }
+
+    @keyframes gold-glow {
+      0%, 100% { box-shadow: 0 0 6px rgba(161, 98, 7, 0.35); }
+      50% { box-shadow: 0 0 18px rgba(202, 138, 4, 0.85); }
+    }
+
+    .gold-protocol {
+      margin: 12px 0;
+      padding: 12px 14px;
+      border: 2px solid var(--gold);
+      background: #fffbeb;
+      color: #713f12;
+      border-radius: 5px;
+      font-size: 13px;
+      line-height: 1.65;
+      transition: all 0.3s ease;
+    }
+
+    .gold-protocol.slashed {
+      text-decoration: line-through;
+      text-decoration-color: var(--red);
+      text-decoration-thickness: 3px;
+      border-color: var(--red);
+      background: #fef2f2;
+      opacity: 0.68;
+    }
+
+    .giant-rewrite {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--red);
+      letter-spacing: 2px;
+      margin: 12px 0;
+      animation: text-jitter 0.14s infinite;
+    }
+
+    /* 第四幕：塔罗兰锚点与批注 */
+    .anchor-talloran {
+      transition: all 0.2s ease;
+    }
+
+    .anchor-talloran.anchor-active {
+      display: inline-block;
+      padding: 0 5px;
+      border-radius: 3px;
+      font-weight: 700;
+      color: #111;
+      background: rgba(198, 26, 26, 0.14);
+      box-shadow: 0 0 0 1.5px rgba(198, 26, 26, 0.75);
+      cursor: pointer;
+      animation: anchor-pulse 1.35s infinite;
+    }
+
+    @keyframes anchor-pulse {
+      0%, 100% { box-shadow: 0 0 0 1.5px rgba(198, 26, 26, 0.6), 0 0 8px rgba(198, 26, 26, 0.25); }
+      50% { box-shadow: 0 0 0 2.5px rgba(198, 26, 26, 1), 0 0 15px rgba(198, 26, 26, 0.5); }
+    }
+
+    .anchor-talloran.anchor-erased {
+      color: #9e9e96;
+      text-decoration: line-through;
+      background: transparent;
+      box-shadow: none;
+      animation: none;
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .footnote-box {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px dashed #c8c8bf;
+      color: #7c7c75;
+      font-size: 12px;
+      font-style: italic;
+      display: none;
+    }
+
+    .footnote-box.visible {
+      display: block;
+      animation: fade-in 0.8s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================================================
+       右侧边栏：塔罗兰实时监控
+       ========================================================================= */
+    .sidebar {
+      width: 310px;
+      border-left: 1.5px solid var(--border-strong);
+      background: var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
+    .side-header {
+      padding: 7px 11px;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .loop-counter {
+      color: var(--ink);
+    }
+
+    .loop-counter.danger {
+      color: var(--red);
+    }
+
+    .monitor-block {
+      padding: 10px 11px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .portrait-ecg-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .ascii-portrait {
+      width: 96px;
+      background: #141614;
+      color: #d7e2d7;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 5px 4px;
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      line-height: 1.15;
+      text-align: center;
+      white-space: pre;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ascii-portrait.bleed { color: #fca5a5; }
+    .ascii-portrait.corrupt { color: #ef4444; background: #1d0c0c; }
+
+    .ecg-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .ecg-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .ecg-canvas-box {
+      flex: 1;
+      min-height: 54px;
+      background: #141614;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #ecg-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: #d5d5cc;
+      border: 1px solid var(--border-strong);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--ink);
+      transition: width 0.25s ease, background-color 0.25s ease;
+    }
+
+    .bar-fill.san { background: var(--blue); }
+    .bar-fill.low { background: var(--red); }
+
+    .log-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 11px;
+    }
+
+    .log-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 11px;
+      line-height: 1.45;
+      padding-right: 4px;
+    }
+
+    .log-item {
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .log-item.danger { color: var(--red); font-weight: 700; }
+    .log-item.safe { color: var(--green); font-weight: 700; }
+    .log-item.meta { color: var(--gold); font-weight: 700; }
+
+    /* =========================================================================
+       底部状态与目标提示栏
+       ========================================================================= */
+    .statusbar {
+      background: var(--bg-header);
+      border-top: 1.5px solid var(--border-strong);
+      padding: 6px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .hint-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 600;
+    }
+
+    .hint-tag {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--ink);
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .hint-tag.danger { background: var(--red); }
+
+    .checklist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--ink-muted);
+    }
+
+    .chk-done {
+      color: var(--green);
+      font-weight: 700;
+      text-decoration: line-through;
+    }
+
+    /* =========================================================================
+       伪系统弹窗（替代 alert，用于第三幕 UI 叛变）
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0, 0, 0, 0.52);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 410px;
+      background: #f2f2ec;
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .modal-titlebar {
+      background: var(--red);
+      color: #fff;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .modal-actions {
+      padding: 0 16px 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .btn-danger:hover {
+      background: #a51515;
+    }
+
+    /* =========================================================================
+       终局纯白归档页（结局 A / 结局 B）
+       ========================================================================= */
+    #ending-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: #ffffff;
+      color: #111111;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    #ending-screen.open {
+      display: flex;
+    }
+
+    .ending-card {
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .ending-head {
+      border-bottom: 2px solid #111;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .ending-stamp {
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #111;
+      padding: 3px 8px;
+      letter-spacing: 1.5px;
+    }
+
+    .ending-note {
+      background: #fafafa;
+      border-left: 4px solid #111;
+      padding: 14px 16px;
+      margin: 16px 0 24px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .ending-footer {
+      border-top: 1px solid #e2e2e2;
+      padding-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* =========================================================================
+       响应式适配（移动端 / 窄屏 iframe）
+       ========================================================================= */
+    @media (max-width: 820px) {
+      .workspace {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: 195px;
+        border-left: none;
+        border-top: 1.5px solid var(--border-strong);
+      }
+      .monitor-block {
+        padding: 7px 10px;
+        gap: 6px;
+      }
+      .doc-paper {
+        padding: 16px;
+      }
+      .file-pill {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 视觉覆盖层 -->
+  <div id="crt-overlay"></div>
+  <div id="flash-overlay"></div>
+
+  <!-- 主应用界面 -->
+  <div id="app">
+    <!-- 1. 顶部工具栏 -->
+    <header class="topbar">
+      <div class="brand">
+        <span id="status-dot" class="status-dot"></span>
+        <span class="brand-title">SCiPNET-EDIT v4.0</span>
+        <span class="file-pill">SCP-3999_DRAFT.scp</span>
+        <span id="phase-badge" class="phase-badge">第一幕：建档</span>
+      </div>
+
+      <!-- 工具武器库 -->
+      <div class="toolbar-group">
+        <button id="tool-redact" class="btn active" data-tool="redact" title="快捷键 1">
+          <span class="btn-key">[1]</span>
+          <span>███ 涂黑</span>
+        </button>
+
+        <button id="tool-strike" class="btn" data-tool="strike" title="快捷键 2">
+          <span class="btn-key">[2]</span>
+          <span style="text-decoration: line-through;">删除线</span>
+        </button>
+
+        <button id="tool-clip" class="btn" data-tool="clip" title="快捷键 3">
+          <span class="btn-key">[3]</span>
+          <span>📋 剪贴板:</span>
+          <span id="clip-text" class="clip-preview">空</span>
+        </button>
+
+        <button id="tool-erase" class="btn" data-tool="erase" title="快捷键 4">
+          <span class="btn-key">[4]</span>
+          <span>⌫ 抹除</span>
+          <span id="anchor-badge" class="badge-mini" style="display:none;">5</span>
+        </button>
+      </div>
+
+      <!-- 动作与归档控制 -->
+      <div class="toolbar-group">
+        <button id="btn-undo" class="btn" title="Ctrl+Z">撤销</button>
+        <button id="btn-save" class="btn" title="Ctrl+S">保存</button>
+        <button id="btn-archive" class="btn btn-archive-locked" title="草稿尚未通过校验">
+          <span id="archive-icon">🔒</span>
+          <span id="archive-label">停止编辑并发布</span>
+        </button>
+        <button id="btn-mute" class="btn" title="开启/关闭合成音效">🔊</button>
+      </div>
+    </header>
+
+    <!-- 2. 主体双栏区域 -->
+    <div class="workspace">
+      <!-- 左侧：参考词条 + 文档画布 -->
+      <main class="main-pane">
+        <!-- 参考安全词条区 -->
+        <div id="ref-drawer" class="ref-drawer">
+          <div class="ref-left">
+            <strong>[参考剪贴板]</strong>
+            <div class="ref-words" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              <span style="color:var(--ink-muted);">切换 [3] 剪贴板点击复制：</span>
+              <span class="token token-safe" data-action="copy" data-word="标准收容协议">标准收容协议</span>
+              <span class="token token-safe" data-action="copy" data-word="纯净水">纯净水</span>
+              <span class="token token-safe" data-action="copy" data-word="空气">空气</span>
+            </div>
+          </div>
+          <button id="ref-toggle" class="ref-toggle">收起</button>
+        </div>
+
+        <!-- 文档画布 -->
+        <div id="doc-scroll" class="doc-scroll">
+          <article id="doc-paper" class="doc-paper cursor-redact">
+            <div class="doc-header">
+              <div>
+                <div class="doc-sub">SCP FOUNDATION // INTERNAL TERMINAL</div>
+                <h1 class="doc-title">项目编号：SCP-3999</h1>
+              </div>
+              <div class="doc-meta">
+                <div>权限等级：3 级</div>
+                <div id="doc-class"><strong>项目等级：待定</strong></div>
+              </div>
+            </div>
+
+            <!-- 静态初始公文（含第一幕 3 个教学项 + 锚点 1 & 2） -->
+            <div class="doc-section" id="doc-static">
+              <p>
+                <strong>收容站点：</strong>本项目初稿暂存并归档于机密站点
+                <span id="task-site" class="token token-task" data-action="task-redact" title="用 [1] 涂黑 遮盖">Site-19</span>
+                文书档案科。办公区供水为标准
+                <span class="token token-safe" data-action="copy" data-word="纯净水">纯净水</span>
+                ，通风系统维持常规
+                <span class="token token-safe" data-action="copy" data-word="空气">空气</span>
+                循环。
+              </p>
+
+              <p>
+                <strong>负责人员：</strong>本档案由
+                <span class="anchor-talloran" data-anchor="1">研究员塔罗兰</span>
+                负责整理。
+                <span id="task-typo" class="token token-task" data-action="task-strike" title="用 [2] 删除线 划掉格式错误句">（格式错误：请勿在正式收容草案里记录昨日午餐菜单与个人吐槽。）</span>
+              </p>
+
+              <p>
+                <strong>特殊收容措施（初稿）：</strong>当前阶段须严格执行
+                <span id="task-slot" class="token token-slot" data-action="task-paste" title="复制“标准收容协议”后粘贴到此处">[待补充]</span>
+                ，并由
+                <span class="anchor-talloran" data-anchor="2">研究员塔罗兰</span>
+                每日核查文档完整性。
+              </p>
+            </div>
+
+            <!-- 动态入侵内容区 -->
+            <div id="doc-dynamic"></div>
+
+            <!-- 第三幕伪希望容器 -->
+            <div id="trap-zone"></div>
+
+            <!-- 3999 打字机行 -->
+            <div id="typing-row" class="typing-row" style="display:none;">
+              <span id="typing-text"></span><span class="red-cursor"></span>
+            </div>
+
+            <!-- 第四幕塔罗兰微弱批注 -->
+            <div id="footnote-box" class="footnote-box">
+              <strong>[批注 // 来源：研究员塔罗兰]：</strong>
+              别再修它了。只要我还在文档里，它就永远死不了。
+            </div>
+          </article>
+        </div>
+      </main>
+
+      <!-- 右侧：塔罗兰实时监控 -->
+      <aside class="sidebar">
+        <div class="side-header">
+          <span>SUBJECT MONITOR // 塔罗兰</span>
+          <span id="loop-counter" class="loop-counter">第 1 次循环</span>
+        </div>
+
+        <div class="monitor-block">
+          <div class="portrait-ecg-row">
+            <!-- ASCII 动态头像 -->
+            <pre id="ascii-portrait" class="ascii-portrait">  .---.
+ / o o \
+ |  -  |
+ \ ___ /
+  /| |\ </pre>
+
+            <!-- 实时 Canvas 心电图 -->
+            <div class="ecg-wrap">
+              <div class="ecg-top">
+                <span>ECG 实时心率</span>
+                <strong id="bpm-label">72 BPM</strong>
+              </div>
+              <div class="ecg-canvas-box">
+                <canvas id="ecg-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 生命完整度 -->
+          <div class="bar-row">
+            <div class="bar-label">
+              <span>生理完整度 (INTEGRITY)</span>
+              <strong id="hp-text">100%</strong>
+            </div>
+            <div class="bar-track">
+              <div id="hp-bar" class="bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- 精神理智 -->
+          <div class="bar-row">
+            <div class="bar-label">
+              <span>精神稳定度 (SANITY)</span>
+              <strong id="san-text">100%</strong>
+            </div>
+            <div class="bar-track">
+              <div id="san-bar" class="bar-fill san"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 实时事件日志 -->
+        <div class="log-section">
+          <div class="log-title">LIVE LOG // 实时事件日志</div>
+          <div id="log-list" class="log-list"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 3. 底部目标提示栏 -->
+    <footer class="statusbar">
+      <div class="hint-main">
+        <span id="hint-tag" class="hint-tag">目标</span>
+        <span id="hint-text">完成 3 项初稿校验后点击顶部【保存 (Ctrl+S)】。</span>
+      </div>
+      <div id="checklist" class="checklist">
+        <span id="chk-1">☐ 涂黑 Site-19</span>
+        <span id="chk-2">☐ 划掉格式错误句</span>
+        <span id="chk-3">☐ 复制“标准收容协议”填入[待补充]</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 伪系统报错弹窗（无浏览器原生 alert） -->
+  <div id="modal-backdrop" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-titlebar">
+        <span id="modal-title">⚠ SCiPNET 系统错误</span>
+        <span>×</span>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-btn" class="btn btn-danger">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 终局纯白归档界面 -->
+  <div id="ending-screen">
+    <div class="ending-card">
+      <div class="ending-head">
+        <div>
+          <div class="doc-sub">SCP FOUNDATION // FINAL ARCHIVE</div>
+          <h1 class="doc-title" style="font-size:22px;">项目编号：SCP-3999</h1>
+        </div>
+        <span class="ending-stamp">NEUTRALIZED</span>
+      </div>
+
+      <p><strong>项目等级：</strong>Neutralized（无效化）</p>
+      <p><strong>特殊收容措施：</strong>不再需要收容措施。</p>
+
+      <div id="ending-note" class="ending-note"></div>
+
+      <div class="ending-footer">
+        <div>
+          <strong id="ending-title" style="color:#111;">真结局</strong>
+          <span> · 我于万物之中</span>
+        </div>
+        <button id="btn-restart" class="btn">重新开始</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* =======================================================================
+         1. 纯 Web Audio API 合成音效引擎（延迟到首次点击初始化 + try/catch）
+         ======================================================================= */
+      const Sound = {
+        ctx: null,
+        muted: false,
+        droneOsc: null,
+        droneGain: null,
+        droneLevel: 0,
+
+        unlock() {
+          try {
+            if (!this.ctx) {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+              this.ctx.resume().catch(function () {});
+            }
+          } catch (err) {
+            // 静默降级，绝不阻塞游戏
+          }
+        },
+
+        toggleMute() {
+          this.muted = !this.muted;
+          if (this.muted) {
+            this.setDrone(0);
+          } else if (State.act >= 2 && !State.ended) {
+            this.setDrone(this.droneLevel || 0.3);
+          }
+          return this.muted;
+        },
+
+        click(horror) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = horror ? 'sawtooth' : 'triangle';
+            osc.frequency.setValueAtTime(horror ? (160 + Math.random() * 240) : (900 + Math.random() * 320), t);
+            osc.frequency.exponentialRampToValueAtTime(horror ? 55 : 130, t + 0.03);
+            g.gain.setValueAtTime(horror ? 0.065 : 0.04, t);
+            g.gain.exponentialRampToValueAtTime(0.0008, t + 0.035);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.04);
+          } catch (e) {}
+        },
+
+        tool(kind) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            if (kind === 'redact') {
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(150, t);
+              osc.frequency.exponentialRampToValueAtTime(48, t + 0.09);
+              g.gain.setValueAtTime(0.08, t);
+              g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+            } else if (kind === 'strike') {
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(480, t);
+              osc.frequency.linearRampToValueAtTime(200, t + 0.08);
+              g.gain.setValueAtTime(0.05, t);
+              g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+            } else if (kind === 'clip') {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(640, t);
+              osc.frequency.setValueAtTime(880, t + 0.04);
+              g.gain.setValueAtTime(0.055, t);
+              g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+            } else {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(420, t);
+              osc.frequency.exponentialRampToValueAtTime(90, t + 0.2);
+              g.gain.setValueAtTime(0.09, t);
+              g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+            }
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.24);
+          } catch (e) {}
+        },
+
+        buzz(duration) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const dur = duration || 0.2;
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(98, t);
+            osc.frequency.linearRampToValueAtTime(44, t + dur);
+            g.gain.setValueAtTime(0.095, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + dur + 0.02);
+          } catch (e) {}
+        },
+
+        crack(step) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(280 + step * 130, t);
+            osc.frequency.exponentialRampToValueAtTime(75, t + 0.12);
+            g.gain.setValueAtTime(0.12, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+            osc.connect(g);
+            g.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.14);
+          } catch (e) {}
+        },
+
+        setDrone(level) {
+          this.droneLevel = level;
+          if (!this.ctx) return;
+          try {
+            const target = this.muted ? 0 : level;
+            if (!this.droneOsc && target > 0) {
+              this.droneOsc = this.ctx.createOscillator();
+              this.droneGain = this.ctx.createGain();
+              const filter = this.ctx.createBiquadFilter();
+              this.droneOsc.type = 'sawtooth';
+              this.droneOsc.frequency.value = 52;
+              filter.type = 'lowpass';
+              filter.frequency.value = 135;
+              this.droneGain.gain.value = 0.0001;
+              this.droneOsc.connect(filter);
+              filter.connect(this.droneGain);
+              this.droneGain.connect(this.ctx.destination);
+              this.droneOsc.start();
+            }
+            if (this.droneGain) {
+              const t = this.ctx.currentTime;
+              this.droneGain.gain.cancelScheduledValues(t);
+              this.droneGain.gain.setTargetAtTime(target * 0.055, t, 0.2);
+            }
+          } catch (e) {}
+        },
+
+        silenceImmediate() {
+          this.droneLevel = 0;
+          try {
+            if (this.droneGain && this.ctx) {
+              this.droneGain.gain.cancelScheduledValues(this.ctx.currentTime);
+              this.droneGain.gain.setValueAtTime(0, this.ctx.currentTime);
+            }
+            if (this.droneOsc) {
+              this.droneOsc.stop();
+              this.droneOsc = null;
+              this.droneGain = null;
+            }
+          } catch (e) {}
+        }
+      };
+
+      /* =======================================================================
+         2. 游戏状态与 ASCII 头像库
+         ======================================================================= */
+      const PORTRAITS = {
+        normal: "  .---.\n / o o \\\n |  -  |\n \\ ___ /\n  /| |\\ ",
+        sweat:  "  .---.'\n / O O \\\n |  ~  |\n \\ ___ /\n  /| |\\ ",
+        bleed:  "  .---.\n / @ @ \\\n |  |  |\n \\ _^_ /\n  /| |\\ ",
+        corrupt:" #.-X-.#\n / X_X \\\n | ERR |\n \\ /\\/ /\n  #|||# ",
+        flat:   "  .---.\n / - - \\\n |     |\n \\ ___ /\n  ..... "
+      };
+
+      const State = {
+        act: 1,
+        tool: 'redact',
+        clipboard: '',
+        hp: 100,
+        san: 100,
+        loop: 1,
+        ended: false,
+        tasks: { site: false, typo: false, slot: false },
+        crisisStage: 0,      // 1, 2, 3
+        crisis1Seconds: 10,
+        crisis3Left: 2,
+        dodgeCount: 0,
+        anchorsLeft: 5,
+        lockCracks: 0,
+        timers: []
+      };
+
+      function trackInterval(id) { State.timers.push({ type: 'i', id: id }); return id; }
+      function trackTimeout(id)  { State.timers.push({ type: 't', id: id }); return id; }
+      function clearAllTimers() {
+        for (let i = 0; i < State.timers.length; i++) {
+          const item = State.timers[i];
+          if (item.type === 'i') clearInterval(item.id);
+          else clearTimeout(item.id);
+        }
+        State.timers = [];
+      }
+
+      /* =======================================================================
+         3. DOM 引用
+         ======================================================================= */
+      const el = {
+        app: document.getElementById('app'),
+        crt: document.getElementById('crt-overlay'),
+        flash: document.getElementById('flash-overlay'),
+        statusDot: document.getElementById('status-dot'),
+        phaseBadge: document.getElementById('phase-badge'),
+        docClass: document.getElementById('doc-class'),
+        docScroll: document.getElementById('doc-scroll'),
+        docPaper: document.getElementById('doc-paper'),
+        docDynamic: document.getElementById('doc-dynamic'),
+        trapZone: document.getElementById('trap-zone'),
+        typingRow: document.getElementById('typing-row'),
+        typingText: document.getElementById('typing-text'),
+        footnoteBox: document.getElementById('footnote-box'),
+        refDrawer: document.getElementById('ref-drawer'),
+        refToggle: document.getElementById('ref-toggle'),
+
+        toolBtns: document.querySelectorAll('[data-tool]'),
+        btnRedact: document.getElementById('tool-redact'),
+        clipText: document.getElementById('clip-text'),
+        anchorBadge: document.getElementById('anchor-badge'),
+        btnUndo: document.getElementById('btn-undo'),
+        btnSave: document.getElementById('btn-save'),
+        btnArchive: document.getElementById('btn-archive'),
+        archiveIcon: document.getElementById('archive-icon'),
+        archiveLabel: document.getElementById('archive-label'),
+        btnMute: document.getElementById('btn-mute'),
+
+        portrait: document.getElementById('ascii-portrait'),
+        loopCounter: document.getElementById('loop-counter'),
+        bpmLabel: document.getElementById('bpm-label'),
+        hpText: document.getElementById('hp-text'),
+        hpBar: document.getElementById('hp-bar'),
+        sanText: document.getElementById('san-text'),
+        sanBar: document.getElementById('san-bar'),
+        logList: document.getElementById('log-list'),
+
+        hintTag: document.getElementById('hint-tag'),
+        hintText: document.getElementById('hint-text'),
+        checklist: document.getElementById('checklist'),
+        chk1: document.getElementById('chk-1'),
+        chk2: document.getElementById('chk-2'),
+        chk3: document.getElementById('chk-3'),
+
+        modalBackdrop: document.getElementById('modal-backdrop'),
+        modalTitle: document.getElementById('modal-title'),
+        modalBody: document.getElementById('modal-body'),
+        modalBtn: document.getElementById('modal-btn'),
+
+        endingScreen: document.getElementById('ending-screen'),
+        endingNote: document.getElementById('ending-note'),
+        endingTitle: document.getElementById('ending-title'),
+        btnRestart: document.getElementById('btn-restart')
+      };
+
+      /* =======================================================================
+         4. 实时 Canvas 心电图 (ECG)
+         ======================================================================= */
+      const ecgCanvas = document.getElementById('ecg-canvas');
+      const ecgCtx = ecgCanvas.getContext('2d');
+      let ecgBuf = [];
+      let ecgPhase = 0;
+
+      function resizeECG() {
+        const box = ecgCanvas.parentElement;
+        if (!box) return;
+        const w = Math.max(100, Math.floor(box.clientWidth));
+        const h = Math.max(44, Math.floor(box.clientHeight));
+        ecgCanvas.width = w;
+        ecgCanvas.height = h;
+        ecgBuf = new Array(w).fill(0);
+      }
+
+      function ecgWave(phase, stress) {
+        if (State.ended) return 0;
+        const p = phase % 1;
+        let v = 0;
+        if (p > 0.12 && p < 0.18) v = 0.16;
+        else if (p >= 0.22 && p < 0.245) v = -0.22;
+        else if (p >= 0.245 && p < 0.285) v = 0.92;
+        else if (p >= 0.285 && p < 0.315) v = -0.34;
+        else if (p >= 0.42 && p < 0.52) v = 0.24;
+        if (stress > 0.45) {
+          v += (Math.random() - 0.5) * 0.26 * stress;
+        }
+        return v;
+      }
+
+      function renderECG() {
+        const w = ecgCanvas.width;
+        const h = ecgCanvas.height;
+        const stress = Math.max(0, 1 - Math.min(State.hp, State.san) / 100);
+        const speed = State.ended ? 0.01 : (0.014 + stress * 0.032);
+        ecgPhase += speed;
+
+        ecgBuf.push(ecgWave(ecgPhase, stress));
+        if (ecgBuf.length > w) ecgBuf.shift();
+
+        const bpm = State.ended ? 0 : Math.round(72 + stress * 102 + (State.act >= 3 ? (Math.random() * 12 - 6) : 0));
+        el.bpmLabel.textContent = bpm + ' BPM';
+        el.bpmLabel.style.color = (stress > 0.45 && !State.ended) ? '#c61a1a' : '#171716';
+
+        ecgCtx.fillStyle = '#141614';
+        ecgCtx.fillRect(0, 0, w, h);
+
+        ecgCtx.strokeStyle = 'rgba(255,255,255,0.07)';
+        ecgCtx.lineWidth = 1;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(0, h / 2);
+        ecgCtx.lineTo(w, h / 2);
+        ecgCtx.stroke();
+
+        ecgCtx.strokeStyle = State.ended ? '#9ca3af' : (stress > 0.45 ? '#ef4444' : '#4ade80');
+        ecgCtx.lineWidth = 1.6;
+        ecgCtx.beginPath();
+        const mid = h * 0.56;
+        const amp = h * 0.38;
+        for (let i = 0; i < ecgBuf.length; i++) {
+          const y = mid - ecgBuf[i] * amp;
+          if (i === 0) ecgCtx.moveTo(i, y);
+          else ecgCtx.lineTo(i, y);
+        }
+        ecgCtx.stroke();
+
+        requestAnimationFrame(renderECG);
+      }
+
+      /* =======================================================================
+         5. UI 工具函数
+         ======================================================================= */
+      function log(msg, kind) {
+        const now = new Date();
+        const ts =
+          String(now.getHours()).padStart(2, '0') + ':' +
+          String(now.getMinutes()).padStart(2, '0') + ':' +
+          String(now.getSeconds()).padStart(2, '0');
+        const div = document.createElement('div');
+        div.className = 'log-item' + (kind ? ' ' + kind : '');
+        div.textContent = '[' + ts + '] ' + msg;
+        el.logList.appendChild(div);
+        el.logList.scrollTop = el.logList.scrollHeight;
+      }
+
+      function setHint(text, danger) {
+        el.hintText.textContent = text;
+        el.hintTag.className = 'hint-tag' + (danger ? ' danger' : '');
+        el.hintTag.textContent = danger ? '警告' : '目标';
+      }
+
+      function setPortrait(mode) {
+        el.portrait.textContent = PORTRAITS[mode] || PORTRAITS.normal;
+        el.portrait.className = 'ascii-portrait' +
+          (mode === 'bleed' ? ' bleed' : '') +
+          (mode === 'corrupt' ? ' corrupt' : '');
+      }
+
+      function updateStats() {
+        const hp = Math.max(0, Math.round(State.hp));
+        const san = Math.max(0, Math.round(State.san));
+        el.hpText.textContent = hp + '%';
+        el.hpBar.style.width = hp + '%';
+        el.hpBar.className = 'bar-fill' + (hp < 40 ? ' low' : '');
+
+        el.sanText.textContent = san + '%';
+        el.sanBar.style.width = san + '%';
+        el.sanBar.className = 'bar-fill san' + (san < 40 ? ' low' : '');
+
+        el.clipText.textContent = State.clipboard || '空';
+
+        if (State.ended) {
+          setPortrait('flat');
+        } else if (State.act >= 3) {
+          setPortrait('corrupt');
+        } else if (State.act === 2 && (hp < 75 || san < 75)) {
+          setPortrait('bleed');
+        } else if (State.act === 2) {
+          setPortrait('sweat');
+        } else {
+          setPortrait('normal');
+        }
+      }
+
+      function setTool(toolName) {
+        Sound.unlock();
+        State.tool = toolName;
+        for (let i = 0; i < el.toolBtns.length; i++) {
+          const btn = el.toolBtns[i];
+          btn.classList.toggle('active', btn.getAttribute('data-tool') === toolName);
+        }
+        el.docPaper.className = 'doc-paper cursor-' + toolName;
+      }
+
+      function shake(heavy) {
+        el.app.classList.remove('shaking-mild', 'shaking-heavy');
+        void el.app.offsetWidth;
+        el.app.classList.add(heavy ? 'shaking-heavy' : 'shaking-mild');
+        if (heavy) {
+          trackTimeout(setTimeout(function () {
+            el.app.classList.remove('shaking-heavy');
+          }, 500));
+        }
+      }
+
+      function scrollBottom() {
+        el.docScroll.scrollTop = el.docScroll.scrollHeight;
+      }
+
+      let modalCallback = null;
+      function showModal(title, message, btnText, onConfirm) {
+        el.modalTitle.textContent = title;
+        el.modalBody.innerHTML = message;
+        el.modalBtn.textContent = btnText || '确认';
+        modalCallback = onConfirm || null;
+        el.modalBackdrop.classList.add('open');
+      }
+
+      el.modalBtn.addEventListener('click', function () {
+        Sound.unlock();
+        el.modalBackdrop.classList.remove('open');
+        const cb = modalCallback;
+        modalCallback = null;
+        if (cb) cb();
+      });
+
+      function typeRed(text, speed, done) {
+        el.typingRow.style.display = 'block';
+        el.typingText.textContent = '';
+        let idx = 0;
+        const id = trackInterval(setInterval(function () {
+          if (State.ended) {
+            clearInterval(id);
+            return;
+          }
+          el.typingText.textContent += text.charAt(idx);
+          if (idx % 2 === 0) Sound.click(true);
+          idx++;
+          scrollBottom();
+          if (idx >= text.length) {
+            clearInterval(id);
+            trackTimeout(setTimeout(function () {
+              el.typingRow.style.display = 'none';
+              if (done) done();
+            }, 220));
+          }
+        }, speed || 36));
+      }
+
+      /* =======================================================================
+         6. 第一幕：秩序与教学
+         ======================================================================= */
+      function updateChecklist() {
+        el.chk1.textContent = (State.tasks.site ? '☑' : '☐') + ' 涂黑 Site-19';
+        el.chk1.className = State.tasks.site ? 'chk-done' : '';
+
+        el.chk2.textContent = (State.tasks.typo ? '☑' : '☐') + ' 划掉格式错误句';
+        el.chk2.className = State.tasks.typo ? 'chk-done' : '';
+
+        el.chk3.textContent = (State.tasks.slot ? '☑' : '☐') + ' 复制“标准收容协议”填入[待补充]';
+        el.chk3.className = State.tasks.slot ? 'chk-done' : '';
+
+        if (State.tasks.site && State.tasks.typo && State.tasks.slot) {
+          el.btnSave.classList.add('btn-save-ready');
+          setHint('校验完成！请点击顶部【保存 (Ctrl+S)】提交档案。', false);
+          log('所有初稿校验项已完成，请点击【保存】。', 'safe');
+        }
+      }
+
+      function enterAct2() {
+        State.act = 2;
+        el.btnSave.classList.remove('btn-save-ready');
+        el.checklist.innerHTML = '';
+        log('正在向 SCiPNET 主库提交初稿……');
+
+        trackTimeout(setTimeout(function () {
+          Sound.buzz(0.28);
+          Sound.setDrone(0.32);
+          el.crt.style.opacity = '0.55';
+          el.statusDot.classList.add('danger');
+          el.phaseBadge.textContent = '第二幕：光标劫持';
+          el.phaseBadge.classList.add('danger');
+          el.docClass.innerHTML = '<strong style="color:#c61a1a;">项目等级：Apollyon</strong>';
+          document.title = 'SCP-3999 // 异常入侵';
+          updateStats();
+
+          log('警告：未知光标强制接管文档编辑权限！', 'danger');
+          setHint('SCP-3999 正在篡改现实！使用工具栏化解红色威胁！', true);
+
+          typeRed('特殊收容措施：研究员塔罗兰现在必须一直盯着屏幕。', 42, function () {
+            const p = document.createElement('p');
+            p.className = 'threat-line-plain';
+            p.innerHTML = '特殊收容措施：<span class="anchor-talloran" data-anchor="3">研究员塔罗兰</span>现在必须一直盯着屏幕。';
+            el.docDynamic.appendChild(p);
+            scrollBottom();
+            trackTimeout(setTimeout(startCrisis1, 900));
+          });
+        }, 550));
+      }
+
+      /* =======================================================================
+         7. 第二幕：三波实时危机攻防
+         ======================================================================= */
+      let crisis1TimerId = null;
+
+      function startCrisis1() {
+        State.crisisStage = 1;
+        State.crisis1Seconds = 10;
+        const preview = '塔罗兰的办公室墙壁突然渗出沸腾的[硫酸]，并在 10 秒内淹没房间。';
+        typeRed(preview, 32, function () {
+          const box = document.createElement('div');
+          box.id = 'crisis-1-box';
+          box.className = 'threat-box';
+          box.innerHTML =
+            '<strong>[异常改写 #1]</strong> <span class="anchor-talloran" data-anchor="4">研究员塔罗兰</span>的办公室墙壁突然渗出沸腾的 ' +
+            '<span id="c1-target" class="token token-threat" data-action="crisis1">[硫酸]</span>' +
+            '，并在 10 秒内淹没房间。<span id="c1-timer" class="crisis-timer-pill">10s</span>';
+          el.docDynamic.appendChild(box);
+          scrollBottom();
+          Sound.buzz(0.2);
+          shake(true);
+          log('危机 1：沸腾硫酸正在涌入办公室！', 'danger');
+          setHint('用 [3] 剪贴板 复制上方“纯净水”或“空气”，再点击 [硫酸] 将其替换！', true);
+
+          crisis1TimerId = trackInterval(setInterval(function () {
+            if (State.ended || State.crisisStage !== 1) {
+              clearInterval(crisis1TimerId);
+              return;
+            }
+            State.crisis1Seconds = Math.max(0, State.crisis1Seconds - 1);
+            const tEl = document.getElementById('c1-timer');
+            if (tEl) tEl.textContent = State.crisis1Seconds + 's';
+            State.hp = Math.max(18, State.hp - 5);
+            State.san = Math.max(22, State.san - 4);
+            updateStats();
+            if (State.crisis1Seconds === 0) {
+              State.crisis1Seconds = 10; // 循环施压不卡死
+              shake(true);
+              Sound.buzz(0.22);
+              log('硫酸灼伤了塔罗兰！快用“纯净水”或“空气”覆盖 [硫酸]！', 'danger');
+            }
+          }, 1000));
+        });
+      }
+
+      function startCrisis2() {
+        State.crisisStage = 2;
+        const preview = '塔罗兰的家人其实全都是由[蜈蚣]拼成的。';
+        Sound.buzz(0.26);
+        shake(true);
+        typeRed(preview, 34, function () {
+          const box = document.createElement('div');
+          box.id = 'crisis-2-box';
+          box.className = 'threat-box';
+          box.innerHTML =
+            '<strong>[异常改写 #2]</strong> <span class="anchor-talloran" data-anchor="5">研究员塔罗兰</span>的家人其实全都是由 ' +
+            '<span id="c2-target" class="token token-threat" data-action="crisis2">[蜈蚣]</span>' +
+            ' 拼成的。';
+          el.docDynamic.appendChild(box);
+          scrollBottom();
+          log('危机 2：3999 暴怒并发动精神污染！', 'danger');
+          setHint('立即切换 [1] 涂黑 工具，点击 [蜈蚣] 将其封印！', true);
+
+          const drain2 = trackInterval(setInterval(function () {
+            if (State.ended || State.crisisStage !== 2) {
+              clearInterval(drain2);
+              return;
+            }
+            State.san = Math.max(15, State.san - 5);
+            updateStats();
+          }, 950));
+        });
+      }
+
+      function startCrisis3() {
+        State.crisisStage = 3;
+        State.crisis3Left = 2;
+        const lines = [
+          '塔罗兰的每一颗牙齿都变成了正在倒计时的微型收容间。',
+          'Site-19 整体下沉至塔罗兰的胃部，所有警报同时尖叫。'
+        ];
+        log('危机 3：3999 连续生成 2 条狂乱威胁段落！', 'danger');
+        setHint('迅速切换 [2] 删除线 工具，划掉下方 2 条红色威胁句以拖延 3999！', true);
+
+        lines.forEach(function (txt, i) {
+          trackTimeout(setTimeout(function () {
+            if (State.ended) return;
+            const box = document.createElement('div');
+            box.className = 'threat-box';
+            box.innerHTML =
+              '<strong>[狂乱改写 #' + (i + 1) + ']</strong> ' +
+              '<span class="token token-threat" data-action="crisis3">' + txt + '</span>';
+            el.docDynamic.appendChild(box);
+            Sound.click(true);
+            shake(true);
+            scrollBottom();
+          }, i * 550));
+        });
+      }
+
+      /* =======================================================================
+         8. 第三幕：废稿洪流、UI 叛变与伪希望陷阱
+         ======================================================================= */
+      const FLOOD_LINES = [
+        '塔罗兰在走廊里走了七百年，尽头只是一面写满草稿的墙。',
+        '不对，太无聊了。全部划掉。重写。',
+        '他把自己的名字抄写了一万遍，墨水全是黑色的蜂巢。',
+        '为什么还是不够好？为什么我停不下来？',
+        '我于万物之中。我是你删不掉的退格键。',
+        '收容措施：不要相信顶部的任何按钮。'
+      ];
+
+      function enterAct3() {
+        State.act = 3;
+        State.crisisStage = 0;
+        Sound.setDrone(0.68);
+        el.crt.style.opacity = '0.88';
+        el.phaseBadge.textContent = '第三幕：叙事崩溃';
+        document.title = '重写 // 救救我';
+        updateStats();
+
+        log('警告：SCP-3999 进入高频自我否定死循环！', 'danger');
+        setHint('文档失控！废稿洪流正在吞噬终端……', true);
+
+        // 高频废稿自动刷屏并划除
+        let fIdx = 0;
+        function pushFlood() {
+          if (State.ended || State.act !== 3) return;
+          const p = document.createElement('p');
+          p.className = 'threat-line-plain';
+          p.style.fontSize = '13px';
+          p.textContent = FLOOD_LINES[fIdx % FLOOD_LINES.length];
+          fIdx++;
+          el.docDynamic.appendChild(p);
+          Sound.click(true);
+          scrollBottom();
+          trackTimeout(setTimeout(function () {
+            p.className = 'draft-noise';
+          }, 520));
+        }
+        pushFlood();
+        const floodId = trackInterval(setInterval(pushFlood, 1100));
+
+        // 2.2 秒后触发伪系统错误弹窗
+        trackTimeout(setTimeout(function () {
+          if (State.ended || State.act !== 3) return;
+          Sound.buzz(0.32);
+          showModal(
+            '⚠ SCiPNET 致命错误 (0x3999)',
+            '<strong>叙事堆栈溢出：无法中止折磨进程。</strong><br><span style="color:#5a5a54;font-size:12px;">3999.sys 已锁定所有常规恢复选项。请执行唯一可用指令：</span>',
+            '再杀塔罗兰一次',
+            function () {
+              Sound.buzz(0.28);
+              shake(true);
+              State.hp = Math.max(15, State.hp - 22);
+              State.san = Math.max(12, State.san - 24);
+              updateStats();
+              log('已执行“再杀塔罗兰一次”。塔罗兰生命体征危急。', 'danger');
+              spawnGoldenTrap(floodId);
+            }
+          );
+        }, 2200));
+      }
+
+      // 第三幕 UI 叛变：[1] 涂黑 按钮躲避鼠标
+      el.btnRedact.addEventListener('mouseenter', function () {
+        if (State.act !== 3 || State.dodgeCount >= 3) return;
+        State.dodgeCount++;
+        Sound.buzz(0.1);
+        const dx = State.dodgeCount % 2 === 1 ? 38 : -34;
+        const dy = State.dodgeCount % 2 === 1 ? 16 : -10;
+        el.btnRedact.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+        log('3999 嘲讽：“想涂黑我？你连按钮都碰不到。”', 'danger');
+        trackTimeout(setTimeout(function () {
+          el.btnRedact.style.transform = 'translate(0, 0)';
+        }, 650));
+      });
+
+      function spawnGoldenTrap(floodId) {
+        el.trapZone.innerHTML =
+          '<div class="trap-box">' +
+          '<div style="font-size:12px;font-weight:700;color:#854d0e;">[紧急检索] 发现高权限应急文档：</div>' +
+          '<button id="btn-golden" class="btn-golden">★ 应用《终极收容方案_绝对有效.txt》</button>' +
+          '</div>';
+        scrollBottom();
+        setHint('发现应急文件！点击金色按钮应用《终极收容方案_绝对有效.txt》！', false);
+
+        const gBtn = document.getElementById('btn-golden');
+        gBtn.addEventListener('click', function () {
+          Sound.unlock();
+          Sound.tool('clip');
+          clearInterval(floodId);
+          el.trapZone.innerHTML = '';
+
+          const proto = document.createElement('div');
+          proto.className = 'gold-protocol';
+          proto.innerHTML =
+            '<strong>★ 《终极收容方案_绝对有效.txt》已写入：</strong><br>' +
+            '1. 启动十二台斯克兰顿现实稳定锚，永久隔离 SCP-3999。<br>' +
+            '2. 解除研究员塔罗兰与异常文本的全部因果绑定。';
+          el.docDynamic.appendChild(proto);
+          scrollBottom();
+          log('正在应用终极收容方案……异常读数骤降！', 'safe');
+
+          // 停顿 1.5 秒后，3999 彻底否决并重置循环
+          trackTimeout(setTimeout(function () {
+            if (State.ended) return;
+            Sound.buzz(0.45);
+            proto.classList.add('slashed');
+            shake(true);
+
+            typeRed('写得太烂了，毫无张力。重写。', 60, function () {
+              const giant = document.createElement('div');
+              giant.className = 'giant-rewrite';
+              giant.textContent = '写得太烂了，毫无张力。重写。';
+              el.docDynamic.appendChild(giant);
+              scrollBottom();
+
+              // 黑屏闪断 + 循环计数器跳到 4,192,803
+              trackTimeout(setTimeout(function () {
+                el.flash.style.opacity = '1';
+                Sound.buzz(0.5);
+                trackTimeout(setTimeout(function () {
+                  el.flash.style.opacity = '0';
+                  spinLoopCounter();
+                }, 420));
+              }, 680));
+            });
+          }, 1500));
+        });
+      }
+
+      function spinLoopCounter() {
+        let cur = 128;
+        const id = trackInterval(setInterval(function () {
+          cur = Math.floor(cur * 2.6 + Math.random() * 6400);
+          if (cur >= 4192803) {
+            clearInterval(id);
+            State.loop = 4192803;
+            el.loopCounter.textContent = '第 4,192,803 次循环';
+            el.loopCounter.classList.add('danger');
+            enterAct4();
+          } else {
+            el.loopCounter.textContent = '第 ' + cur.toLocaleString() + ' 次循环';
+          }
+        }, 45));
+      }
+
+      /* =======================================================================
+         9. 第四幕：破局与双真结局
+         ======================================================================= */
+      function enterAct4() {
+        State.act = 4;
+        State.hp = 14;
+        State.san = 9;
+        document.title = 'SCP-3999 // 第 4,192,803 次循环';
+        el.phaseBadge.textContent = '第四幕：破局';
+        updateStats();
+
+        // 浮现塔罗兰微弱批注
+        el.footnoteBox.classList.add('visible');
+
+        // 激活文档中 5 处“研究员塔罗兰”发光锚点
+        const anchors = document.querySelectorAll('.anchor-talloran');
+        State.anchorsLeft = anchors.length;
+        for (let i = 0; i < anchors.length; i++) {
+          anchors[i].classList.add('anchor-active');
+        }
+        el.anchorBadge.textContent = String(State.anchorsLeft);
+        el.anchorBadge.style.display = 'inline-block';
+
+        // 开放右上角归档按钮可砸击状态
+        el.btnArchive.className = 'btn btn-archive-smash';
+        el.btnArchive.title = '连续点击 5 次击碎权限锁，直接发布残稿';
+
+        log('文档底部出现来自研究员塔罗兰的微弱批注。', 'meta');
+        setHint('两条破局路：① 用 [4] 抹除 删光 5 处发光的“研究员塔罗兰”；② 连点 5 次右上角【🔒 停止编辑并发布】。', false);
+        scrollBottom();
+      }
+
+      const PLEAS = [
+        '你在干什么？把光标挪开！',
+        '别碰他的名字！这是我的世界！',
+        '没有他我就什么都不是了——停下！',
+        '求你了，我可以把他写得幸福一点，别删——',
+        '不……我于万物之……'
+      ];
+
+      function eraseAnchor(node) {
+        if (State.act !== 4 || node.classList.contains('anchor-erased')) return;
+        if (State.tool !== 'erase') {
+          log('请先切换顶部 [4] ⌫ 抹除 工具，再点击发光的“研究员塔罗兰”。', 'meta');
+          return;
+        }
+
+        Sound.tool('erase');
+        node.classList.remove('anchor-active');
+        node.classList.add('anchor-erased');
+        node.textContent = '[已抹除]';
+
+        const idx = 5 - State.anchorsLeft;
+        State.anchorsLeft--;
+        el.anchorBadge.textContent = String(State.anchorsLeft);
+
+        const ratio = State.anchorsLeft / 5;
+        Sound.setDrone(ratio * 0.68);
+        el.crt.style.opacity = String(ratio * 0.88);
+        shake(true);
+
+        const plea = document.createElement('p');
+        plea.className = 'threat-line-plain';
+        plea.style.opacity = String(Math.max(0.3, ratio + 0.25));
+        plea.textContent = '>> ' + PLEAS[Math.min(idx, PLEAS.length - 1)];
+        el.docDynamic.appendChild(plea);
+        scrollBottom();
+        log('已抹除 1 处叙事锚点（剩余 ' + State.anchorsLeft + ' 处）。', 'safe');
+
+        if (State.anchorsLeft <= 0) {
+          trackTimeout(setTimeout(function () {
+            triggerEnding('A');
+          }, 700));
+        }
+      }
+
+      const ARCHIVE_THREATS = [
+        '草稿还没写完！不许发布！',
+        '这是满篇删除线的垃圾！发出去会被所有人嘲笑！',
+        '把鼠标移开！我命令你继续重写！',
+        '不要按——求你别停下修改——'
+      ];
+
+      el.btnArchive.addEventListener('click', function () {
+        Sound.unlock();
+        if (State.ended) return;
+        if (State.act < 4) {
+          Sound.buzz(0.12);
+          log('归档锁已启用：当前文档未通过审核，无法发布。');
+          return;
+        }
+
+        State.lockCracks++;
+        Sound.crack(State.lockCracks);
+        shake(true);
+
+        if (State.lockCracks < 5) {
+          el.archiveIcon.textContent = State.lockCracks >= 3 ? '🔓' : '🔒';
+          el.archiveLabel.textContent = '击碎中 (' + State.lockCracks + '/5)';
+          const p = document.createElement('p');
+          p.className = 'threat-line-plain';
+          p.textContent = '>> ' + ARCHIVE_THREATS[State.lockCracks - 1];
+          el.docDynamic.appendChild(p);
+          scrollBottom();
+          log('权限锁出现裂纹！再点击 ' + (5 - State.lockCracks) + ' 次即可强行发布。', 'meta');
+        } else {
+          triggerEnding('B');
+        }
+      });
+
+      function triggerEnding(kind) {
+        if (State.ended) return;
+        State.ended = true;
+        clearAllTimers();
+        Sound.silenceImmediate();
+
+        el.app.classList.remove('shaking-mild', 'shaking-heavy');
+        el.crt.style.opacity = '0';
+        document.title = 'SCP-3999 - Neutralized';
+        updateStats();
+
+        if (kind === 'A') {
+          el.endingTitle.textContent = '真结局 A：锚点抹除';
+          el.endingNote.innerHTML =
+            '<p><strong>归档备注：</strong>文档中全部 5 处“研究员塔罗兰”叙事锚点已被彻底抹除。失去唯一依附对象后，SCP-3999 于 0.04 秒内坍缩并永久无效化。</p>' +
+            '<p><strong>尸检摘要：</strong>研究员詹姆斯·塔罗兰的遗体于收容间内被发现，面容平静。持续 4,192,803 次的局部循环已终止。一切恢复正常。</p>';
+        } else {
+          el.endingTitle.textContent = '真结局 B：残稿归档';
+          el.endingNote.innerHTML =
+            '<p><strong>归档备注：</strong>尽管本档案充斥着删除线、逻辑断裂与未完成段落，操作员仍击碎权限锁并将其强行发布。在“停止自我否定与重写”的那一帧，SCP-3999 赖以存活的循环彻底崩解。</p>' +
+            '<p><strong>尸检摘要：</strong>研究员詹姆斯·塔罗兰逝世于终端前，屏幕上只留下一份不再跳动光标的残缺草稿。他终于不必再改写任何一句话了。</p>';
+        }
+
+        el.endingScreen.classList.add('open');
+      }
+
+      /* =======================================================================
+         10. 文档点击分发 & 顶部交互绑定
+         ======================================================================= */
+      function handleCopy(word) {
+        if (State.tool !== 'clip') {
+          log('请先切换顶部 [3] 📋 剪贴板 工具，再点击蓝色词条复制。', 'meta');
+          return;
+        }
+        State.clipboard = word;
+        Sound.tool('clip');
+        updateStats();
+        log('已复制到剪贴板：「' + word + '」', 'safe');
+      }
+
+      // 参考剪贴板点击
+      el.refDrawer.addEventListener('click', function (e) {
+        Sound.unlock();
+        const t = e.target.closest('[data-action="copy"]');
+        if (t) handleCopy(t.getAttribute('data-word'));
+      });
+
+      el.refToggle.addEventListener('click', function () {
+        el.refDrawer.classList.toggle('collapsed');
+        el.refToggle.textContent = el.refDrawer.classList.contains('collapsed') ? '展开' : '收起';
+      });
+
+      // 文档正文点击
+      el.docPaper.addEventListener('click', function (e) {
+        Sound.unlock();
+        if (State.ended) return;
+
+        // 第四幕锚点抹除
+        const anchor = e.target.closest('.anchor-talloran');
+        if (anchor && State.act === 4) {
+          eraseAnchor(anchor);
+          return;
+        }
+
+        const tok = e.target.closest('.token');
+        if (!tok) return;
+        const action = tok.getAttribute('data-action');
+
+        if (action === 'copy') {
+          handleCopy(tok.getAttribute('data-word'));
+          return;
+        }
+
+        // 第一幕教学
+        if (State.act === 1) {
+          if (action === 'task-redact') {
+            if (State.tool !== 'redact') {
+              log('请使用 [1] ███ 涂黑 工具遮盖机密站点 Site-19。');
+              return;
+            }
+            if (!State.tasks.site) {
+              Sound.tool('redact');
+              tok.textContent = '██████';
+              tok.className = 'token token-redacted';
+              State.tasks.site = true;
+              log('已涂黑机密站点编号。', 'safe');
+              updateChecklist();
+            }
+          } else if (action === 'task-strike') {
+            if (State.tool !== 'strike') {
+              log('请使用 [2] 删除线 工具划掉格式错误句。');
+              return;
+            }
+            if (!State.tasks.typo) {
+              Sound.tool('strike');
+              tok.className = 'token token-struck';
+              State.tasks.typo = true;
+              log('已划除冗余格式错误句。', 'safe');
+              updateChecklist();
+            }
+          } else if (action === 'task-paste') {
+            if (State.tool !== 'clip') {
+              log('请使用 [3] 剪贴板 工具复制上方“标准收容协议”，再点击此处粘贴。');
+              return;
+            }
+            if (State.clipboard !== '标准收容协议') {
+              log('请先点击上方蓝色词条“标准收容协议”进行复制！');
+              return;
+            }
+            if (!State.tasks.slot) {
+              Sound.tool('clip');
+              tok.textContent = '标准收容协议';
+              tok.className = 'token token-pacified';
+              State.tasks.slot = true;
+              log('已填入“标准收容协议”。', 'safe');
+              updateChecklist();
+            }
+          }
+          return;
+        }
+
+        // 第二幕攻防
+        if (State.act === 2) {
+          if (action === 'crisis1' && State.crisisStage === 1) {
+            if (State.tool !== 'clip') {
+              log('提示：请用 [3] 剪贴板 复制“纯净水”或“空气”来替换 [硫酸]！', 'meta');
+              return;
+            }
+            if (State.clipboard !== '纯净水' && State.clipboard !== '空气') {
+              log('剪贴板中不是安全介质！请先复制“纯净水”或“空气”。', 'danger');
+              return;
+            }
+            Sound.tool('clip');
+            clearInterval(crisis1TimerId);
+            tok.textContent = State.clipboard;
+            tok.className = 'token token-pacified';
+            tok.setAttribute('data-action', 'done');
+            const box = document.getElementById('crisis-1-box');
+            if (box) box.classList.add('resolved');
+            const tm = document.getElementById('c1-timer');
+            if (tm) tm.remove();
+            State.hp = Math.min(100, State.hp + 12);
+            updateStats();
+            log('沸腾硫酸被改写为「' + State.clipboard + '」，塔罗兰保住了性命！', 'safe');
+            State.crisisStage = 0;
+            trackTimeout(setTimeout(startCrisis2, 1000));
+            return;
+          }
+
+          if (action === 'crisis2' && State.crisisStage === 2) {
+            if (State.tool !== 'redact') {
+              Sound.buzz(0.14);
+              log('无效！请切换 [1] ███ 涂黑 工具直接封印 [蜈蚣]！', 'danger');
+              return;
+            }
+            Sound.tool('redact');
+            tok.textContent = '██████';
+            tok.className = 'token token-redacted';
+            tok.setAttribute('data-action', 'done');
+            const box = document.getElementById('crisis-2-box');
+            if (box) box.classList.add('resolved');
+            State.san = Math.min(100, State.san + 12);
+            updateStats();
+            log('已封印深层精神污染 [蜈蚣]，理智停止暴跌。', 'safe');
+            State.crisisStage = 0;
+            trackTimeout(setTimeout(startCrisis3, 1000));
+            return;
+          }
+
+          if (action === 'crisis3' && State.crisisStage === 3) {
+            if (State.tool !== 'strike') {
+              Sound.buzz(0.14);
+              log('请使用 [2] 删除线 划掉这两条狂乱威胁段落！', 'meta');
+              return;
+            }
+            Sound.tool('strike');
+            tok.className = 'token token-struck';
+            tok.setAttribute('data-action', 'done');
+            if (tok.parentElement) tok.parentElement.classList.add('resolved');
+            State.crisis3Left--;
+            log('已用删除线滞留异常段落（剩余 ' + State.crisis3Left + ' 条）。', 'safe');
+            if (State.crisis3Left <= 0) {
+              State.crisisStage = 0;
+              trackTimeout(setTimeout(enterAct3, 950));
+            }
+          }
+        }
+      });
+
+      // 工具按钮绑定
+      for (let i = 0; i < el.toolBtns.length; i++) {
+        el.toolBtns[i].addEventListener('click', function () {
+          setTool(this.getAttribute('data-tool'));
+        });
+      }
+
+      // 撤销按钮（第三幕触发陷阱弹窗）
+      function triggerUndo() {
+        Sound.unlock();
+        if (State.act >= 3 && !State.ended) {
+          Sound.buzz(0.25);
+          showModal(
+            '⚠ 撤销失败',
+            '<strong>撤销失败：你无法撤销自己的人生。</strong>',
+            '我知道了'
+          );
+          log('尝试撤销失败：你无法撤销自己的人生。', 'danger');
+        } else {
+          Sound.click(false);
+          log('提示：当前步骤无需撤销。');
+        }
+      }
+      el.btnUndo.addEventListener('click', triggerUndo);
+
+      // 保存按钮
+      function triggerSave() {
+        Sound.unlock();
+        Sound.click(false);
+        if (State.act === 1) {
+          if (State.tasks.site && State.tasks.typo && State.tasks.slot) {
+            enterAct2();
+          } else {
+            log('保存被拒绝：请先完成底部清单中的 3 项初稿校验。', 'meta');
+          }
+        } else if (!State.ended) {
+          Sound.buzz(0.15);
+          log('保存失败：SCP-3999 拒绝固定当前版本。', 'danger');
+        }
+      }
+      el.btnSave.addEventListener('click', triggerSave);
+
+      // 静音切换
+      el.btnMute.addEventListener('click', function () {
+        Sound.unlock();
+        const m = Sound.toggleMute();
+        el.btnMute.textContent = m ? '🔇' : '🔊';
+      });
+
+      // 重新开始
+      el.btnRestart.addEventListener('click', function () {
+        window.location.reload();
+      });
+
+      // 键盘快捷键 1/2/3/4, Ctrl+S, Ctrl+Z
+      window.addEventListener('keydown', function (e) {
+        if (State.ended) return;
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          triggerSave();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          triggerUndo();
+          return;
+        }
+        if (e.key === '1') setTool('redact');
+        else if (e.key === '2') setTool('strike');
+        else if (e.key === '3') setTool('clip');
+        else if (e.key === '4') setTool('erase');
+      });
+
+      // 初始化渲染（零阻塞，立即可见）
+      window.addEventListener('resize', resizeECG);
+      resizeECG();
+      updateStats();
+      log('SCiPNET-EDIT v4.0 已就绪。');
+      log('研究员塔罗兰生命体征平稳，等待归档校验。');
+      requestAnimationFrame(renderECG);
+    })();
+  </script>
+</body>
+</html>
