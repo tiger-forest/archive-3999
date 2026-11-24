@@ -1355,7 +1355,7 @@
         <div class="brand">
           <span id="status-dot" class="status-dot"></span>
           <span class="brand-title">SCiPNET-EDIT v4.0</span>
-          <span id="phase-badge" class="phase-badge">第一幕 · 正常建档</span>
+          <span id="phase-badge" class="phase-badge">标准建档</span>
         </div>
 
         <!-- 放大后的工具栏 -->
@@ -2148,7 +2148,7 @@
       function startAct1() {
         State.act = 1;
         document.title = 'SCP-3999 - SCiPNET 档案起草';
-        el.phaseBadge.textContent = '第一幕 · 正常建档';
+        el.phaseBadge.textContent = '标准建档';
         setTool('redact');
         log('已登录：3级研究员 詹姆斯·塔罗兰。', 'safe');
         log('任务：完成 SCP-3999 机密遮盖、格式清理、临床腔改写与描述补全。');
@@ -2220,7 +2220,7 @@
         State.stress = 0.52;
         saveProgress(2);
         document.title = '警告：SCP-3999 文档异常修改';
-        el.phaseBadge.textContent = '第二幕 · 异常入侵';
+        el.phaseBadge.textContent = '未授权写入告警';
         el.phaseBadge.classList.add('danger');
         el.statusDot.classList.add('danger');
         el.vignette.style.opacity = '0.52';
@@ -2234,18 +2234,18 @@
         runAct2Round1();
       }
 
-      // 回合 1：篡改等级 + 划除并写入修正
+      // 异常入侵 1：篡改等级 + 划除并写入修正
       function runAct2Round1() {
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[未授权入侵 · 回合 1/5]</div>' +
+          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[检测到非授权数据注入]</div>' +
           '<span id="a2-r1-target" class="tok-threat">特殊收容措施作废：SCP-3999 不可被收容，立即撤离 Site-118 全部警卫。</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         setTool('strike');
-        setHint('回合 1/5：使用 [2] 删除线 划掉上方红色篡改句！', true);
+        setHint('收容措施遭到篡改！使用 [2] 删除线 划掉上方红色篡改句！', true);
         setReferenceCards('先划掉红色篡改句，再写入修正协议', []);
 
         document.getElementById('a2-r1-target').addEventListener('click', function () {
@@ -2260,8 +2260,8 @@
           setHint('很好！请点击底部【参考栏】写入等级恢复指令。', false);
           setReferenceCards('写入标准修正协议', [
             {
-              tag: '[修正协议 · 恢复 Keter 分级]',
-              text: '驳回未授权修改：维持 SCP-3999 为 Keter 级，四名武装警卫继续坚守竖井入口。',
+              tag: '[ 修正协议 · 恢复 Keter 分级 ]',
+              text: '维持 SCP-3999 为 Keter 级，四名武装警卫继续坚守竖井入口。',
               highlight: true,
               onClick: function () {
                 const p = document.createElement('div');
@@ -2279,21 +2279,21 @@
         }, { once: true });
       }
 
-      // 回合 2：两处恶意破坏稳定锚条款，需用 [数据删除] 遮盖
+      // 异常入侵 2：两处恶意破坏稳定锚条款，需用 [数据删除] 遮盖
       function runAct2Round2() {
         State.a2Round = 2;
         Sound.glitch(0.24);
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[未授权入侵 · 回合 2/5 — 试图破坏硬件收容]</div>' +
+          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[硬件配置参数遭破坏]</div>' +
           '<div style="margin-bottom:8px;">1. 立即切断竖井内全部 <span class="tok-threat" data-a2-r2="1">斯克兰顿现实稳定锚供电线路</span>。</div>' +
           '<div>2. 将耐酸性挡板替换为 <span class="tok-threat" data-a2-r2="2">可溶解的湿纸板并敞开井口</span>。</div>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         setTool('redact');
-        setHint('回合 2/5：使用 [1] [数据删除] 遮盖上方 2 处恶意硬件篡改！', true);
+        setHint('稳定锚参数遭篡改！使用 [1] [数据删除] 遮盖上方 2 处恶意篡改！', true);
         setReferenceCards('遮盖 2 处硬件篡改以阻止执行', []);
 
         let done = 0;
@@ -2319,7 +2319,7 @@
         });
       }
 
-      // 回合 3：强行污染描述，划掉后写入现实稳态声明
+      // 异常入侵 3：强行污染描述，划掉后校准记录
       function runAct2Round3() {
         State.a2Round = 3;
         Sound.glitch(0.26);
@@ -2327,14 +2327,14 @@
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[未授权入侵 · 回合 3/5 — 强行改写描述]</div>' +
-          '<span id="a2-r3-target" class="tok-threat">描述覆写：SCP-3999 正在吞噬 Site-118 的整条时间线，所有文字都将失去意义。</span>';
+          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[描述区域发生逻辑畸变]</div>' +
+          '<span id="a2-r3-target" class="tok-threat">SCP-3999 正在吞噬 Site-118 的整条时间线，所有文字都将失去意义。</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         setTool('strike');
-        setHint('回合 3/5：使用 [2] 删除线 划掉这段描述污染！', true);
-        setReferenceCards('先划掉污染，再写入稳态声明', []);
+        setHint('检测到描述污染！使用 [2] 删除线 划掉这段污染语句！', true);
+        setReferenceCards('先划掉污染语句，再校准记录', []);
 
         document.getElementById('a2-r3-target').addEventListener('click', function () {
           if (State.tool !== 'strike') {
@@ -2345,10 +2345,10 @@
           Sound.confirm();
           this.className = 'tok tok-struck';
           box.classList.add('resolved');
-          setReferenceCards('写入稳态声明', [
+          setReferenceCards('校准描述记录', [
             {
-              tag: '[稳态声明 · 锁定描述]',
-              text: '校验重申：Site-118 基准现实稳定，研究员塔罗兰正在执行标准信息危害隔离程序。',
+              tag: '[ 记录校准 ]',
+              text: 'Site-118 基准现实处于受控状态，研究员塔罗兰正在执行标准信息危害隔离程序。',
               highlight: true,
               onClick: function () {
                 const p = document.createElement('div');
@@ -2366,20 +2366,20 @@
         }, { once: true });
       }
 
-      // 回合 4：针对塔罗兰与警卫的双重威胁，用 [数据删除] 或删除线压制
+      // 异常入侵 4：针对塔罗兰与警卫的双重威胁，用 [数据删除] 或删除线压制
       function runAct2Round4() {
         State.a2Round = 4;
         Sound.glitch(0.24);
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[未授权入侵 · 回合 4/5 — 人员认知干扰]</div>' +
+          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[人员编制档案遭受认知污染]</div>' +
           '<div style="margin-bottom:8px;">• <span class="tok-threat" data-a2-r4="1">命令驻守警卫遗忘 SCP-3999 的存在并向竖井内开火。</span></div>' +
           '<div>• <span class="tok-threat" data-a2-r4="2">剥夺研究员塔罗兰的档案编辑权限并将其锁死在终端前。</span></div>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
-        setHint('回合 4/5：使用 [1] [数据删除] 或 [2] 删除线，压制上方 2 条认知干扰！', true);
+        setHint('检测到认知危害注入！使用 [1] [数据删除] 或 [2] 删除线 压制上方 2 处红字！', true);
         setReferenceCards('压制全部干扰后将启动 RAISA 稳定协议', []);
 
         let done = 0;
@@ -2408,20 +2408,20 @@
         });
       }
 
-      // 回合 5：最后一次顽抗压制 -> 解锁 SRA 1/2 特殊协议
+      // 异常入侵 5：最后一次顽抗压制 -> 解锁 SRA 1/2 特殊协议
       function runAct2Round5() {
         State.a2Round = 5;
         Sound.glitch(0.22);
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[未授权入侵 · 回合 5/5 — 残余异常脉冲]</div>' +
+          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:6px;">[残余异常数据流]</div>' +
           '<span id="a2-r5-target" class="tok-threat">不要关掉我——把收容间撕开——把这整份文档烧成灰！</span>';
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         setTool('strike');
-        setHint('回合 5/5：使用 [2] 删除线 彻底划掉最后一条残余脉冲！', true);
+        setHint('使用 [2] 删除线 彻底划掉最后一条残余红字！', true);
 
         document.getElementById('a2-r5-target').addEventListener('click', function () {
           if (State.tool !== 'strike') {
@@ -2435,7 +2435,7 @@
           State.stress = 0.18;
           el.vignette.style.opacity = '0.12';
           el.statusDot.classList.remove('danger');
-          el.phaseBadge.textContent = '第二幕 · 收容锁定';
+          el.phaseBadge.textContent = '收容锁定中';
           el.phaseBadge.classList.remove('danger');
           setTelemetry('0.96 Hm', '恢复平稳', '#1', false);
           Sound.setDrone(0.1);
@@ -2583,7 +2583,7 @@
         State.stress = 0.82;
         saveProgress(3);
         document.title = '草稿(4,192,803) - 未保存';
-        el.phaseBadge.textContent = '第三幕 · 混乱消耗战';
+        el.phaseBadge.textContent = '现实结构崩溃';
         el.phaseBadge.classList.add('danger');
         el.statusDot.classList.add('danger');
         el.vignette.style.opacity = '0.78';
@@ -2891,7 +2891,7 @@
                             taunt.style.color = '#ff5252';
                             taunt.style.fontSize = '13.5px';
                             taunt.style.marginTop = '8px';
-                            taunt.textContent = '（3999 咆哮：一包星爆果汁糖被埋入 10 吨土壤。甜瓜腐烂。邓氏狼灭绝。你依然在我的腹中。）';
+                            taunt.textContent = '（3999 咆哮：甜瓜腐烂。邓氏狼灭绝。你依然在我的腹中。）';
                             el.docDynamic.appendChild(taunt);
                             scrollDoc();
 
@@ -3302,16 +3302,24 @@
         State.a3NightmaresDone = 0;
         setTool('strike');
 
+        const struckOnlyLine = '<div style="color:rgba(255,82,82,0.55); font-size:12px; line-height:1.7; user-select:none; letter-spacing:1px; margin:4px 0;">' +
+          Array(12).fill('<span style="text-decoration:line-through; margin:0 3px;">只有</span>').join('') +
+          '</div>';
+
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         box.innerHTML =
-          '<div style="color:rgba(255,82,82,0.7); font-size:13px; margin-bottom:8px;">只有只有只有只有只有只有只有只有只有只有只有</div>' +
-          '<div style="display:flex; flex-direction:column; gap:10px;">' +
+          struckOnlyLine +
+          struckOnlyLine +
+          '<div style="display:flex; flex-direction:column; gap:8px; margin:6px 0;">' +
           '<div><span class="tok-threat" data-nm="1">你的噩梦</span></div>' +
+          struckOnlyLine +
           '<div><span class="tok-threat" data-nm="2">关乎你所爱之人的死亡</span></div>' +
+          struckOnlyLine +
           '<div><span class="tok-threat" data-nm="3">你醒来，直面愈加疯狂的噩梦</span></div>' +
           '</div>' +
-          '<div style="color:rgba(255,82,82,0.7); font-size:13px; margin-top:8px;">只有只有只有只有只有只有只有只有只有只有只有</div>';
+          struckOnlyLine +
+          struckOnlyLine;
         el.docDynamic.appendChild(box);
         scrollDoc();
 
@@ -3376,7 +3384,7 @@
         State.stress = 0.65;
         saveProgress(4);
         document.title = '受访者：SCP-3999 // 反转采访';
-        el.phaseBadge.textContent = '第四幕 · 反转采访';
+        el.phaseBadge.textContent = '逆向采访记录';
         el.phaseBadge.classList.remove('danger');
         el.vignette.style.opacity = '0.45';
         setTool('strike');
@@ -3419,7 +3427,7 @@
         scrollDoc();
 
         setHint('使用 [2] 删除线 点击划掉 SCP-3999 的发言！（若它消去删除线，就继续划！）', false);
-        setReferenceCards('第四幕拉锯 (' + (State.a4Round + 1) + '/' + ACT4_ROUNDS.length + ')：用删除线压碎 3999 的发言', []);
+        setReferenceCards('逆向采访推进中 (' + (State.a4Round + 1) + '/' + ACT4_ROUNDS.length + ')：用删除线损坏异常语句', []);
 
         speechEl.addEventListener('click', function onStrike3999() {
           if (State.tool !== 'strike') {
@@ -3476,7 +3484,7 @@
         State.stress = 0.22;
         saveProgress(5);
         document.title = '我于万物之中';
-        el.phaseBadge.textContent = '第五幕 · 终局归档';
+        el.phaseBadge.textContent = '认知注销程序';
         el.statusDot.classList.remove('danger');
         el.vignette.style.opacity = '0.18';
         Sound.setDrone(0.16);
