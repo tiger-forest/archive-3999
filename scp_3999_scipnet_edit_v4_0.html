@@ -2107,7 +2107,7 @@
         const iv = addInterval(function () {
           if (State.ended) { clearInterval(iv); return; }
           span.textContent += text.charAt(i);
-          if (i % 2 === 0) Sound.key(isRed);
+          if (speed >= 100 || i % 2 === 0) Sound.key(isRed);
           i++;
           scrollDoc();
           if (i >= text.length) {
@@ -3189,40 +3189,64 @@
         next();
       }
 
-      function streamOnlyWall(container, chunksTotal, onDone) {
-        const wallDiv = document.createElement('div');
-        wallDiv.className = 'only-flood-block';
-        wallDiv.style.color = '#ef4444';
-        wallDiv.style.fontSize = '15px';
-        wallDiv.style.lineHeight = '1.85';
-        wallDiv.style.letterSpacing = '0.5px';
-        wallDiv.style.wordBreak = 'break-all';
-        wallDiv.style.margin = '10px 0';
-        container.appendChild(wallDiv);
+      function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone) {
+        let paraIndex = 0;
 
-        let chunkIdx = 0;
-        const iv = addInterval(function () {
-          if (State.ended) { clearInterval(iv); return; }
+        function runOneParagraph() {
+          if (State.ended) return;
+          const wallPara = document.createElement('div');
+          wallPara.className = 'only-flood-block';
+          wallPara.style.color = '#ef4444';
+          wallPara.style.fontSize = '14.5px';
+          wallPara.style.lineHeight = '1.85';
+          wallPara.style.letterSpacing = '0.5px';
+          wallPara.style.wordBreak = 'break-all';
+          wallPara.style.margin = '14px 0';
+          container.appendChild(wallPara);
 
-          const span = document.createElement('span');
-          span.textContent = '只有只有只有只有只有只有只有只有';
-          wallDiv.appendChild(span);
-          if (chunkIdx % 2 === 0) Sound.key(true);
-          scrollDoc();
+          const isLast = (paraIndex === totalParas - 1);
+          // 每段生成 80 个 chunk（每个 chunk 2 个“只有”，总计 160 个“只有”，约 4~5 行密集排版，与原版完全一致）
+          const chunksInPara = 80;
+          let chunkIdx = 0;
 
-          // 随后紧跟着被划掉，形成“边刷屏边被划掉”的压迫感
-          addTimeout(function () {
-            span.style.textDecoration = 'line-through';
-            span.style.color = 'rgba(239, 68, 68, 0.45)';
-            span.style.textDecorationColor = '#ff2222';
-          }, 140);
+          const iv = addInterval(function () {
+            if (State.ended) { clearInterval(iv); return; }
 
-          chunkIdx++;
-          if (chunkIdx >= chunksTotal) {
-            clearInterval(iv);
-            if (onDone) addTimeout(onDone, 400);
-          }
-        }, 48);
+            const span = document.createElement('span');
+            if (isLast && endsWithExist && chunkIdx === chunksInPara - 1) {
+              span.textContent = '只有存在';
+            } else {
+              span.textContent = '只有只有';
+            }
+            span.style.color = '#ef4444';
+            wallPara.appendChild(span);
+
+            if (chunkIdx % 2 === 0) Sound.key(true);
+            if (chunkIdx % 2 === 0) scrollDoc();
+
+            // 随后紧跟着被划掉，形成“边刷屏边被猩红横线追着划掉”的极速压迫感
+            addTimeout(function () {
+              span.style.textDecoration = 'line-through';
+              span.style.textDecorationColor = '#ef4444';
+              span.style.color = 'var(--text-dim)';
+            }, 90);
+
+            chunkIdx++;
+            if (chunkIdx >= chunksInPara) {
+              clearInterval(iv);
+              scrollDoc();
+              paraIndex++;
+              if (paraIndex < totalParas) {
+                // 如果还有下一大段，稍作停顿后开始倾泻下一大段
+                addTimeout(runOneParagraph, 160);
+              } else {
+                if (onDone) addTimeout(onDone, 500);
+              }
+            }
+          }, 20);
+        }
+
+        runOneParagraph();
       }
 
       // 第三幕阶段 4：大提顿仪式与「只有」洪流
@@ -3233,18 +3257,17 @@
         const amcDiv = document.createElement('div');
         amcDiv.className = 'clinical-entry';
         amcDiv.innerHTML =
-          '<p style="margin-bottom:8px;"><span class="tok-struck" style="text-decoration:line-through; color:var(--text-dim);">' +
-          '研究员塔罗兰的大学同学所养的宠物将在大提顿国家公园（Grand Teton National Park）的随机地点成为仪式祭品，尸体的脑浆将飞溅在一块岩石上并用一碗黄油爆米花和清爽可口可乐®冲刷。' +
-          '</span>请欣赏节目，只有在AMC影院公司，只有SCP-3999，只有在Applebees，只有在沃尔玛，只有在巴诺书店，只有在家得宝，只有在麦当劳，只有在Wawa，只有在伍兹霍尔海洋研究所，只有在你的地下室，只有在你身后，只在唯一，只有只有只有只有只有只有只有只有只有只有只有只有只有只有只有</p>';
+          '<p style="margin-bottom:12px; text-decoration:line-through; color:var(--text-dim); line-height:1.85; font-size:14px; word-break:break-all;">' +
+          '研究员塔罗兰的大学同学所养的宠物将在大提顿国家公园（Grand Teton National Park）的随机地点成为仪式祭品，尸体的脑浆将飞溅在一块岩石上并用一碗黄油爆米花和清爽可口可乐®冲刷。请欣赏节目，只有在AMC影院公司，只有SCP-3999，只有在Applebees，只有在沃尔玛，只有在巴诺书店，只有在家得宝，只有在麦当劳，只有在Wawa，只有在伍兹霍尔海洋研究所，只有在你的地下室，只有在你身后，只在唯一，只有只有只有只有只有只有只有只有只有只有只有只有只有只有</p>';
         el.docDynamic.appendChild(amcDiv);
         scrollDoc();
 
         setHint('异常文字涌现……', true);
         setReferenceCards('', []);
 
-        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一波“只有”连续刷屏
+        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一大段“只有”连续刷屏并划掉
         addTimeout(function () {
-          streamOnlyWall(el.docDynamic, 22, function () {
+          streamOnlyParagraphs(el.docDynamic, 1, false, function () {
             // 刷完后再停顿 1.2 秒，再弹出【救命，拜托】
             addTimeout(openHelpModal, 1200);
           });
@@ -3263,7 +3286,7 @@
           if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
           State.a3HelpNudgeTimer = setTimeout(function () {
             if (State.a3Stage === 5 && State.a3HelpClicks < 5) {
-              el.helpNudge.textContent = '被划掉了……多点几次！';
+              el.helpNudge.textContent = '多点几次！';
             }
           }, 2400);
         }
@@ -3276,27 +3299,23 @@
           State.a3HelpClicks++;
           Sound.key(false);
 
-          // 写入文档正文，紧接着立刻被 3999 红线划掉
-          const p = document.createElement('div');
-          p.className = 'clinical-entry';
-          p.textContent = '救命，拜托';
-          el.docDynamic.appendChild(p);
-          scrollDoc();
-
-          addTimeout(function () {
-            p.classList.add('struck-by-3999');
-            Sound.key(true);
-          }, 160);
-
           if (State.a3HelpClicks < 5) {
             el.helpNudge.textContent = State.a3HelpClicks >= 2 ? '继续点，多点几次！' : '';
             armNudgeTimer();
           } else {
             if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
             el.helpModal.classList.remove('open');
-            // 第二波“只有”刷屏并划掉，随后停顿 1.8 秒给玩家反应时间，再出现噩梦
-            streamOnlyWall(el.docDynamic, 22, function () {
-              addTimeout(startAct3Nightmares, 1800);
+
+            // 写入文档正文【救命, 拜托】（按原版文档展现，干净单行，不带删除线）
+            const p = document.createElement('div');
+            p.className = 'clinical-entry';
+            p.innerHTML = '<p style="margin:14px 0; font-size:15px; font-weight:700; color:#f87171;">救命, 拜托</p>';
+            el.docDynamic.appendChild(p);
+            scrollDoc();
+
+            // 第二大段“只有”刷屏并划掉，随后停顿 2.0 秒给玩家充分反应时间，再出现噩梦
+            streamOnlyParagraphs(el.docDynamic, 1, false, function () {
+              addTimeout(startAct3Nightmares, 2000);
             });
           }
         };
@@ -3337,8 +3356,8 @@
             State.a3NightmaresDone++;
             if (State.a3NightmaresDone >= 3) {
               box.classList.add('resolved');
-              // 第三波铺天盖地的“只有”洪流并逐渐划掉
-              streamOnlyWall(el.docDynamic, 32, function () {
+              // 第三波铺天盖地的“只有”洪流（连续 4 大段，最后一段以“存在”结尾），与原版完全吻合
+              streamOnlyParagraphs(el.docDynamic, 4, true, function () {
                 const endingDiv = document.createElement('div');
                 endingDiv.className = 'clinical-entry';
                 endingDiv.style.color = '#e2e8f0';
@@ -3815,8 +3834,8 @@
                               el.docDynamic.appendChild(loveLine);
                               scrollDoc();
 
-                              // 逐字打出「我爱自己。」，速度略慢（75ms/字）
-                              typeInto(loveLine, '我爱自己。', false, 75, function () {
+                              // 逐字打出「我爱自己。」，极慢沉重（320ms/字）
+                              typeInto(loveLine, '我爱自己。', false, 320, function () {
                                 setHint('……', false);
 
                                 // 慢速一个点一个点地打出省略号，之后再提供“我写完了”
