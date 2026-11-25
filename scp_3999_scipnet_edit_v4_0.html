@@ -3567,6 +3567,7 @@
       let isOnlyStreaming = false;
       let onlyBsCount = 0;
       let onlyLastBsTime = 0;
+      let onlyBriefFreezeUntil = 0;
 
       function appendOnlyChunk(para, text) {
         if (!para) return;
@@ -3588,11 +3589,11 @@
         }, 420);
       }
 
-      // 玩家按 Backspace 或点击清除按钮：前 3 次真能削掉一小截并被填平，随后退格权限彻底被剥夺（不鬼畜、不卡死）
+      // 玩家按 Backspace 或点击清除按钮：前 3 次狠砍一整行并定格 200ms 让玩家看清缺口，随后剥夺权限绝不鬼畜
       function triggerOnlyBackspace() {
         if (!isOnlyStreaming || !activeOnlyPara) return;
         const now = Date.now();
-        if (now - onlyLastBsTime < 350) return; // 节流防连发鬼畜
+        if (now - onlyLastBsTime < 380) return; // 节流防连发
         onlyLastBsTime = now;
 
         if (onlyBsCount >= 3) {
@@ -3610,19 +3611,39 @@
 
         onlyBsCount++;
         let removed = 0;
-        for (let k = 0; k < 4; k++) {
+        for (let k = 0; k < 10; k++) {
           if (activeOnlyPara.lastElementChild) {
             activeOnlyPara.lastElementChild.remove();
             removed++;
           }
         }
         if (removed > 0) {
+          // 只在有效的这 3 次内各短暂冻结喷涌 220ms，让玩家肉眼清晰看见一整行缩了回去
+          onlyBriefFreezeUntil = Date.now() + 220;
           Sound.key(false);
-          setHint('已清除末尾 ' + removed + ' 组字元……', false);
+          setHint('已清除一整行（剩余退格机会：' + (3 - onlyBsCount) + '）', false);
 
-          // 180ms 后填平被删掉的缺口（不多刷，只补回被删的数量）
+          // 在被删掉的缺口末尾闪一个亮绿退格光标提示视线
+          const cur = document.createElement('span');
+          cur.className = 'cursor-green';
+          activeOnlyPara.appendChild(cur);
+          addTimeout(function () { if (cur.isConnected) cur.remove(); }, 200);
+
+          const btn = el.refCards.querySelector('.ref-card');
+          if (btn) {
+            btn.style.borderColor = 'var(--green)';
+            btn.style.transform = 'scale(0.96)';
+            addTimeout(function () {
+              if (btn.isConnected) {
+                btn.style.borderColor = '';
+                btn.style.transform = '';
+              }
+            }, 160);
+          }
+
+          // 230ms 后填平缺口（只补回刚被删的数量，绝不越按越长）
           const targetPara = activeOnlyPara;
-          const refillCount = removed;
+          const refillCount = Math.min(removed, 8);
           addTimeout(function () {
             if (!isOnlyStreaming || !targetPara || !targetPara.isConnected) return;
             Sound.glitch(0.1);
@@ -3630,8 +3651,8 @@
               appendOnlyChunk(targetPara, '只有只有');
             }
             scrollDoc();
-            setHint(onlyBsCount >= 3 ? '退格键正在失去响应……' : '缺口已被迅速填平！', true);
-          }, 180);
+            setHint(onlyBsCount >= 3 ? '退格键已彻底失灵！' : '缺口被瞬间反扑填平！', true);
+          }, 230);
         }
       }
 
@@ -3640,6 +3661,7 @@
         isOnlyStreaming = true;
         onlyBsCount = 0;
         onlyLastBsTime = 0;
+        onlyBriefFreezeUntil = 0;
         let paraIndex = 0;
 
         setHint('异常文字持续涌入！按 Backspace 退格键或点击下方按钮尝试清除！', true);
@@ -3670,6 +3692,7 @@
 
           const iv = addInterval(function () {
             if (State.ended) { clearInterval(iv); return; }
+            if (Date.now() < onlyBriefFreezeUntil) return;
 
             const txt = (isLast && endsWithExist && chunkIdx === chunksInPara - 1) ? '只有存在' : '只有只有';
             appendOnlyChunk(wallPara, txt);
