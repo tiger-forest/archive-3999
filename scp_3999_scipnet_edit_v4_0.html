@@ -2455,11 +2455,13 @@
         setReferenceCards('先划掉红色篡改句，再写入修正协议', []);
 
         document.getElementById('a2-r1-target').addEventListener('click', function () {
+          if (this.getAttribute('data-done')) return;
           if (State.tool !== 'strike') {
             setHint('请先点击顶部 [2] 删除线 工具！', true);
             nudgeTool('strike');
             return;
           }
+          this.setAttribute('data-done', '1');
           Sound.confirm();
           this.className = 'tok tok-struck';
           box.classList.add('resolved');
@@ -2482,7 +2484,7 @@
               }
             }
           ]);
-        }, { once: true });
+        });
       }
 
       // 异常入侵 2：两处恶意破坏稳定锚条款，需用 【数据删除】 遮盖
@@ -2540,11 +2542,13 @@
         setReferenceCards('先划掉污染语句，再校准记录', []);
 
         document.getElementById('a2-r3-target').addEventListener('click', function () {
+          if (this.getAttribute('data-done')) return;
           if (State.tool !== 'strike') {
             setHint('请切换到 [2] 删除线 工具！', true);
             nudgeTool('strike');
             return;
           }
+          this.setAttribute('data-done', '1');
           Sound.confirm();
           this.className = 'tok tok-struck';
           box.classList.add('resolved');
@@ -2566,7 +2570,7 @@
               }
             }
           ]);
-        }, { once: true });
+        });
       }
 
       // 异常入侵 4：针对塔罗兰与警卫的双重威胁，用 【数据删除】 或删除线压制
@@ -3837,15 +3841,17 @@
                   setReferenceCards('划掉句尾篡改后，开始在文档中抹除自身锚点', []);
 
                   redSpan.addEventListener('click', function () {
+                    if (this.getAttribute('data-done')) return;
                     if (State.tool !== 'strike') {
                       setHint('请使用 [2] 删除线 工具！', true);
                       nudgeTool('strike');
                       return;
                     }
+                    this.setAttribute('data-done', '1');
                     Sound.confirm();
                     this.className = 'tok tok-struck';
                     addTimeout(startAct5RealAnchorDeletion, 650);
-                  }, { once: true });
+                  });
                 }, 3200);
               }
             }, 22);
