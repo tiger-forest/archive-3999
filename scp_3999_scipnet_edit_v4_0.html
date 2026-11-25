@@ -3513,47 +3513,87 @@
         next();
       }
 
+      let activeOnlyPara = null;
+      let isOnlyStreaming = false;
+
+      function appendOnlyChunk(para, text) {
+        if (!para) return;
+        const span = document.createElement('span');
+        span.textContent = text;
+        // 刚喷出时：纯鲜红加粗，绝不带删除线
+        span.style.color = '#dc2626';
+        span.style.fontWeight = '700';
+        para.appendChild(span);
+
+        // 延迟 420ms 后再被猩红横线追着划掉，确保肉眼清晰看到“先出现鲜红只有，后被划上横线”
+        addTimeout(function () {
+          if (!span.isConnected) return;
+          span.style.textDecoration = 'line-through';
+          span.style.textDecorationThickness = '2px';
+          span.style.textDecorationColor = '#b91c1c';
+          span.style.color = 'var(--text-dim)';
+          span.style.fontWeight = '400';
+        }, 420);
+      }
+
+      // 玩家按 Backspace 或点击清除按钮：真能删掉末尾一点点，但永远追不上涌出的速度
+      function triggerOnlyBackspace() {
+        if (!isOnlyStreaming || !activeOnlyPara) return;
+        if (activeOnlyPara.lastElementChild) {
+          activeOnlyPara.lastElementChild.remove();
+          Sound.key(false);
+        }
+        setHint('已清除末尾字符——但异常写入速度过快，无法阻止！', true);
+        // 短暂反扑：刚删掉 1 个，70ms 后又多涌出 2 个鲜红“只有”填平缺口
+        const targetPara = activeOnlyPara;
+        addTimeout(function () {
+          if (!isOnlyStreaming || !targetPara || !targetPara.isConnected) return;
+          appendOnlyChunk(targetPara, '只有只有');
+          appendOnlyChunk(targetPara, '只有');
+          Sound.key(true);
+          scrollDoc();
+        }, 70);
+      }
+
       function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone) {
+        State.a3Stage = 4;
+        isOnlyStreaming = true;
         let paraIndex = 0;
+
+        setHint('异常文字持续涌入！按 Backspace 退格键或点击下方按钮尝试清除！', true);
+        setReferenceCards('尝试清除异常写入', [
+          {
+            tag: '[ 退格清除 · Backspace ]',
+            text: '⌫ 退格删除异常字符',
+            highlight: false,
+            onClick: function () { triggerOnlyBackspace(); }
+          }
+        ]);
 
         function runOneParagraph() {
           if (State.ended) return;
           const wallPara = document.createElement('div');
           wallPara.className = 'only-flood-block';
-          wallPara.style.color = '#ef4444';
-          wallPara.style.fontSize = '14.5px';
+          wallPara.style.fontSize = '15px';
           wallPara.style.lineHeight = '1.85';
           wallPara.style.letterSpacing = '0.5px';
           wallPara.style.wordBreak = 'break-all';
           wallPara.style.margin = '14px 0';
           container.appendChild(wallPara);
+          activeOnlyPara = wallPara;
 
           const isLast = (paraIndex === totalParas - 1);
-          // 每段生成 80 个 chunk（每个 chunk 2 个“只有”，总计 160 个“只有”，约 4~5 行密集排版，与原版完全一致）
-          const chunksInPara = 80;
+          const chunksInPara = 64;
           let chunkIdx = 0;
 
           const iv = addInterval(function () {
             if (State.ended) { clearInterval(iv); return; }
 
-            const span = document.createElement('span');
-            if (isLast && endsWithExist && chunkIdx === chunksInPara - 1) {
-              span.textContent = '只有存在';
-            } else {
-              span.textContent = '只有只有';
-            }
-            span.style.color = '#ef4444';
-            wallPara.appendChild(span);
+            const txt = (isLast && endsWithExist && chunkIdx === chunksInPara - 1) ? '只有存在' : '只有只有';
+            appendOnlyChunk(wallPara, txt);
 
             if (chunkIdx % 2 === 0) Sound.key(true);
             if (chunkIdx % 2 === 0) scrollDoc();
-
-            // 随后紧跟着被划掉，形成“边刷屏边被猩红横线追着划掉”的极速压迫感
-            addTimeout(function () {
-              span.style.textDecoration = 'line-through';
-              span.style.textDecorationColor = '#ef4444';
-              span.style.color = 'var(--text-dim)';
-            }, 90);
 
             chunkIdx++;
             if (chunkIdx >= chunksInPara) {
@@ -3561,13 +3601,15 @@
               scrollDoc();
               paraIndex++;
               if (paraIndex < totalParas) {
-                // 如果还有下一大段，稍作停顿后开始倾泻下一大段
-                addTimeout(runOneParagraph, 160);
+                addTimeout(runOneParagraph, 200);
               } else {
-                if (onDone) addTimeout(onDone, 500);
+                isOnlyStreaming = false;
+                activeOnlyPara = null;
+                setReferenceCards('', []);
+                if (onDone) addTimeout(onDone, 550);
               }
             }
-          }, 20);
+          }, 34);
         }
 
         runOneParagraph();
