@@ -16,6 +16,10 @@
       --bg-header: #e2e2da;
       --bg-elevated: #ffffff;
       --bg-paper: #ffffff;
+      --box-bg: #f8f8f5;
+      --script-bg: #f2f2eb;
+      --corrupt-bg: #e8e8e1;
+      --card-bg: #ffffff;
       --border: #dcdcd4;
       --border-strong: #232320;
       --border-soft: #c7c7be;
@@ -560,7 +564,7 @@
       padding: 6px 13px;
       border-radius: 4px;
       border: 1px solid var(--border-strong);
-      background: #ffffff;
+      background: var(--card-bg);
       color: var(--text-main);
       cursor: pointer;
       display: inline-flex;
@@ -867,7 +871,8 @@
     }
 
     .anomaly-entry.resolved {
-      background: #f8f8f5;
+      background: var(--box-bg);
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
       border-color: var(--border);
       border-left-color: var(--text-muted);
       color: var(--text-dim);
@@ -876,7 +881,8 @@
     .script-box {
       margin: 14px 0;
       padding: 14px 18px;
-      background: #f2f2eb;
+      background: var(--script-bg);
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
       border: 1px dashed var(--border-soft);
       border-radius: 4px;
       color: var(--text-main);
@@ -886,7 +892,8 @@
     .interview-box {
       margin: 16px 0;
       padding: 16px 18px;
-      background: #f8f8f5;
+      background: var(--box-bg);
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
       border: 1px solid var(--border);
       border-radius: 6px;
       color: var(--text-main);
@@ -917,7 +924,8 @@
       display: inline-block;
       padding: 3px 9px;
       border-radius: 4px;
-      background: #e8e8e1;
+      background: var(--corrupt-bg);
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
       border: 1px solid #94a3b8;
       color: #475569;
       font-weight: 700;
@@ -1027,7 +1035,7 @@
       line-height: 1.55;
       padding: 12px 16px;
       border-radius: 5px;
-      background: #ffffff;
+      background: var(--card-bg);
       border: 1px solid var(--border-soft);
       color: var(--text-main);
       cursor: pointer;
@@ -1137,7 +1145,7 @@
     }
 
     .metric-cell {
-      background: #ffffff;
+      background: var(--card-bg);
       border: 1px solid var(--border-soft);
       border-radius: 4px;
       padding: 7px 9px;
@@ -1205,7 +1213,8 @@
       font-family: var(--font-mono);
       font-size: 12px;
       padding: 4px 9px;
-      background: #ffffff;
+      background: var(--card-bg);
+      transition: background-color 0.8s ease, border-color 0.8s ease;
       border: 1px solid var(--border-soft);
       border-radius: 4px;
       color: var(--text-muted);
@@ -2767,45 +2776,76 @@
       function runAct3Layer1() {
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<p style="margin:0 0 10px;">SCP-3999当前无法被收容，正促成ZK级现实终结场景。最为可行的方案是令<span class="real-anchor" data-anchor="2">研究员塔罗兰</span>与一切基金会站点及人员自我断绝联系。破坏能力将会<span id="a3-l1-fumble" style="color:var(--crimson); font-weight:700;">停止</span>。</p>';
+        const p = document.createElement('p');
+        p.style.margin = '0 0 10px';
+        box.appendChild(p);
         el.docDynamic.appendChild(box);
         scrollDoc();
 
         setHint('3999 正在起草隔离提案……', false);
         setReferenceCards('等待异常文本稳定……', []);
 
-        // 3999 词穷演变效果（文档自己在修改）：
-        // 出一个停止 -> 被划掉 -> 出一个得以控制 -> 被划掉 -> 出一个残留少许
-        addTimeout(function () {
-          const fumble = document.getElementById('a3-l1-fumble');
-          if (!fumble) return;
+        const partA = 'SCP-3999当前无法被收容，正促成ZK级现实终结场景。最为可行的方案是令';
+        const partB = '与一切基金会站点及人员自我断绝联系。破坏能力将会';
 
-          // 1. 划掉“停止”
-          fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span>';
-          Sound.glitch(0.18);
+        typeInto(p, partA, true, 24, function () {
+          // 插入真实锚点 2
+          const anchor2 = document.createElement('span');
+          anchor2.className = 'real-anchor';
+          anchor2.setAttribute('data-anchor', '2');
+          anchor2.textContent = '研究员塔罗兰';
+          p.appendChild(anchor2);
+          Sound.key(true);
           scrollDoc();
 
-          // 2. 出“得以控制”
-          addTimeout(function () {
-            fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="color:var(--crimson); font-weight:700;">得以控制</span>';
-            Sound.key(true);
-            scrollDoc();
+          typeInto(p, partB, true, 24, function () {
+            const fumble = document.createElement('span');
+            fumble.id = 'a3-l1-fumble';
+            p.appendChild(fumble);
 
-            // 3. 划掉“得以控制”
-            addTimeout(function () {
-              fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="text-decoration:line-through; opacity:0.6;">得以控制</span>';
-              Sound.glitch(0.18);
-              scrollDoc();
+            // 1. 逐字打出“停止”
+            const w1 = document.createElement('span');
+            w1.style.color = 'var(--crimson)';
+            w1.style.fontWeight = '700';
+            fumble.appendChild(w1);
 
-              // 4. 出“残留少许”
+            typeInto(w1, '停止', true, 55, function () {
+              // 停顿后划掉“停止”
               addTimeout(function () {
-                fumble.innerHTML = '<span style="text-decoration:line-through; opacity:0.6;">停止</span> <span style="text-decoration:line-through; opacity:0.6;">得以控制</span> <span style="color:var(--crimson); font-weight:700;">残留少许</span>';
-                Sound.key(true);
+                w1.style.textDecoration = 'line-through';
+                w1.style.opacity = '0.6';
+                Sound.glitch(0.18);
                 scrollDoc();
 
-                // 提供玩家反驳卡片
+                // 2. 逐字打出“得以控制”
                 addTimeout(function () {
+                  const sp1 = document.createTextNode(' ');
+                  fumble.appendChild(sp1);
+                  const w2 = document.createElement('span');
+                  w2.style.color = 'var(--crimson)';
+                  w2.style.fontWeight = '700';
+                  fumble.appendChild(w2);
+
+                  typeInto(w2, '得以控制', true, 55, function () {
+                    // 停顿后划掉“得以控制”
+                    addTimeout(function () {
+                      w2.style.textDecoration = 'line-through';
+                      w2.style.opacity = '0.6';
+                      Sound.glitch(0.18);
+                      scrollDoc();
+
+                      // 3. 逐字打出“残留少许。”
+                      addTimeout(function () {
+                        const sp2 = document.createTextNode(' ');
+                        fumble.appendChild(sp2);
+                        const w3 = document.createElement('span');
+                        w3.style.color = 'var(--crimson)';
+                        w3.style.fontWeight = '700';
+                        fumble.appendChild(w3);
+
+                        typeInto(w3, '残留少许。', true, 65, function () {
+                          // 提供玩家反驳卡片
+                          addTimeout(function () {
                   setReferenceCards('驳回隔离提案', [
             {
               tag: '',
@@ -2866,11 +2906,16 @@
               }
             }
           ]);
-                }, 600);
-              }, 700);
-            }, 850);
-          }, 700);
-        }, 1100);
+                          }, 500);
+                        });
+                      }, 400);
+                    }, 650);
+                  });
+                }, 400);
+              }, 650);
+            });
+          });
+        });
       }
 
       // 第二层：精准的官僚恶意（“越遮盖，细节越血腥具体”）
@@ -3879,15 +3924,28 @@
           const appBg = mixHex('#f4f4f0', '#030406', progress);
           const paperBg = mixHex('#ffffff', '#090c10', progress);
           const barBg = mixHex('#e2e2da', '#07090d', progress);
+          const boxBg = mixHex('#f8f8f5', '#0d1117', progress);
+          const scriptBg = mixHex('#f2f2eb', '#0d1117', progress);
+          const corruptBg = mixHex('#e8e8e1', '#11161f', progress);
+          const cardBg = mixHex('#ffffff', '#0e131b', progress);
+          const borderCol = mixHex('#cdcdc4', '#1e293b', progress);
+
+          el.app.style.setProperty('--box-bg', boxBg);
+          el.app.style.setProperty('--script-bg', scriptBg);
+          el.app.style.setProperty('--corrupt-bg', corruptBg);
+          el.app.style.setProperty('--card-bg', cardBg);
+          el.app.style.setProperty('--border', borderCol);
+
           el.app.style.backgroundColor = appBg;
           document.body.style.backgroundColor = appBg;
           el.docPaper.style.backgroundColor = paperBg;
+          el.docPaper.style.borderColor = borderCol;
           const topbarEl = document.querySelector('.topbar');
           const statusbarEl = document.querySelector('.statusbar');
           if (topbarEl) topbarEl.style.backgroundColor = barBg;
           if (statusbarEl) statusbarEl.style.backgroundColor = barBg;
           if (el.refDock) el.refDock.style.backgroundColor = barBg;
-          if (progress >= 0.48) {
+          if (progress >= 0.45) {
             el.app.classList.add('darkening-half');
           }
         }
@@ -3920,8 +3978,14 @@
         if (left <= 0) {
           el.anchorCounter.classList.remove('visible');
           el.app.classList.remove('darkening-half');
+          el.app.style.removeProperty('--box-bg');
+          el.app.style.removeProperty('--script-bg');
+          el.app.style.removeProperty('--corrupt-bg');
+          el.app.style.removeProperty('--card-bg');
+          el.app.style.removeProperty('--border');
           el.app.style.backgroundColor = '';
           el.docPaper.style.backgroundColor = '';
+          el.docPaper.style.borderColor = '';
           const topbarEl = document.querySelector('.topbar');
           const statusbarEl = document.querySelector('.statusbar');
           if (topbarEl) topbarEl.style.backgroundColor = '';
