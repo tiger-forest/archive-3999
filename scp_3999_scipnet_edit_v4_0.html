@@ -276,6 +276,16 @@
     }
 
     /* 虚空模式全量暗色接管：确保进入第五幕黑化后无任何残留白块 */
+    #app.void-mode .ref-drawer {
+      display: none !important;
+    }
+
+    #app.void-mode .file-pill {
+      background: #0f141c !important;
+      border-color: #334155 !important;
+      color: #94a3b8 !important;
+    }
+
     #app.void-mode .topbar,
     #app.void-mode .statusbar {
       background: #07090d !important;
@@ -361,8 +371,18 @@
     #app.darkening-half .doc-header,
     #app.darkening-half .topbar,
     #app.darkening-half .statusbar,
-    #app.darkening-half .ref-dock {
+    #app.darkening-half .ref-dock,
+    #app.darkening-half .ref-drawer {
       border-color: #334155 !important;
+    }
+    #app.darkening-half .ref-drawer {
+      background: #0d1117 !important;
+      color: #94a3b8 !important;
+    }
+    #app.darkening-half .file-pill {
+      background: #1e293b !important;
+      border-color: #475569 !important;
+      color: #cbd5e1 !important;
     }
     #app.darkening-half .interview-box,
     #app.darkening-half .script-box,
@@ -453,38 +473,80 @@
       background: #1e293b !important;
     }
 
-    /* 顶部操作员身份条 + 工具栏 */
+    /* 顶部单行软件工具栏（demo0 紧凑质感） */
     .topbar {
       background: var(--bg-header);
       border-bottom: 1.5px solid var(--border-strong);
-      padding: 8px 16px;
+      padding: 8px 14px;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       flex-shrink: 0;
     }
 
-    .topbar-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+    .file-pill {
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
     }
 
-    .identity-bar {
-      font-size: 13px;
-      color: var(--text-dim);
-      padding-bottom: 5px;
+    /* 顶部独立 [参考剪贴板] 抽屉条 */
+    .ref-drawer {
+      background: #efefe8;
       border-bottom: 1px solid var(--border-soft);
+      padding: 7px 16px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: background-color 0.8s ease, border-color 0.8s ease, opacity 0.6s ease;
     }
 
-    .identity-bar strong {
+    .ref-drawer.collapsed .ref-drawer-words {
+      display: none;
+    }
+
+    .ref-drawer.stripped {
+      display: none;
+    }
+
+    .ref-drawer-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ref-drawer-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ref-toggle {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      border-radius: 3px;
+      padding: 2px 8px;
+      cursor: pointer;
+      color: var(--text-dim);
+    }
+
+    .ref-toggle:hover {
+      background: #e2e2d8;
       color: var(--text-main);
     }
 
@@ -1571,45 +1633,51 @@
   <!-- 主应用终端 -->
   <div id="app">
     <header class="topbar" id="topbar">
-      <!-- 明确交代玩家背景身份 -->
-      <div class="identity-bar">
-        <span>操作员：<strong>3级研究员 詹姆斯·塔罗兰</strong> ｜ 当前任务：<strong>起草并归档 SCP-3999 标准收容档案</strong></span>
+      <div class="brand">
+        <span id="status-dot" class="status-dot"></span>
+        <span class="brand-title">SCiPNET-EDIT v4.0</span>
+        <span class="file-pill">SCP-3999_DRAFT.scp</span>
         <span id="anchor-counter" class="anchor-counter-badge">待抹除名称：<span id="anchor-count-num">8</span></span>
       </div>
 
-      <div class="topbar-row">
-        <div class="brand">
-          <span id="status-dot" class="status-dot"></span>
-          <span class="brand-title">SCiPNET-EDIT v4.0</span>
-        </div>
+      <div class="toolbar-group" id="tool-group">
+        <button id="tool-redact" class="btn active" data-tool="redact" title="快捷键 1">
+          <span class="btn-key">[1]</span>
+          <span>【数据删除】</span>
+        </button>
 
-        <!-- 放大后的工具栏 -->
-        <div class="toolbar-group" id="tool-group">
-          <button id="tool-redact" class="btn active" data-tool="redact" title="快捷键 1">
-            <span class="btn-key">[1]</span>
-            <span>【数据删除】</span>
-          </button>
+        <button id="tool-strike" class="btn" data-tool="strike" title="快捷键 2">
+          <span class="btn-key">[2]</span>
+          <span style="text-decoration: line-through;">删除线 ~~</span>
+        </button>
 
-          <button id="tool-strike" class="btn" data-tool="strike" title="快捷键 2">
-            <span class="btn-key">[2]</span>
-            <span style="text-decoration: line-through;">删除线 ~~</span>
-          </button>
+        <button id="tool-clip" class="btn" data-tool="clip" title="快捷键 3">
+          <span class="btn-key">[3]</span>
+          <span>剪贴板:</span>
+          <span id="clip-text" class="clip-preview">空</span>
+        </button>
+      </div>
 
-          <button id="tool-clip" class="btn" data-tool="clip" title="快捷键 3">
-            <span class="btn-key">[3]</span>
-            <span>剪贴板:</span>
-            <span id="clip-text" class="clip-preview">空</span>
-          </button>
-        </div>
-
-        <div class="toolbar-group">
-          <button id="btn-mute" class="btn" title="切换合成音效">🔊 音效开</button>
-        </div>
+      <div class="toolbar-group">
+        <button id="btn-mute" class="btn" title="切换合成音效">🔊 音效开</button>
       </div>
     </header>
 
     <div class="workspace">
       <main class="main-pane">
+        <!-- 独立 [参考剪贴板] 抽屉条（处于纸张外，不污染正文） -->
+        <div id="ref-drawer" class="ref-drawer">
+          <div class="ref-drawer-left">
+            <strong>[参考剪贴板]</strong>
+            <div class="ref-drawer-words">
+              <span style="color:var(--text-dim);">点击词条自动复制：</span>
+              <span class="tok tok-copy" data-copy="标准收容协议" title="点击复制并切换至剪贴板">标准收容协议</span>
+              <span class="tok tok-copy" data-copy="1.00 Hm 基准阈值" title="点击复制并切换至剪贴板">1.00 Hm 基准阈值</span>
+            </div>
+          </div>
+          <button id="ref-drawer-toggle" class="ref-toggle">收起</button>
+        </div>
+
         <div id="doc-scroll" class="doc-scroll">
           <article id="doc-paper" class="doc-paper cursor-redact">
             <div class="doc-header">
@@ -1625,13 +1693,6 @@
 
             <!-- 第一幕：扎实的常规档案校对与起草 -->
             <div id="doc-static" class="doc-section">
-              <p style="font-size:13.5px; color:var(--text-dim); border-bottom:1px dashed var(--border-soft); padding-bottom:10px; margin-bottom:16px;">
-                可用标准词条（点击即可复制）：
-                <span class="tok tok-copy" data-copy="标准收容协议" title="点击复制并切换至剪贴板">标准收容协议</span>
-                &nbsp;
-                <span class="tok tok-copy" data-copy="1.00 Hm 基准阈值" title="点击复制并切换至剪贴板">1.00 Hm 基准阈值</span>
-              </p>
-
               <p>
                 <span class="field-key">特殊收容措施：</span>
                 SCP-3999 现收容于
@@ -1727,7 +1788,7 @@
       <div class="status-left">
         <button id="btn-reset-storage" class="btn-reset-subtle" title="清除本地进度并重新开始">[重置档案]</button>
         <span id="hint-tag" class="hint-tag">指引</span>
-        <span id="hint-text" class="hint-text">校对档案：遮盖 2 处涉密项、划掉 1 处作废附注，并复制上方蓝色词条填入 2 处 [待补充]。</span>
+        <span id="hint-text" class="hint-text">校对档案：遮盖 2 处涉密项、划掉 1 处作废附注，并从顶部 [参考剪贴板] 复制填入 2 处 [待补充]。</span>
       </div>
       <div style="font-size:12.5px; color:var(--text-muted);">快捷键：1-3 切换工具</div>
     </footer>
@@ -2116,6 +2177,8 @@
         toolRedact: document.getElementById('tool-redact'),
         toolStrike: document.getElementById('tool-strike'),
         toolClip: document.getElementById('tool-clip'),
+        refDrawer: document.getElementById('ref-drawer'),
+        refDrawerToggle: document.getElementById('ref-drawer-toggle'),
         clipText: document.getElementById('clip-text'),
         btnMute: document.getElementById('btn-mute'),
 
@@ -2425,6 +2488,10 @@
          8. 第二幕：有分量的前期对抗（5 个来回）→ SRA 特殊协议 → 延长版虚假胜利
          ======================================================================= */
       function startAct2() {
+        if (el.refDrawer) {
+          el.refDrawer.classList.add('collapsed');
+          if (el.refDrawerToggle) el.refDrawerToggle.textContent = '展开';
+        }
         State.act = 2;
         State.a2Round = 1;
         State.stress = 0.52;
@@ -4293,12 +4360,12 @@
         if (pEl && !pEl.getAttribute('data-done')) {
           const expected = pEl.getAttribute('data-a1-paste');
           if (State.tool !== 'clip') {
-            setHint('请先点击上方蓝色词条，或按 [3] 切换到剪贴板！', true);
+            setHint('请先点击顶部 [参考剪贴板] 中的词条，或按 [3] 切换到剪贴板！', true);
             nudgeTool('clip');
             return;
           }
           if (!State.clipboard) {
-            setHint('剪贴板为空！请先点击上方蓝色标准词条进行复制。', true);
+            setHint('剪贴板为空！请先点击顶部 [参考剪贴板] 中的词条进行复制。', true);
             return;
           }
           if (State.clipboard !== expected) {
@@ -4314,6 +4381,30 @@
           checkAct1Progress();
         }
       });
+
+      // 顶部 [参考剪贴板] 抽屉点击复制（自动切剪贴板）与收起
+      if (el.refDrawer) {
+        el.refDrawer.addEventListener('click', function (e) {
+          Sound.unlock();
+          const cEl = e.target.closest('[data-copy]');
+          if (cEl) {
+            const word = cEl.getAttribute('data-copy');
+            State.clipboard = word;
+            if (el.clipText) el.clipText.textContent = word;
+            setTool('clip');
+            Sound.confirm();
+            log('已复制「' + word + '」至剪贴板。', 'safe');
+            setHint('已复制到剪贴板，请点击正文中对应的 [待补充] 填入。', false);
+          }
+        });
+      }
+      if (el.refDrawerToggle && el.refDrawer) {
+        el.refDrawerToggle.addEventListener('click', function () {
+          Sound.unlock();
+          const isCollapsed = el.refDrawer.classList.toggle('collapsed');
+          this.textContent = isCollapsed ? '展开' : '收起';
+        });
+      }
 
       // 工具按钮
       for (let i = 0; i < el.toolBtns.length; i++) {
