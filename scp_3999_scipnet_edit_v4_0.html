@@ -3656,7 +3656,7 @@
         }
       }
 
-      function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone) {
+      function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone, intervalMs, chunksPerPara) {
         State.a3Stage = 4;
         isOnlyStreaming = true;
         onlyBsCount = 0;
@@ -3687,7 +3687,7 @@
           activeOnlyPara = wallPara;
 
           const isLast = (paraIndex === totalParas - 1);
-          const chunksInPara = 64;
+          const chunksInPara = chunksPerPara || 64;
           let chunkIdx = 0;
 
           const iv = addInterval(function () {
@@ -3714,7 +3714,7 @@
                 if (onDone) addTimeout(onDone, 550);
               }
             }
-          }, 34);
+          }, intervalMs || 34);
         }
 
         runOneParagraph();
@@ -3736,12 +3736,12 @@
         setHint('异常文字涌现……', true);
         setReferenceCards('', []);
 
-        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一大段“只有”连续刷屏并划掉
+        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一大段“只有”慢速渗出并划掉
         addTimeout(function () {
           streamOnlyParagraphs(el.docDynamic, 1, false, function () {
             // 刷完后再停顿 1.2 秒，再弹出【救命，拜托】
             addTimeout(openHelpModal, 1200);
-          });
+          }, 82, 48);
         }, 1600);
       }
 
@@ -3784,10 +3784,10 @@
             el.docDynamic.appendChild(p);
             scrollDoc();
 
-            // 第二大段“只有”刷屏并划掉，随后停顿 2.0 秒给玩家充分反应时间，再出现噩梦
+            // 第二大段“只有”慢速渗出并划掉，随后停顿 2.0 秒给玩家充分反应时间，再出现噩梦
             streamOnlyParagraphs(el.docDynamic, 1, false, function () {
               addTimeout(startAct3Nightmares, 2000);
-            });
+            }, 82, 48);
           }
         };
       }
