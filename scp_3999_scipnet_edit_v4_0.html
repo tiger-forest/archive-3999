@@ -6,29 +6,31 @@
   <title>SCP-3999 - SCiPNET</title>
   <style>
     /* =========================================================================
-       SCP-3999：我于万物之中 — SCiPNET-EDIT v4.0 (暗色基金会终端完整重构版)
-       100% 零外部依赖 | 原生 HTML + CSS + JS | 纯 Web Audio API 合成音效
+       SCP-3999：我于万物之中 — SCiPNET-EDIT v4.0 (demo0 经典纸质公文档案重塑版)
+       100% 零外部依赖 | 浅色公文质感 + 动态失色崩坏 | 纯 Web Audio API 合成音效
        ========================================================================= */
     :root {
       --bg-void: #06080a;
-      --bg-app: #0b0e12;
-      --bg-panel: #12171e;
-      --bg-elevated: #181f29;
-      --bg-paper: #0f141a;
-      --border: #26303d;
-      --border-strong: #3c4a5e;
-      --text-main: #e5ecf4;
-      --text-dim: #94a3b8;
-      --text-muted: #5c6b7f;
-      --green: #34d399;
-      --green-soft: rgba(52, 211, 153, 0.14);
-      --cyan: #38bdf8;
-      --cyan-soft: rgba(56, 189, 248, 0.16);
-      --amber: #f59e0b;
-      --amber-soft: rgba(245, 158, 11, 0.15);
-      --crimson: #ff3b3b;
-      --crimson-soft: rgba(255, 59, 59, 0.15);
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', 'PingFang SC', 'Microsoft YaHei', monospace;
+      --bg-app: #f4f4f0;
+      --bg-panel: #eaeae3;
+      --bg-header: #e2e2da;
+      --bg-elevated: #ffffff;
+      --bg-paper: #ffffff;
+      --border: #dcdcd4;
+      --border-strong: #232320;
+      --border-soft: #c7c7be;
+      --text-main: #171716;
+      --text-dim: #5a5a54;
+      --text-muted: #787870;
+      --green: #166534;
+      --green-soft: rgba(22, 101, 52, 0.1);
+      --cyan: #185796;
+      --cyan-soft: rgba(24, 87, 150, 0.08);
+      --amber: #a16207;
+      --amber-soft: rgba(161, 98, 7, 0.12);
+      --crimson: #c61a1a;
+      --crimson-soft: rgba(198, 26, 26, 0.08);
+      --font-mono: 'Courier New', Consolas, Monaco, 'JetBrains Mono', 'PingFang SC', 'Microsoft YaHei', monospace;
       --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
     }
 
@@ -43,27 +45,29 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--bg-void);
+      background-color: var(--bg-app);
       color: var(--text-main);
       font-family: var(--font-mono);
-      font-size: 16px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.7;
       user-select: none;
     }
 
     /* =========================================================================
        视觉氛围层（CRT 扫描线、暗红压迫暗角、闪断黑屏）
+       初始为 0（洁白公文），随着异常加剧逐步侵蚀
        ========================================================================= */
     #crt-overlay {
       pointer-events: none;
       position: fixed;
       inset: 0;
       z-index: 45;
-      opacity: 0.22;
+      opacity: 0;
+      transition: opacity 0.6s ease;
       background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.24) 0px,
-        rgba(0, 0, 0, 0.24) 1px,
+        rgba(0, 0, 0, 0.045) 0px,
+        rgba(0, 0, 0, 0.045) 1px,
         transparent 1px,
         transparent 3px
       );
@@ -76,7 +80,7 @@
       z-index: 46;
       opacity: 0;
       transition: opacity 0.6s ease;
-      background: radial-gradient(circle at center, transparent 42%, rgba(175, 12, 12, 0.42) 100%);
+      background: radial-gradient(circle at center, transparent 48%, rgba(198, 26, 26, 0.28) 100%);
     }
 
     #flash-overlay {
@@ -84,7 +88,7 @@
       position: fixed;
       inset: 0;
       z-index: 96;
-      background: #000000;
+      background: #050505;
       opacity: 0;
       transition: opacity 0.12s ease;
     }
@@ -110,24 +114,24 @@
     }
 
     @keyframes pulse-green {
-      0%, 100% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.55), 0 0 12px rgba(52, 211, 153, 0.2); }
-      50% { box-shadow: 0 0 0 2.5px rgba(52, 211, 153, 0.95), 0 0 22px rgba(52, 211, 153, 0.45); }
+      0%, 100% { box-shadow: 0 0 0 1px rgba(22, 101, 52, 0.45); }
+      50% { box-shadow: 0 0 0 2.5px rgba(22, 101, 52, 0.85), 0 0 12px rgba(22, 101, 52, 0.25); }
     }
 
     @keyframes pulse-cyan {
-      0%, 100% { box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.65), 0 0 10px rgba(56, 189, 248, 0.25); }
-      50% { box-shadow: 0 0 0 2.5px rgba(224, 242, 254, 0.95), 0 0 20px rgba(56, 189, 248, 0.6); }
+      0%, 100% { box-shadow: 0 0 0 1px rgba(24, 87, 150, 0.45); }
+      50% { box-shadow: 0 0 0 2.5px rgba(24, 87, 150, 0.85), 0 0 14px rgba(24, 87, 150, 0.35); }
     }
 
     @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 0 1px rgba(255, 59, 59, 0.65); }
-      50% { box-shadow: 0 0 0 2.5px rgba(255, 59, 59, 1), 0 0 18px rgba(255, 59, 59, 0.5); }
+      0%, 100% { box-shadow: 0 0 0 1px rgba(198, 26, 26, 0.55); }
+      50% { box-shadow: 0 0 0 2.5px rgba(198, 26, 26, 0.95), 0 0 14px rgba(198, 26, 26, 0.35); }
     }
 
     .shaking { animation: shake-heavy 0.12s linear 4; }
 
     /* =========================================================================
-       阶段 0：序幕黑屏引子 & 刷新嘲讽层
+       阶段 0：序幕黑屏引子 & 刷新嘲讽层（保持深邃黑幕，接入后反差转入白纸）
        ========================================================================= */
     .fullscreen-layer {
       position: fixed;
@@ -195,7 +199,7 @@
     .intro-sub {
       font-size: 13px;
       letter-spacing: 2px;
-      color: var(--text-dim);
+      color: #94a3b8;
       margin-top: -6px;
     }
 
@@ -225,7 +229,7 @@
 
     .intro-sound-hint {
       font-size: 14px;
-      color: var(--amber);
+      color: #f59e0b;
       letter-spacing: 1px;
     }
 
@@ -233,14 +237,14 @@
       max-width: 580px;
       font-size: 20px;
       font-weight: 700;
-      color: var(--crimson);
+      color: #ff3b3b;
       letter-spacing: 1.5px;
       margin-bottom: 28px;
       line-height: 1.85;
     }
 
     /* =========================================================================
-       主终端架构 (SCiPNET-EDIT v4.0) — 全面放大操作区
+       主终端架构 (SCiPNET-EDIT v4.0 · demo0 质感)
        ========================================================================= */
     #app {
       display: flex;
@@ -250,19 +254,26 @@
       background: var(--bg-app);
       position: relative;
       z-index: 10;
-      transition: background-color 0.8s ease;
+      transition: background-color 0.8s ease, color 0.8s ease;
     }
 
-    #app.void-mode { background: #030406; }
+    #app.void-mode {
+      background: #030406 !important;
+      color: #f1f5f9 !important;
+    }
+
+    #app.void-mode .quiet-finale-line {
+      color: #f1f5f9 !important;
+    }
 
     /* 顶部操作员身份条 + 工具栏 */
     .topbar {
-      background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+      background: var(--bg-header);
+      border-bottom: 1.5px solid var(--border-strong);
+      padding: 8px 16px;
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
@@ -277,8 +288,8 @@
     .identity-bar {
       font-size: 13px;
       color: var(--text-dim);
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--border-soft);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -287,62 +298,60 @@
     }
 
     .identity-bar strong {
-      color: #f8fafc;
+      color: var(--text-main);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .status-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+      box-shadow: 0 0 6px rgba(22, 101, 52, 0.6);
       flex-shrink: 0;
     }
 
     .status-dot.danger {
       background: var(--crimson);
-      box-shadow: 0 0 12px var(--crimson);
+      box-shadow: 0 0 10px var(--crimson);
       animation: blink 0.8s infinite;
     }
 
     .brand-title {
       font-weight: 700;
-      font-size: 15px;
-      color: #f8fafc;
-      letter-spacing: 0.5px;
+      font-size: 14.5px;
+      color: var(--text-main);
+      letter-spacing: 0.3px;
     }
 
     .phase-badge {
-      font-size: 13px;
-      padding: 3px 10px;
+      font-size: 12px;
+      padding: 2px 8px;
       border-radius: 4px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      color: var(--green);
+      background: var(--border-strong);
+      color: #f4f4f0;
       font-weight: 700;
     }
 
     .phase-badge.danger {
-      color: var(--crimson);
-      border-color: rgba(255, 59, 59, 0.6);
-      background: var(--crimson-soft);
+      background: var(--crimson);
+      color: #ffffff;
     }
 
     .anchor-counter-badge {
       display: none;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 4px;
       background: var(--cyan-soft);
-      border: 1px solid var(--cyan);
-      color: #e0f2fe;
+      border: 1.5px solid var(--cyan);
+      color: var(--cyan);
       animation: pulse-cyan 1.6s infinite;
     }
 
@@ -352,7 +361,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: opacity 0.6s ease;
     }
 
@@ -363,12 +372,12 @@
 
     .btn {
       font-family: var(--font-mono);
-      font-size: 14.5px;
-      font-weight: 700;
-      padding: 9px 15px;
-      border-radius: 5px;
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 6px 13px;
+      border-radius: 4px;
       border: 1px solid var(--border-strong);
-      background: var(--bg-elevated);
+      background: #ffffff;
       color: var(--text-main);
       cursor: pointer;
       display: inline-flex;
@@ -379,17 +388,16 @@
     }
 
     .btn:hover:not(:disabled) {
-      background: #232d3b;
-      border-color: #64748b;
+      background: #e5e5dc;
     }
 
     .btn:active:not(:disabled) { transform: scale(0.97); }
 
     .btn.active {
-      background: #f1f5f9;
-      color: #090c10;
-      border-color: #ffffff;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+      background: var(--border-strong);
+      color: #f4f4f0;
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
     }
 
     .btn.nudge {
@@ -398,19 +406,18 @@
     }
 
     .btn-key {
-      font-size: 12px;
-      opacity: 0.7;
+      font-size: 11px;
+      opacity: 0.65;
     }
 
     .btn-primary {
-      background: rgba(52, 211, 153, 0.16);
+      background: var(--green);
       border-color: var(--green);
-      color: var(--green);
+      color: #ffffff;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--green);
-      color: #05120c;
+      background: #14532d;
     }
 
     /* =========================================================================
@@ -434,29 +441,30 @@
     .doc-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 22px 24px 36px;
+      padding: 24px 24px 38px;
       scroll-behavior: smooth;
     }
 
     .doc-scroll::-webkit-scrollbar { width: 9px; }
     .doc-scroll::-webkit-scrollbar-track { background: var(--bg-app); }
-    .doc-scroll::-webkit-scrollbar-thumb { background: #2c3747; border-radius: 5px; }
+    .doc-scroll::-webkit-scrollbar-thumb { background: #c2c2b8; border-radius: 5px; }
 
+    /* 居中白色 A4 纸卡片质感 */
     .doc-paper {
-      max-width: 860px;
+      max-width: 820px;
       margin: 0 auto;
       background: var(--bg-paper);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 28px 32px;
-      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.42);
+      border: 1px solid #cdcdc4;
+      border-radius: 6px;
+      padding: 30px 36px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
       transition: background-color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
     }
 
     .doc-paper.stripped-paper {
-      background: transparent;
-      border-color: transparent;
-      box-shadow: none;
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
     }
 
     .doc-paper.cursor-redact { cursor: crosshair; }
@@ -464,9 +472,9 @@
     .doc-paper.cursor-erase  { cursor: cell; }
 
     .doc-header {
-      border-bottom: 1px solid var(--border-strong);
-      padding-bottom: 14px;
-      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-strong);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -474,107 +482,107 @@
     }
 
     .doc-kicker {
-      font-size: 11.5px;
-      letter-spacing: 1.6px;
-      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
     }
 
     .doc-title {
       margin: 4px 0 0;
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 700;
-      color: #f8fafc;
+      color: var(--text-main);
     }
 
     .doc-meta {
       text-align: right;
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--text-dim);
       line-height: 1.55;
     }
 
-    .doc-section p { margin: 0 0 16px; }
-    .field-key { color: #f8fafc; font-weight: 700; }
+    .doc-section p { margin: 0 0 16px; line-height: 1.75; }
+    .field-key { color: var(--text-main); font-weight: 700; }
 
-    /* 可交互词条样式 */
+    /* 可交互词条样式 (demo0 纸面高反差) */
     .tok {
       display: inline;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 2px 6px;
+      border-radius: 3px;
       cursor: pointer;
       transition: all 0.16s ease;
     }
 
     .tok-redact-task {
-      color: var(--amber);
-      background: var(--amber-soft);
-      border: 1px dashed rgba(245, 158, 11, 0.8);
+      color: #92400e;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px dashed #d97706;
       font-weight: 600;
     }
     .tok-redact-task:hover { background: rgba(245, 158, 11, 0.28); }
 
     .tok-strike-task {
-      color: #cbd5e1;
-      background: rgba(148, 163, 184, 0.14);
-      border: 1px dashed #94a3b8;
+      color: #475569;
+      background: rgba(100, 116, 139, 0.1);
+      border: 1px dashed #64748b;
     }
-    .tok-strike-task:hover { background: rgba(148, 163, 184, 0.28); }
+    .tok-strike-task:hover { background: rgba(100, 116, 139, 0.22); }
 
     .tok-verify-task {
-      color: var(--cyan);
-      background: var(--cyan-soft);
-      border: 1px dashed var(--cyan);
+      color: #0369a1;
+      background: rgba(2, 132, 199, 0.1);
+      border: 1px dashed #0284c7;
       font-weight: 600;
     }
-    .tok-verify-task:hover { background: rgba(56, 189, 248, 0.28); }
+    .tok-verify-task:hover { background: rgba(2, 132, 199, 0.22); }
 
     .tok-verified {
       color: var(--green) !important;
       background: var(--green-soft) !important;
-      border: 1px solid rgba(52, 211, 153, 0.5) !important;
+      border: 1px solid var(--green) !important;
       cursor: default !important;
     }
 
-    /* 经典 [数据删除] 黑底块 */
+    /* 经典 SCP 纯黑底 [数据删除] 遮盖块（白纸黑条，最具基金会辨识度） */
     .tok-redacted {
       display: inline-block;
-      background: #020304 !important;
-      color: #d1d5db !important;
-      border: 1px solid #3f4c5e !important;
-      padding: 1px 8px !important;
-      border-radius: 3px;
+      background: #111111 !important;
+      color: #111111 !important;
+      border: 1px solid #111111 !important;
+      padding: 1px 7px !important;
+      border-radius: 2px;
       font-weight: 700;
-      font-size: 14.5px;
+      font-size: 14px;
       letter-spacing: 0.5px;
       cursor: default !important;
-      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9);
+      user-select: none;
     }
 
     .tok-struck {
       text-decoration: line-through !important;
-      text-decoration-thickness: 2.5px !important;
-      text-decoration-color: #94a3b8 !important;
-      color: var(--text-muted) !important;
+      text-decoration-thickness: 2.2px !important;
+      text-decoration-color: #787870 !important;
+      color: #787870 !important;
       background: transparent !important;
       border-color: transparent !important;
-      opacity: 0.62;
+      opacity: 0.72;
       cursor: default !important;
     }
 
     .tok-threat {
-      color: #ff4d4d;
+      color: var(--crimson);
       background: var(--crimson-soft);
-      border: 1.5px solid rgba(255, 59, 59, 0.8);
+      border: 1.5px solid rgba(198, 26, 26, 0.75);
       font-weight: 700;
       display: inline-block;
-      padding: 3px 9px;
+      padding: 2px 8px;
       border-radius: 4px;
       cursor: pointer;
       animation: text-jitter 0.2s infinite;
     }
 
     .tok-threat:hover {
-      background: rgba(255, 59, 59, 0.3);
+      background: rgba(198, 26, 26, 0.2);
     }
 
     body.no-jitter .tok-threat,
@@ -589,27 +597,27 @@
 
     .real-anchor.active-anchor {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
-      background: var(--cyan-soft);
-      border: 1.5px solid var(--cyan);
-      color: #f0f9ff;
+      background: rgba(24, 87, 150, 0.1);
+      border: 1.5px solid #185796;
+      color: #185796;
       font-weight: 700;
       cursor: pointer;
       animation: pulse-cyan 1.4s infinite;
     }
 
     .real-anchor.active-anchor:hover {
-      background: rgba(56, 189, 248, 0.35);
+      background: rgba(24, 87, 150, 0.22);
     }
 
     .real-anchor.erased-anchor {
       display: inline;
       padding: 0 4px;
-      color: var(--text-muted);
+      color: #9ca3af;
       text-decoration: line-through;
       text-decoration-thickness: 2px;
-      opacity: 0.55;
+      opacity: 0.6;
       cursor: default;
       border: none;
       background: transparent;
@@ -619,17 +627,17 @@
     /* 空白描述槽 */
     .blank-desc-box {
       margin: 10px 0 20px;
-      padding: 18px 20px;
-      background: rgba(255, 255, 255, 0.025);
-      border: 1.5px dashed var(--border-strong);
+      padding: 16px 18px;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1.5px dashed var(--border-soft);
       border-radius: 6px;
       color: var(--text-dim);
-      font-size: 15px;
+      font-size: 14.5px;
     }
 
     @keyframes pulse-amber {
-      0%, 100% { opacity: 1; text-shadow: 0 0 6px rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08); }
-      50% { opacity: 0.55; text-shadow: 0 0 12px rgba(245, 158, 11, 0.85); background: rgba(245, 158, 11, 0.22); }
+      0%, 100% { opacity: 1; background: rgba(161, 98, 7, 0.08); }
+      50% { opacity: 0.6; background: rgba(161, 98, 7, 0.22); }
     }
     .pending-highlight {
       animation: pulse-amber 1.2s infinite ease-in-out;
@@ -643,33 +651,33 @@
     .clinical-entry {
       margin: 12px 0;
       padding: 12px 16px;
-      background: rgba(52, 211, 153, 0.06);
+      background: rgba(22, 101, 52, 0.06);
       border-left: 3.5px solid var(--green);
-      border-radius: 0 5px 5px 0;
-      color: #ecfdf5;
+      border-radius: 0 4px 4px 0;
+      color: #14532d;
     }
 
     .clinical-entry.struck-by-3999 {
       color: var(--text-muted);
       border-left-color: var(--crimson);
-      background: rgba(255, 59, 59, 0.05);
+      background: rgba(198, 26, 26, 0.05);
       text-decoration: line-through;
       text-decoration-color: var(--crimson);
-      text-decoration-thickness: 2.5px;
+      text-decoration-thickness: 2.2px;
     }
 
     .anomaly-entry {
       margin: 12px 0;
-      padding: 13px 16px;
-      background: rgba(255, 59, 59, 0.08);
-      border: 1px solid rgba(255, 59, 59, 0.38);
+      padding: 12px 16px;
+      background: rgba(198, 26, 26, 0.06);
+      border: 1px solid rgba(198, 26, 26, 0.35);
       border-left: 3.5px solid var(--crimson);
-      border-radius: 5px;
-      color: #fecaca;
+      border-radius: 4px;
+      color: #7f1d1d;
     }
 
     .anomaly-entry.resolved {
-      background: rgba(255, 255, 255, 0.02);
+      background: #f8f8f5;
       border-color: var(--border);
       border-left-color: var(--text-muted);
       color: var(--text-dim);
@@ -678,19 +686,20 @@
     .script-box {
       margin: 14px 0;
       padding: 14px 18px;
-      background: #13161c;
-      border: 1px dashed #64748b;
-      border-radius: 5px;
-      color: #e2e8f0;
-      font-size: 15px;
+      background: #f2f2eb;
+      border: 1px dashed var(--border-soft);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-size: 14.5px;
     }
 
     .interview-box {
       margin: 16px 0;
       padding: 16px 18px;
-      background: #10151d;
-      border: 1px solid var(--border-strong);
+      background: #f8f8f5;
+      border: 1px solid var(--border);
       border-radius: 6px;
+      color: var(--text-main);
     }
 
     .iv-line {
@@ -700,27 +709,27 @@
 
     .iv-3999-speech {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 4px;
-      background: var(--crimson-soft);
+      background: rgba(198, 26, 26, 0.08);
       border: 1.5px solid var(--crimson);
-      color: #ff5c5c;
+      color: var(--crimson);
       font-weight: 700;
       cursor: pointer;
       animation: pulse-red 1.3s infinite;
     }
 
     .iv-3999-speech:hover {
-      background: rgba(255, 59, 59, 0.28);
+      background: rgba(198, 26, 26, 0.2);
     }
 
     .iv-corrupted {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 3px 9px;
       border-radius: 4px;
-      background: #151b23;
-      border: 1px solid #475569;
-      color: #94a3b8;
+      background: #e8e8e1;
+      border: 1px solid #94a3b8;
+      color: #475569;
       font-weight: 700;
     }
 
@@ -733,61 +742,30 @@
     }
 
     .def-line.manual-target {
-      background: rgba(255, 59, 59, 0.12);
-      border: 1px dashed rgba(255, 59, 59, 0.75);
-      color: #ff6b6b;
+      background: rgba(198, 26, 26, 0.08);
+      border: 1px dashed rgba(198, 26, 26, 0.75);
+      color: var(--crimson);
       font-weight: 700;
       cursor: pointer;
     }
 
     .def-line.manual-target:hover {
-      background: rgba(255, 59, 59, 0.26);
+      background: rgba(198, 26, 26, 0.2);
     }
 
     .def-line.struck {
       text-decoration: line-through;
       text-decoration-thickness: 2px;
-      text-decoration-color: #94a3b8;
-      color: var(--text-muted);
+      text-decoration-color: #84847c;
+      color: #84847c;
       background: transparent;
       border-color: transparent;
-      opacity: 0.62;
+      opacity: 0.65;
       cursor: default;
     }
 
-    /* 只有只有增殖框 */
-    .only-box {
-      margin: 16px 0;
-      padding: 16px 18px;
-      background: rgba(255, 59, 59, 0.06);
-      border: 1.5px solid rgba(255, 59, 59, 0.5);
-      border-radius: 6px;
-      color: #ff5252;
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.65;
-      word-break: break-all;
-      max-height: 240px;
-      overflow-y: auto;
-    }
-
-    .prompt-strip {
-      margin: 16px 0;
-      padding: 14px 18px;
-      background: #151c27;
-      border: 1.5px solid var(--amber);
-      border-radius: 6px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .prompt-text {
-      color: var(--amber);
-      font-weight: 700;
-      font-size: 15px;
+    .only-flood-block {
+      color: var(--crimson);
     }
 
     .quiet-finale-line {
@@ -817,11 +795,11 @@
       animation: blink 0.55s infinite;
     }
 
-    /* 底部常驻 [ 标准协议参考栏 ] — 全面放大 */
+    /* 底部常驻 [ 标准协议参考栏 ] (demo0 抽屉质感) */
     .ref-dock {
       background: var(--bg-panel);
-      border-top: 2px solid var(--border-strong);
-      padding: 14px 18px;
+      border-top: 1.5px solid var(--border-strong);
+      padding: 13px 18px;
       flex-shrink: 0;
       transition: opacity 0.6s ease, max-height 0.6s ease, padding 0.6s ease;
     }
@@ -840,7 +818,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-dim);
     }
@@ -855,32 +833,34 @@
       flex: 1 1 260px;
       text-align: left;
       font-family: var(--font-mono);
-      font-size: 14.5px;
+      font-size: 14px;
       line-height: 1.55;
-      padding: 13px 16px;
-      border-radius: 6px;
-      background: var(--bg-elevated);
-      border: 1.5px solid var(--border-strong);
-      color: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 5px;
+      background: #ffffff;
+      border: 1px solid var(--border-soft);
+      color: var(--text-main);
       cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
     }
 
     .ref-card:hover {
       border-color: var(--green);
-      background: #1d2938;
+      background: #f8faf8;
     }
 
     .ref-card:active { transform: scale(0.985); }
 
     .ref-card.highlight-card {
       border-color: var(--green);
+      border-width: 1.5px;
       animation: pulse-green 1.5s infinite;
     }
 
     .ref-card-tag {
       display: block;
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--green);
       margin-bottom: 4px;
       font-weight: 700;
@@ -888,18 +868,18 @@
     }
 
     .ref-empty {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--text-muted);
       padding: 6px 0;
     }
 
     /* =========================================================================
-       右侧遥测边栏（仅实时 Canvas 心电图 + 遥测数据 + 日志，无任何字符画）
+       右侧遥测边栏（Canvas 心电图 + 实体监控仪表感）
        ========================================================================= */
     .sidebar {
       width: 300px;
       background: var(--bg-panel);
-      border-left: 1px solid var(--border);
+      border-left: 1.5px solid var(--border-strong);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -916,20 +896,20 @@
 
     .side-head {
       padding: 10px 14px;
-      background: var(--bg-elevated);
-      border-bottom: 1px solid var(--border);
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-soft);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
-      color: var(--text-dim);
+      color: var(--text-main);
       flex-shrink: 0;
     }
 
     .telemetry-panel {
       padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border-soft);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -943,17 +923,17 @@
     }
 
     .ecg-wrap {
-      background: #070a0d;
+      background: #141614;
       border: 1px solid var(--border-strong);
-      border-radius: 5px;
+      border-radius: 4px;
       padding: 7px 9px;
     }
 
     .ecg-top {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-dim);
+      font-size: 11.5px;
+      color: #94a3b8;
       margin-bottom: 4px;
     }
 
@@ -967,9 +947,9 @@
     }
 
     .metric-cell {
-      background: #0c1016;
-      border: 1px solid var(--border);
-      border-radius: 5px;
+      background: #ffffff;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
       padding: 7px 9px;
     }
 
@@ -987,7 +967,7 @@
     }
 
     .log-title {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 8px;
@@ -1005,17 +985,17 @@
     .log-item { margin-bottom: 7px; color: var(--text-dim); word-break: break-word; }
     .log-item.danger { color: var(--crimson); }
     .log-item.safe { color: var(--green); }
-    .log-item.cold { color: #e2e8f0; border-left: 2px solid var(--green); padding-left: 7px; }
+    .log-item.cold { color: var(--text-main); border-left: 2px solid var(--green); padding-left: 7px; }
     .log-item.amber { color: var(--amber); }
 
     /* =========================================================================
-       底部引导提示条 — 放大字号与间距
+       底部引导提示条
        ========================================================================= */
     .statusbar {
-      background: #0f141b;
-      border-top: 1px solid var(--border);
-      padding: 10px 16px;
-      font-size: 14.5px;
+      background: var(--bg-header);
+      border-top: 1.5px solid var(--border-strong);
+      padding: 9px 16px;
+      font-size: 14px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -1035,20 +1015,20 @@
       font-family: var(--font-mono);
       font-size: 12px;
       padding: 4px 9px;
-      background: transparent;
-      border: 1px solid #2a3442;
+      background: #ffffff;
+      border: 1px solid var(--border-soft);
       border-radius: 4px;
       color: var(--text-muted);
       cursor: pointer;
     }
-    .btn-reset-subtle:hover { border-color: var(--text-dim); color: var(--text-main); }
+    .btn-reset-subtle:hover { border-color: var(--border-strong); color: var(--text-main); }
 
     .hint-tag {
       font-size: 12px;
       padding: 3px 9px;
       border-radius: 4px;
       background: var(--green-soft);
-      border: 1px solid rgba(52, 211, 153, 0.55);
+      border: 1px solid var(--green);
       color: var(--green);
       font-weight: 700;
       flex-shrink: 0;
@@ -1056,14 +1036,14 @@
 
     .hint-tag.danger {
       background: var(--crimson-soft);
-      border-color: rgba(255, 59, 59, 0.65);
+      border-color: var(--crimson);
       color: var(--crimson);
     }
 
     .hint-text {
-      color: #f8fafc;
+      color: var(--text-main);
       font-weight: 600;
-      font-size: 14.5px;
+      font-size: 14px;
     }
 
     /* =========================================================================
@@ -1073,7 +1053,7 @@
       position: fixed;
       inset: 0;
       z-index: 86;
-      background: rgba(8, 3, 3, 0.72);
+      background: rgba(23, 23, 22, 0.65);
       display: none;
       align-items: center;
       justify-content: center;
@@ -1085,12 +1065,12 @@
     .help-modal-box {
       width: 100%;
       max-width: 480px;
-      background: #14090b;
+      background: #ffffff;
       border: 2px solid var(--crimson);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 32px 26px;
       text-align: center;
-      box-shadow: 0 0 50px rgba(255, 59, 59, 0.35);
+      box-shadow: 0 12px 36px rgba(198, 26, 26, 0.25);
     }
 
     #btn-help-big {
@@ -1101,15 +1081,15 @@
       font-weight: 700;
       letter-spacing: 4px;
       color: #ffffff;
-      background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
-      border: 2px solid #f87171;
-      border-radius: 8px;
+      background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+      border: 2px solid #b91c1c;
+      border-radius: 6px;
       cursor: pointer;
-      box-shadow: 0 6px 24px rgba(220, 38, 38, 0.5);
+      box-shadow: 0 6px 20px rgba(198, 26, 26, 0.45);
       transition: transform 0.08s ease, background 0.15s ease;
     }
 
-    #btn-help-big:hover { background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%); }
+    #btn-help-big:hover { background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%); }
     #btn-help-big:active { transform: scale(0.96); }
 
     #help-nudge {
@@ -1127,8 +1107,8 @@
       position: fixed;
       inset: 0;
       z-index: 85;
-      background: #0d1310;
-      color: #dcfce7;
+      background: #fdfdfc;
+      color: #171716;
       display: none;
       flex-direction: column;
       align-items: center;
@@ -1140,28 +1120,34 @@
     #fake-ending-overlay.open { display: flex; }
 
     .fake-card {
-      max-width: 560px;
+      max-width: 580px;
       width: 100%;
       text-align: center;
       position: relative;
+      background: #ffffff;
+      border: 2px solid var(--green);
+      border-radius: 8px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     .fake-stamp {
       display: inline-block;
-      border: 1.5px solid var(--green);
+      border: 2px solid var(--green);
       color: var(--green);
-      padding: 3px 10px;
-      font-size: 12px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 700;
       letter-spacing: 2px;
       margin-bottom: 14px;
     }
 
     .credits-viewport {
-      margin: 22px auto 0;
+      margin: 20px auto 0;
       height: 155px;
       overflow: hidden;
-      border-top: 1px solid rgba(52, 211, 153, 0.25);
-      border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+      border-top: 1.5px dashed var(--border-soft);
+      border-bottom: 1.5px dashed var(--border-soft);
       position: relative;
     }
 
@@ -1171,7 +1157,7 @@
       gap: 15px;
       padding-top: 135px;
       font-size: 13.5px;
-      color: #bbf7d0;
+      color: #14532d;
       transition: transform 14s linear;
     }
 
@@ -1186,9 +1172,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(12, 4, 4, 0.92);
-      border: 1.5px solid var(--crimson);
-      border-radius: 4px;
+      background: rgba(254, 242, 242, 0.96);
+      border: 2px solid var(--crimson);
+      border-radius: 6px;
       padding: 16px;
     }
 
@@ -1198,14 +1184,14 @@
       width: 92%;
       height: 3px;
       background: var(--crimson);
-      box-shadow: 0 0 12px var(--crimson);
+      box-shadow: 0 0 8px rgba(198, 26, 26, 0.6);
       margin-bottom: 14px;
       transform: rotate(-1deg);
     }
 
     .slash-text {
       color: var(--crimson);
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 700;
       letter-spacing: 2px;
       line-height: 1.6;
@@ -1213,7 +1199,7 @@
     }
 
     /* =========================================================================
-       第五幕终局：Site-118 极简纯白/冷灰 Neutralized 最终归档报告
+       第五幕终局：Site-118 极简纯白 Neutralized 最终归档报告
        ========================================================================= */
     #final-ending {
       position: fixed;
@@ -1308,7 +1294,7 @@
         width: 100%;
         height: 175px;
         border-left: none;
-        border-top: 1px solid var(--border);
+        border-top: 1.5px solid var(--border-strong);
       }
       .sidebar.stripped { height: 0; width: 100%; }
       .ecg-box { height: 40px; }
@@ -1525,8 +1511,8 @@
   <div id="fake-ending-overlay">
     <div class="fake-card">
       <div class="fake-stamp">CONTAINED // 已收容</div>
-      <h2 style="margin:0 0 8px; font-size:21px; color:#f0fdf4;">项目编号：SCP-3999</h2>
-      <p style="margin:0; font-size:13.5px; color:#bbf7d0; line-height:1.7;">
+      <h2 style="margin:0 0 8px; font-size:21px; color:var(--text-main);">项目编号：SCP-3999</h2>
+      <p style="margin:0; font-size:13.5px; color:var(--text-dim); line-height:1.7;">
         项目等级：Contained（已收容） · 全部斯克兰顿现实稳定锚运行正常。<br />
         3 级研究员詹姆斯·塔罗兰生理与认知评估均已恢复基准水平，获批两周带薪休假。
       </p>
@@ -1538,7 +1524,7 @@
           <div>叙事安全核验：RAISA</div>
           <div>站点保障：Site-118 异常收容工程处</div>
           <div>特别鸣谢：3 级研究员 詹姆斯·塔罗兰</div>
-          <div style="color:#4ade80; margin-top:4px;">档案校验完成，正在安全关闭会话……</div>
+          <div style="color:var(--green); font-weight:700; margin-top:4px;">档案校验完成，正在安全关闭会话……</div>
         </div>
 
         <div id="credits-slash" class="credits-slash">
@@ -1979,7 +1965,7 @@
         } else {
           const bpm = Math.round(72 + s * 98 + (s > 0.5 ? (Math.random() * 8 - 4) : 0));
           el.bpmVal.textContent = bpm + ' BPM';
-          el.bpmVal.style.color = s > 0.45 ? '#ff3b3b' : '#34d399';
+          el.bpmVal.style.color = s > 0.45 ? '#c61a1a' : '#166534';
         }
 
         ecgCtx.fillStyle = '#070a0d';
@@ -1991,7 +1977,7 @@
         ecgCtx.lineTo(w, h / 2);
         ecgCtx.stroke();
 
-        ecgCtx.strokeStyle = (State.ecgOffline || State.ended) ? '#475569' : (s > 0.45 ? '#ff3b3b' : '#34d399');
+        ecgCtx.strokeStyle = (State.ecgOffline || State.ended) ? '#475569' : (s > 0.45 ? '#c61a1a' : '#166534');
         ecgCtx.lineWidth = 1.8;
         ecgCtx.beginPath();
         const mid = h * 0.56;
@@ -2187,7 +2173,7 @@
         Sound.confirm();
         el.a1Colloquial.classList.remove('pending-highlight');
         el.a1Colloquial.textContent = text;
-        el.a1Colloquial.style.color = '#34d399';
+        el.a1Colloquial.style.color = 'var(--green)';
         log('已完成现场记录标准化录入。', 'safe');
         setHint('最后一步：从底部【标准协议参考栏】选择标准描述，补全空白的“描述：”栏。', false);
 
@@ -2469,7 +2455,7 @@
                 Sound.confirm();
                 const line = document.createElement('div');
                 line.className = 'clinical-entry';
-                line.style.color = '#34d399';
+                line.style.color = 'var(--green)';
                 line.style.fontWeight = '700';
                 line.style.fontSize = '16px';
                 el.docDynamic.appendChild(line);
@@ -3117,7 +3103,7 @@
                     setReferenceCards('正在写入……', []);
                     const playerDef = document.createElement('div');
                     playerDef.className = 'def-line';
-                    playerDef.style.color = '#86efac';
+                    playerDef.style.color = 'var(--green)';
                     list.appendChild(playerDef);
                     scrollDoc();
 
@@ -3171,7 +3157,7 @@
           }
           const div = document.createElement('div');
           div.className = 'def-line';
-          div.style.color = '#fca5a5';
+          div.style.color = 'var(--crimson)';
           div.textContent = FLOOD_DEFS[i];
           list.appendChild(div);
           Sound.key(true);
@@ -3360,12 +3346,12 @@
               streamOnlyParagraphs(el.docDynamic, 4, true, function () {
                 const endingDiv = document.createElement('div');
                 endingDiv.className = 'clinical-entry';
-                endingDiv.style.color = '#e2e8f0';
+                endingDiv.style.color = 'var(--text-main)';
                 endingDiv.style.lineHeight = '1.8';
                 endingDiv.style.margin = '14px 0';
                 endingDiv.innerHTML =
                   '<p style="margin-bottom:8px; color:rgba(239,68,68,0.7);"><span style="text-decoration:line-through;">只有在只有在只有在只有只有在只有在只有在在那个只有在这个只有在在只有在只有在只有在只有在在在只有在只有在最后在只有在最后我能看到的地方只有我一个人时，我才可以放声大哭。</span></p>' +
-                  '<p style="color:#f1f5f9; font-weight:700;">在那个只有在这个时候我才是一个有血有泪的活人。</p>';
+                  '<p style="color:var(--text-main); font-weight:700;">在那个只有在这个时候我才是一个有血有泪的活人。</p>';
                 el.docDynamic.appendChild(endingDiv);
                 scrollDoc();
                 Sound.shatter();
@@ -4068,7 +4054,7 @@
             v1.className = 'tok tok-verified';
           }
           el.a1Colloquial.textContent = '外勤观测表明，项目邻近区域出现高频电磁干扰及局部空间几何偏移。';
-          el.a1Colloquial.style.color = '#34d399';
+          el.a1Colloquial.style.color = 'var(--green)';
           el.a1DescSlot.className = 'clinical-entry';
           el.a1DescSlot.textContent = 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体。';
 
