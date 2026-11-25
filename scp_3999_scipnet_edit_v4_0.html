@@ -261,12 +261,127 @@
     }
 
     #app.void-mode {
+      --crimson: #ff4d4d;
+      --green: #34d399;
       background: #030406 !important;
       color: #f1f5f9 !important;
     }
 
     #app.void-mode .quiet-finale-line {
       color: #f1f5f9 !important;
+    }
+
+    /* 虚空模式全量暗色接管：确保进入第五幕黑化后无任何残留白块 */
+    #app.void-mode .topbar,
+    #app.void-mode .statusbar {
+      background: #07090d !important;
+      border-color: #1e293b !important;
+      color: #94a3b8 !important;
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
+    }
+
+    #app.void-mode .identity-bar {
+      border-bottom-color: #1e293b !important;
+      color: #64748b !important;
+    }
+
+    #app.void-mode .identity-bar strong,
+    #app.void-mode .brand-title,
+    #app.void-mode .hint-text {
+      color: #cbd5e1 !important;
+    }
+
+    #app.void-mode .btn,
+    #app.void-mode .btn-reset-subtle {
+      background: #0f141c !important;
+      border-color: #334155 !important;
+      color: #94a3b8 !important;
+    }
+
+    #app.void-mode .btn:hover:not(:disabled),
+    #app.void-mode .btn-reset-subtle:hover {
+      background: #1e293b !important;
+      color: #f1f5f9 !important;
+    }
+
+    #app.void-mode .ref-dock {
+      background: #07090d !important;
+      border-top-color: #1e293b !important;
+    }
+
+    #app.void-mode .ref-dock-head {
+      color: #64748b !important;
+    }
+
+    #app.void-mode .ref-card {
+      background: #0e131b !important;
+      border-color: #334155 !important;
+      color: #f1f5f9 !important;
+      box-shadow: none !important;
+    }
+
+    #app.void-mode .ref-card:hover {
+      background: #151c28 !important;
+      border-color: #34d399 !important;
+    }
+
+    #app.void-mode .ref-card.highlight-card {
+      border-color: #34d399 !important;
+    }
+
+    #app.void-mode .doc-header {
+      border-bottom-color: #1e293b !important;
+    }
+
+    #app.void-mode .doc-title,
+    #app.void-mode .field-key {
+      color: #e2e8f0 !important;
+    }
+
+    #app.void-mode .doc-kicker,
+    #app.void-mode .doc-meta {
+      color: #64748b !important;
+    }
+
+    #app.void-mode .interview-box,
+    #app.void-mode .script-box,
+    #app.void-mode .anomaly-entry.resolved,
+    #app.void-mode .blank-desc-box {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border-color: #1e293b !important;
+      color: #94a3b8 !important;
+    }
+
+    #app.void-mode .anomaly-entry {
+      background: rgba(255, 59, 59, 0.05) !important;
+      border-color: rgba(255, 59, 59, 0.25) !important;
+      color: #fca5a5 !important;
+    }
+
+    #app.void-mode .clinical-entry {
+      background: rgba(52, 211, 153, 0.04) !important;
+      border-left-color: #34d399 !important;
+      color: #cbd5e1 !important;
+    }
+
+    #app.void-mode .iv-corrupted {
+      background: #11161f !important;
+      border-color: #334155 !important;
+      color: #94a3b8 !important;
+    }
+
+    #app.void-mode .tok-threat {
+      color: #ff4d4d !important;
+      background: rgba(255, 59, 59, 0.14) !important;
+      border-color: rgba(255, 59, 59, 0.65) !important;
+    }
+
+    #app.void-mode .doc-scroll::-webkit-scrollbar-track {
+      background: #030406 !important;
+    }
+
+    #app.void-mode .doc-scroll::-webkit-scrollbar-thumb {
+      background: #1e293b !important;
     }
 
     /* 顶部操作员身份条 + 工具栏 */
