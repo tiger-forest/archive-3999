@@ -1578,6 +1578,38 @@
     /* =========================================================================
        移动端与窄屏适配
        ========================================================================= */
+    /* 开发者跳幕调试条（默认隐藏，Ctrl+Shift+D 呼出，绝不打扰正常玩家） */
+    #dev-bar {
+      position: fixed;
+      top: 10px;
+      right: 14px;
+      z-index: 999;
+      background: rgba(15, 23, 42, 0.94);
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      max-width: 720px;
+      font-size: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    #dev-bar.open { display: flex; }
+    #dev-bar button {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      border: 1px solid #475569;
+      background: #1e293b;
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+    #dev-bar button:hover { background: #334155; border-color: #38bdf8; color: #ffffff; }
+
     @media (max-width: 880px) {
       .workspace { flex-direction: column; }
       .sidebar {
@@ -1865,6 +1897,24 @@
         <button id="btn-restart-final" class="btn-light">[ 重新接入终端 ]</button>
       </div>
     </article>
+  </div>
+
+  <!-- 开发者跳幕捷径面板（按 Ctrl+Shift+D 呼出/隐藏） -->
+  <div id="dev-bar">
+    <strong style="color:#38bdf8; margin-right:4px;">[DEV 跳幕]</strong>
+    <button data-dev="1">Act1 建档</button>
+    <button data-dev="2">Act2 入侵</button>
+    <button data-dev="2v">Act2 假胜利</button>
+    <button data-dev="3">Act3 三层乱斗</button>
+    <button data-dev="3iv">Act3 首次采访</button>
+    <button data-dev="3def">Act3 定义战</button>
+    <button data-dev="3only">Act3 只有洪流</button>
+    <button data-dev="3nm">Act3 噩梦</button>
+    <button data-dev="4">Act4 反转采访</button>
+    <button data-dev="5">Act5 删名</button>
+    <button data-dev="5f">Act5 静默终局</button>
+    <button data-dev="end">最终报告</button>
+    <button id="dev-close" style="color:#f87171; border-color:#7f1d1d;">×</button>
   </div>
 
   <script>
@@ -4512,10 +4562,135 @@
       resizeECG();
       requestAnimationFrame(renderECG);
 
+      /* =======================================================================
+         14. 开发者跳幕捷径（Ctrl+Shift+D 呼出 或 URL ?dev=xxx 直达）
+         ======================================================================= */
+      function completeAct1Silently() {
+        State.a1Redacts = 2;
+        State.a1Strikes = 1;
+        State.a1Pastes = 2;
+        State.a1Rewritten = true;
+        State.a1DescDone = true;
+        document.querySelectorAll('[data-a1-redact]').forEach(function (n) {
+          n.textContent = '【数据删除】';
+          n.className = 'tok tok-redacted';
+        });
+        document.querySelectorAll('[data-a1-strike]').forEach(function (n) {
+          n.className = 'tok tok-struck';
+        });
+        document.querySelectorAll('[data-a1-paste]').forEach(function (n) {
+          n.textContent = n.getAttribute('data-a1-paste');
+          n.className = 'tok tok-verified';
+        });
+        el.a1DescSlot.className = 'clinical-entry';
+        el.a1DescSlot.textContent = 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，现由研究员塔罗兰负责持续休谟监测与档案记录。';
+      }
+
+      function seedMissingAnchors(maxAnchor) {
+        const missing = [];
+        for (let i = 1; i <= maxAnchor; i++) {
+          if (!document.querySelector('[data-anchor="' + i + '"]')) {
+            missing.push('<span class="real-anchor" data-anchor="' + i + '">研究员塔罗兰</span>');
+          }
+        }
+        if (missing.length > 0) {
+          const seed = document.createElement('div');
+          seed.className = 'anomaly-entry resolved';
+          seed.innerHTML = '<p>前置档案记录索引：' + missing.join(' ｜ ') + '</p>';
+          el.docDynamic.appendChild(seed);
+        }
+      }
+
+      function devJump(target) {
+        Sound.unlock();
+        clearTimers();
+        Sound.silenceImmediate();
+        isOnlyStreaming = false;
+        activeOnlyPara = null;
+        State.ended = false;
+        State.ecgOffline = false;
+        State.a5BlockedByInterference = false;
+        State.a5Interference1Fired = false;
+        State.a5Interference2Fired = false;
+
+        // 复位视觉层与覆盖弹窗
+        el.introScreen.classList.add('hidden');
+        el.refreshTaunt.classList.add('hidden');
+        el.helpModal.classList.remove('open');
+        el.fakeOverlay.classList.remove('open');
+        el.finalEnding.classList.remove('open');
+        el.anchorCounter.classList.remove('visible');
+        el.app.classList.remove('void-mode', 'darkening-half');
+        el.docPaper.classList.remove('stripped-paper');
+        el.sidebar.classList.remove('stripped');
+        el.toolGroup.classList.remove('stripped');
+        el.refDock.classList.remove('stripped');
+        el.telemetryPanel.classList.remove('offline');
+        document.body.classList.remove('no-jitter');
+        el.app.style.cssText = '';
+        document.body.style.backgroundColor = '';
+        el.docPaper.style.backgroundColor = '';
+        el.docPaper.style.borderColor = '';
+        el.docDynamic.innerHTML = '';
+
+        if (target === '1') {
+          window.location.href = window.location.pathname;
+          return;
+        }
+
+        completeAct1Silently();
+        if (el.refDrawer && target !== '1') {
+          el.refDrawer.classList.add('collapsed');
+          if (el.refDrawerToggle) el.refDrawerToggle.textContent = '展开';
+        }
+
+        if (target === '2') { startAct2(); }
+        else if (target === '2v') { State.act = 2; triggerExtendedFakeVictory(); }
+        else if (target === '3') { startAct3(); }
+        else if (target === '3iv') { State.act = 3; seedMissingAnchors(5); startAct3FirstInterview(); }
+        else if (target === '3def') { State.act = 3; seedMissingAnchors(6); startAct3DefinitionCascade(); }
+        else if (target === '3only') { State.act = 3; seedMissingAnchors(6); startAct3OnlyMultiply(); }
+        else if (target === '3nm') { State.act = 3; seedMissingAnchors(6); startAct3Nightmares(); }
+        else if (target === '4') { seedMissingAnchors(6); startAct4(); }
+        else if (target === '5') { seedMissingAnchors(7); startAct5(); }
+        else if (target === '5f') {
+          State.act = 5;
+          document.body.classList.add('no-jitter');
+          el.sidebar.classList.add('stripped');
+          el.toolGroup.classList.add('stripped');
+          el.docPaper.classList.add('stripped-paper');
+          el.app.classList.add('void-mode');
+          startAct5QuietFinale();
+        }
+        else if (target === 'end') { triggerFinalSite118Report(); }
+      }
+
+      const devBar = document.getElementById('dev-bar');
+      if (devBar) {
+        devBar.addEventListener('click', function (e) {
+          if (e.target.id === 'dev-close') { devBar.classList.remove('open'); return; }
+          const t = e.target.getAttribute('data-dev');
+          if (t) devJump(t);
+        });
+      }
+
+      window.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+          e.preventDefault();
+          if (devBar) devBar.classList.toggle('open');
+        }
+      });
+
+      const urlDev = new URLSearchParams(window.location.search).get('dev');
+      if (urlDev) {
+        if (devBar) devBar.classList.add('open');
+        setTimeout(function () { devJump(urlDev); }, 80);
+      }
+
       let savedAct = 0;
       try { savedAct = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10); } catch (e) {}
 
-      if (savedAct >= 2 && savedAct <= 4) {
+      if (!urlDev && savedAct >= 2 && savedAct <= 4) {
         el.introScreen.classList.add('hidden');
         el.refreshTaunt.classList.remove('hidden');
         el.btnResumeLoop.addEventListener('click', function () {
