@@ -656,7 +656,36 @@
 
     .doc-paper.cursor-redact { cursor: crosshair; }
     .doc-paper.cursor-strike { cursor: not-allowed; }
-    .doc-paper.cursor-erase  { cursor: cell; }
+    .doc-paper.cursor-clip   { cursor: copy; }
+
+    .clip-preview {
+      color: var(--cyan);
+      font-weight: 700;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn.active .clip-preview {
+      color: #93c5fd;
+    }
+
+    .tok-copy {
+      color: var(--cyan);
+      background: var(--cyan-soft);
+      border-bottom: 1.5px dashed var(--cyan);
+      font-weight: 700;
+    }
+    .tok-copy:hover { background: rgba(24, 87, 150, 0.16); }
+
+    .tok-slot {
+      color: var(--cyan);
+      background: rgba(24, 87, 150, 0.06);
+      border: 1px dashed var(--cyan);
+      font-weight: 600;
+    }
+    .tok-slot:hover { background: rgba(24, 87, 150, 0.15); }
 
     .doc-header {
       border-bottom: 2px solid var(--border-strong);
@@ -1566,9 +1595,10 @@
             <span style="text-decoration: line-through;">删除线 ~~</span>
           </button>
 
-          <button id="tool-erase" class="btn" data-tool="erase" title="快捷键 3">
+          <button id="tool-clip" class="btn" data-tool="clip" title="快捷键 3">
             <span class="btn-key">[3]</span>
-            <span>⌫ 抹除</span>
+            <span>剪贴板:</span>
+            <span id="clip-text" class="clip-preview">空</span>
           </button>
         </div>
 
@@ -1593,20 +1623,35 @@
               </div>
             </div>
 
-            <!-- 第一幕：冷峻极简的常规档案校对与起草 -->
+            <!-- 第一幕：扎实的常规档案校对与起草 -->
             <div id="doc-static" class="doc-section">
+              <p style="font-size:13.5px; color:var(--text-dim); border-bottom:1px dashed var(--border-soft); padding-bottom:10px; margin-bottom:16px;">
+                可用标准词条（点击即可复制）：
+                <span class="tok tok-copy" data-copy="标准收容协议" title="点击复制并切换至剪贴板">标准收容协议</span>
+                &nbsp;
+                <span class="tok tok-copy" data-copy="1.00 Hm 基准阈值" title="点击复制并切换至剪贴板">1.00 Hm 基准阈值</span>
+              </p>
+
               <p>
                 <span class="field-key">特殊收容措施：</span>
                 SCP-3999 现收容于
                 <span id="a1-r1" class="tok tok-redact-task" data-a1-redact="1" title="使用 [1] 【数据删除】 遮盖涉密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span>
-                的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫二十四小时轮班驻守。竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），用以维持内部基准现实读数。
+                的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫二十四小时轮班驻守。竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），用以将内部现实读数稳定于
+                <span id="a1-p1" class="tok tok-slot" data-a1-paste="1.00 Hm 基准阈值" title="复制“1.00 Hm 基准阈值”后点击填入">[待补充：休谟参数]</span>
+                ；所有日常维护及档案校验须严格遵循
+                <span id="a1-p2" class="tok tok-slot" data-a1-paste="标准收容协议" title="复制“标准收容协议”后点击填入">[待补充：归档规程]</span>。
               </p>
 
               <p>
-                本项目经
-                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] 【数据删除】 遮盖 O5 审批密钥">O5-7 机密审批密钥 [AURORA-9]</span>
-                核准转入，并授权移交至 3 级<span class="real-anchor" data-anchor="1">研究员塔罗兰</span>全权负责日常建档与异常观测。
+                本项目由外勤特工
+                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] 【数据删除】 遮盖特工姓名与编号">马库斯·陈（编号 #8841）</span>
+                协助转移入库，经 O5-7 审批密钥核准后，移交至 3 级<span class="real-anchor" data-anchor="1">研究员塔罗兰</span>全权负责日常建档与异常观测。
                 <span id="a1-s1" class="tok tok-strike-task" data-a1-strike="1" title="使用 [2] 删除线 划掉作废草稿附注">（旧版草稿附注：上月移交记录曾暂拟归类为 Euclid，该分类建议已作废。）</span>
+              </p>
+
+              <p>
+                <span class="field-key">前期观测记录：</span>
+                在稳定锚阵列全功率运行期间，收容间内壁监测仪偶发轻微电磁噪声，周边照明设施曾录得 0.03 秒级频闪，目前尚未观测到实体自主突破物理屏障的倾向。
               </p>
 
               <p><span class="field-key">描述：</span></p>
@@ -1627,7 +1672,7 @@
             <span id="ref-status">等待校对完成</span>
           </div>
           <div id="ref-cards" class="ref-cards">
-            <div class="ref-empty">完成上方 3 处档案校对后，从此处写入项目描述。</div>
+            <div class="ref-empty">完成上方涉密遮盖、附注划除与词条填入后，从此处写入项目描述。</div>
           </div>
         </section>
       </main>
@@ -1682,7 +1727,7 @@
       <div class="status-left">
         <button id="btn-reset-storage" class="btn-reset-subtle" title="清除本地进度并重新开始">[重置档案]</button>
         <span id="hint-tag" class="hint-tag">指引</span>
-        <span id="hint-text" class="hint-text">校对档案：使用 [1] 【数据删除】 遮盖 2 处涉密项，用 [2] 删除线 划掉 1 处作废附注。</span>
+        <span id="hint-text" class="hint-text">校对档案：遮盖 2 处涉密项、划掉 1 处作废附注，并复制上方蓝色词条填入 2 处 [待补充]。</span>
       </div>
       <div style="font-size:12.5px; color:var(--text-muted);">快捷键：1-3 切换工具</div>
     </footer>
@@ -1976,6 +2021,7 @@
       const State = {
         act: 0, // 0=序幕, 1=第一幕, 2=第二幕, 3=第三幕, 4=第四幕, 5=第五幕
         tool: 'redact',
+        clipboard: '',
         stress: 0,
         ecgOffline: false,
         ended: false,
@@ -1984,6 +2030,7 @@
         // 第一幕状态
         a1Redacts: 0,
         a1Strikes: 0,
+        a1Pastes: 0,
         a1Verified: false,
         a1Rewritten: false,
         a1DescDone: false,
@@ -2068,7 +2115,8 @@
         toolBtns: document.querySelectorAll('[data-tool]'),
         toolRedact: document.getElementById('tool-redact'),
         toolStrike: document.getElementById('tool-strike'),
-        toolErase: document.getElementById('tool-erase'),
+        toolClip: document.getElementById('tool-clip'),
+        clipText: document.getElementById('clip-text'),
         btnMute: document.getElementById('btn-mute'),
 
         docScroll: document.getElementById('doc-scroll'),
@@ -2229,7 +2277,7 @@
       }
 
       function nudgeTool(toolName) {
-        const map = { redact: el.toolRedact, strike: el.toolStrike, erase: el.toolErase };
+        const map = { redact: el.toolRedact, strike: el.toolStrike, clip: el.toolClip };
         const btn = map[toolName];
         if (btn) {
           btn.classList.remove('nudge');
@@ -2335,7 +2383,7 @@
       }
 
       function checkAct1Progress() {
-        if (State.a1Redacts >= 2 && State.a1Strikes >= 1 && !State.a1Rewritten) {
+        if (State.a1Redacts >= 2 && State.a1Strikes >= 1 && State.a1Pastes >= 2 && !State.a1Rewritten) {
           State.a1Rewritten = true;
           Sound.confirm();
           log('涉密脱敏与附注清理完成。', 'safe');
@@ -3825,7 +3873,6 @@
           });
         });
 
-        setTool('erase');
         log('已高亮文档中全部 ' + State.a5AnchorsTotal + ' 处“研究员塔罗兰”。', 'cold');
         setHint('请上下滚动文档，点击（或直接按 Backspace 键自动定位）抹除所有发青光的「研究员塔罗兰」！', false);
         setReferenceCards('定位并抹除文档中的「研究员塔罗兰」', [
@@ -4219,6 +4266,46 @@
           Sound.confirm();
           log('已划除作废草稿附注。', 'safe');
           checkAct1Progress();
+          return;
+        }
+
+        // 3. 点击可复制标准词条 -> 默认直接切换到 [3] 剪贴板并写入
+        const cEl = e.target.closest('[data-copy]');
+        if (cEl) {
+          const word = cEl.getAttribute('data-copy');
+          State.clipboard = word;
+          if (el.clipText) el.clipText.textContent = word;
+          setTool('clip');
+          Sound.confirm();
+          log('已复制「' + word + '」至剪贴板。', 'safe');
+          setHint('已复制到剪贴板，请点击正文中对应的 [待补充] 填入。', false);
+          return;
+        }
+
+        // 4. 点击 [待补充] 槽位执行粘贴
+        const pEl = e.target.closest('[data-a1-paste]');
+        if (pEl && !pEl.getAttribute('data-done')) {
+          const expected = pEl.getAttribute('data-a1-paste');
+          if (State.tool !== 'clip') {
+            setHint('请先点击上方蓝色词条，或按 [3] 切换到剪贴板！', true);
+            nudgeTool('clip');
+            return;
+          }
+          if (!State.clipboard) {
+            setHint('剪贴板为空！请先点击上方蓝色标准词条进行复制。', true);
+            return;
+          }
+          if (State.clipboard !== expected) {
+            setHint('词条不匹配！此处应填入「' + expected + '」。', true);
+            return;
+          }
+          pEl.setAttribute('data-done', '1');
+          pEl.textContent = State.clipboard;
+          pEl.className = 'tok tok-verified';
+          State.a1Pastes++;
+          Sound.confirm();
+          log('已填入「' + State.clipboard + '」(' + State.a1Pastes + '/2)。', 'safe');
+          checkAct1Progress();
         }
       });
 
@@ -4274,7 +4361,7 @@
 
         if (e.key === '1') setTool('redact');
         else if (e.key === '2') setTool('strike');
-        else if (e.key === '3') setTool('erase');
+        else if (e.key === '3') setTool('clip');
       });
 
       /* =======================================================================
@@ -4298,8 +4385,13 @@
           // 补全第一幕已完成状态
           State.a1Redacts = 2;
           State.a1Strikes = 1;
+          State.a1Pastes = 2;
           State.a1Rewritten = true;
           State.a1DescDone = true;
+          document.querySelectorAll('[data-a1-paste]').forEach(function (n) {
+            n.textContent = n.getAttribute('data-a1-paste');
+            n.className = 'tok tok-verified';
+          });
           document.querySelectorAll('[data-a1-redact]').forEach(function (n) {
             n.textContent = '【数据删除】';
             n.className = 'tok tok-redacted';
