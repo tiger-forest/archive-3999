@@ -701,19 +701,19 @@
     }
 
     .tok-redact-task {
-      color: #92400e;
-      background: rgba(245, 158, 11, 0.14);
-      border: 1px dashed #d97706;
+      color: var(--text-main);
+      background: rgba(23, 23, 22, 0.045);
+      border-bottom: 1.5px dashed #b45309;
       font-weight: 600;
     }
-    .tok-redact-task:hover { background: rgba(245, 158, 11, 0.28); }
+    .tok-redact-task:hover { background: rgba(180, 83, 9, 0.12); }
 
     .tok-strike-task {
-      color: #475569;
-      background: rgba(100, 116, 139, 0.1);
-      border: 1px dashed #64748b;
+      color: var(--text-dim);
+      background: rgba(23, 23, 22, 0.035);
+      border-bottom: 1.5px dashed #64748b;
     }
-    .tok-strike-task:hover { background: rgba(100, 116, 139, 0.22); }
+    .tok-strike-task:hover { background: rgba(100, 116, 139, 0.14); }
 
     .tok-verify-task {
       color: #0369a1;
@@ -820,13 +820,13 @@
 
     /* 空白描述槽 */
     .blank-desc-box {
-      margin: 10px 0 20px;
-      padding: 16px 18px;
-      background: rgba(0, 0, 0, 0.02);
-      border: 1.5px dashed var(--border-soft);
-      border-radius: 6px;
+      margin: 8px 0 18px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.015);
+      border-left: 3px solid var(--border-soft);
+      border-radius: 0 4px 4px 0;
       color: var(--text-dim);
-      font-size: 14.5px;
+      font-size: 15px;
     }
 
     @keyframes pulse-amber {
@@ -1593,35 +1593,25 @@
               </div>
             </div>
 
-            <!-- 第一幕：扎实的正常建档正文 -->
+            <!-- 第一幕：冷峻极简的常规档案校对与起草 -->
             <div id="doc-static" class="doc-section">
               <p>
                 <span class="field-key">特殊收容措施：</span>
                 SCP-3999 现收容于
-                <span id="a1-r1" class="tok tok-redact-task" data-a1-redact="1" title="使用 [1] 【数据删除】 遮盖机密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span>
-                的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫二十四小时轮班驻守。
-                <span id="a1-s1" class="tok tok-strike-task" data-a1-strike="1" title="使用 [2] 删除线 划掉不规范批注">（实习生批注：这竖井黑得吓人，我觉得警卫晚上肯定睡不着哈哈）</span>
+                <span id="a1-r1" class="tok tok-redact-task" data-a1-redact="1" title="使用 [1] 【数据删除】 遮盖涉密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span>
+                的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫二十四小时轮班驻守。竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），用以维持内部基准现实读数。
               </p>
 
               <p>
-                竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），负责维持内部基准现实读数。当前硬件核验项：
-                <span id="a1-v1" class="tok tok-verify-task" data-a1-verify="1" title="点击核验稳定锚阵列">[待核验：每30米 SRA 阵列与耐酸性挡板完整度]</span>。
-                本项目由站点外勤特工
-                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] 【数据删除】 遮盖特工真名">马库斯·陈（编号 #8841）</span>
-                协助转移入库，并经
-                <span id="a1-r3" class="tok tok-redact-task" data-a1-redact="3" title="使用 [1] 【数据删除】 遮盖 O5 审批代号">O5-7 机密审批代号 [AURORA-9]</span>
-                授权移交至 3 级<span class="real-anchor" data-anchor="1">研究员塔罗兰</span>全权负责日常建档。
-              </p>
-
-              <p>
-                <span class="field-key">前期现场记录：</span>
-                <span id="a1-colloquial" style="color:var(--amber);">现场记录说这玩意儿一靠近灯泡就滋滋响，周围东西还会莫名其妙歪掉，挺邪门的。</span>
-                <span id="a1-s2" class="tok tok-strike-task" data-a1-strike="2" title="使用 [2] 删除线 划掉冗余草稿备注">（草稿备注：这段格式我瞎写的，塔罗兰前辈记得帮我删一下！）</span>
+                本项目经
+                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] 【数据删除】 遮盖 O5 审批密钥">O5-7 机密审批密钥 [AURORA-9]</span>
+                核准转入，并授权移交至 3 级<span class="real-anchor" data-anchor="1">研究员塔罗兰</span>全权负责日常建档与异常观测。
+                <span id="a1-s1" class="tok tok-strike-task" data-a1-strike="1" title="使用 [2] 删除线 划掉作废草稿附注">（旧版草稿附注：上月移交记录曾暂拟归类为 Euclid，该分类建议已作废。）</span>
               </p>
 
               <p><span class="field-key">描述：</span></p>
               <div id="a1-desc-slot" class="blank-desc-box">
-                [ 数据缺失 / 请先完成上方机密遮盖、批注划除与硬件核验，再写入标准描述 ]
+                <span style="color:var(--text-muted);">[ 待写入项目描述…… ]</span>
               </div>
             </div>
 
@@ -1633,11 +1623,11 @@
         <!-- 底部常驻 [ 标准协议参考栏 ] -->
         <section id="ref-dock" class="ref-dock">
           <div class="ref-dock-head">
-            <span>[ 标准协议参考栏 // 点击下方卡片写入正文 ]</span>
-            <span id="ref-status">请先完成上方建档校验</span>
+            <span>[ 标准协议参考栏 ]</span>
+            <span id="ref-status">等待校对完成</span>
           </div>
           <div id="ref-cards" class="ref-cards">
-            <div class="ref-empty">完成机密项 【数据删除】（3处）、不规范批注划除（2处）及硬件核验后，此处将提供标准记录卡片。</div>
+            <div class="ref-empty">完成上方 3 处档案校对后，从此处写入项目描述。</div>
           </div>
         </section>
       </main>
@@ -1692,7 +1682,7 @@
       <div class="status-left">
         <button id="btn-reset-storage" class="btn-reset-subtle" title="清除本地进度并重新开始">[重置档案]</button>
         <span id="hint-tag" class="hint-tag">指引</span>
-        <span id="hint-text" class="hint-text">使用 [1] 【数据删除】 遮盖 3 处橙色机密项，用 [2] 删除线 划掉 2 处灰色批注，并点击蓝色硬件核验。</span>
+        <span id="hint-text" class="hint-text">校对档案：使用 [1] 【数据删除】 遮盖 2 处涉密项，用 [2] 删除线 划掉 1 处作废附注。</span>
       </div>
       <div style="font-size:12.5px; color:var(--text-muted);">快捷键：1-3 切换工具</div>
     </footer>
@@ -2085,7 +2075,6 @@
         docPaper: document.getElementById('doc-paper'),
         docClass: document.getElementById('doc-class'),
         docDynamic: document.getElementById('doc-dynamic'),
-        a1Colloquial: document.getElementById('a1-colloquial'),
         a1DescSlot: document.getElementById('a1-desc-slot'),
 
         refDock: document.getElementById('ref-dock'),
@@ -2335,63 +2324,40 @@
       });
 
       /* =======================================================================
-         7. 第一幕：扎实的正常建档
+         7. 第一幕：冷峻极简的正常建档
          ======================================================================= */
       function startAct1() {
         State.act = 1;
         document.title = 'SCP-3999 - SCiPNET 档案起草';
         setTool('redact');
         log('已登录：3级研究员 詹姆斯·塔罗兰。', 'safe');
-        log('任务：完成 SCP-3999 机密遮盖、格式清理与描述补全。');
+        log('档案已载入，等待常规校对与描述补全。');
       }
 
       function checkAct1Progress() {
-        if (State.a1Redacts >= 3 && State.a1Strikes >= 2 && State.a1Verified && !State.a1Rewritten) {
-          el.a1Colloquial.classList.add('pending-highlight');
-          setHint('前置校验全部完成！请从底部【标准协议参考栏】写入现场记录。', false);
-          log('机密项与硬件核验完成，请写入规范现场记录。', 'safe');
-          setReferenceCards('步骤 1/2：写入现场记录', [
+        if (State.a1Redacts >= 2 && State.a1Strikes >= 1 && !State.a1Rewritten) {
+          State.a1Rewritten = true;
+          Sound.confirm();
+          log('涉密脱敏与附注清理完成。', 'safe');
+          setHint('校对完毕！请从底部参考栏选择项目描述，补全“描述：”栏。', false);
+
+          // 光标在描述框内亮起并闪烁
+          el.a1DescSlot.innerHTML = '[ 等待写入项目描述…… ]<span class="cursor-green"></span>';
+
+          setReferenceCards('写入项目描述以完成初稿', [
             {
-              tag: '',
-              text: '外勤观测表明，项目邻近区域出现高频电磁干扰及局部空间几何偏移，建议保持标准安全距离。',
+              tag: '[标准描述 A]',
+              text: 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，现由研究员塔罗兰负责持续休谟监测与档案记录。',
               highlight: true,
-              onClick: function () { applyAct1Rewrite(this.text); }
+              onClick: function () { finishAct1Desc(this.text); }
             },
             {
-              tag: '',
-              text: '初步记录显示，项目周边光照设施频繁产生异常电流噪声并伴随轻度休谟读数波动。',
-              onClick: function () { applyAct1Rewrite(this.text); }
+              tag: '[标准描述 B]',
+              text: 'SCP-3999 为针对特定站点人员产生局部逻辑畸变的收容对象，目前在 Site-118 竖井内维持稳定。',
+              onClick: function () { finishAct1Desc(this.text); }
             }
           ]);
         }
-      }
-
-      function applyAct1Rewrite(text) {
-        if (State.a1Rewritten) return;
-        State.a1Rewritten = true;
-        Sound.confirm();
-        el.a1Colloquial.classList.remove('pending-highlight');
-        el.a1Colloquial.textContent = text;
-        el.a1Colloquial.style.color = 'var(--green)';
-        log('已完成现场记录标准化录入。', 'safe');
-        setHint('最后一步：从底部【标准协议参考栏】选择标准描述，补全空白的“描述：”栏。', false);
-
-        // 此时光标在描述框内出现并闪烁
-        el.a1DescSlot.innerHTML = '[ 等待写入标准描述…… ]<span class="cursor-green"></span>';
-
-        setReferenceCards('步骤 2/2：补全“描述：”栏以完成初稿', [
-          {
-            tag: '[标准描述 A]',
-            text: 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，现由研究员塔罗兰负责持续休谟监测与档案记录。',
-            highlight: true,
-            onClick: function () { finishAct1Desc(this.text); }
-          },
-          {
-            tag: '[标准描述 B]',
-            text: 'SCP-3999 为针对特定站点人员产生局部逻辑畸变的收容对象，目前在 Site-118 竖井内维持稳定。',
-            onClick: function () { finishAct1Desc(this.text); }
-          }
-        ]);
       }
 
       function finishAct1Desc(text) {
@@ -4221,11 +4187,11 @@
         Sound.unlock();
         if (State.ended || State.act !== 1) return;
 
-        // 1. 【数据删除】 3 处机密项
+        // 1. 【数据删除】 2 处涉密项
         const rEl = e.target.closest('[data-a1-redact]');
         if (rEl && !rEl.getAttribute('data-done')) {
           if (State.tool !== 'redact') {
-            setHint('请先点击顶部 [1] 【数据删除】 工具，再点击橙色机密项！', true);
+            setHint('请先切换到顶部 [1] 【数据删除】 工具。', true);
             nudgeTool('redact');
             return;
           }
@@ -4234,16 +4200,16 @@
           rEl.className = 'tok tok-redacted';
           State.a1Redacts++;
           Sound.confirm();
-          log('已完成机密遮盖 (' + State.a1Redacts + '/3)。', 'safe');
+          log('已脱敏涉密信息 (' + State.a1Redacts + '/2)。', 'safe');
           checkAct1Progress();
           return;
         }
 
-        // 2. 删除线 2 处不规范批注
+        // 2. 删除线 1 处作废草稿附注
         const sEl = e.target.closest('[data-a1-strike]');
         if (sEl && !sEl.getAttribute('data-done')) {
           if (State.tool !== 'strike') {
-            setHint('请先切换到顶部 [2] 删除线 工具，再划掉灰色不规范批注！', true);
+            setHint('请先切换到顶部 [2] 删除线 工具。', true);
             nudgeTool('strike');
             return;
           }
@@ -4251,19 +4217,7 @@
           sEl.className = 'tok tok-struck';
           State.a1Strikes++;
           Sound.confirm();
-          log('已划除不规范口语批注 (' + State.a1Strikes + '/2)。', 'safe');
-          checkAct1Progress();
-          return;
-        }
-
-        // 3. 硬件核验
-        const vEl = e.target.closest('[data-a1-verify]');
-        if (vEl && !State.a1Verified) {
-          State.a1Verified = true;
-          vEl.textContent = '[已校验：每30米 SRA 阵列与耐酸性挡板完整 · 1.00 Hm]';
-          vEl.className = 'tok tok-verified';
-          Sound.confirm();
-          log('Site-118 一公里竖井与 SRA 稳定锚硬件校验通过。', 'safe');
+          log('已划除作废草稿附注。', 'safe');
           checkAct1Progress();
         }
       });
@@ -4342,9 +4296,8 @@
           el.refreshTaunt.classList.add('hidden');
 
           // 补全第一幕已完成状态
-          State.a1Redacts = 3;
-          State.a1Strikes = 2;
-          State.a1Verified = true;
+          State.a1Redacts = 2;
+          State.a1Strikes = 1;
           State.a1Rewritten = true;
           State.a1DescDone = true;
           document.querySelectorAll('[data-a1-redact]').forEach(function (n) {
@@ -4354,15 +4307,8 @@
           document.querySelectorAll('[data-a1-strike]').forEach(function (n) {
             n.className = 'tok tok-struck';
           });
-          const v1 = document.querySelector('[data-a1-verify]');
-          if (v1) {
-            v1.textContent = '[已校验：每30米 SRA 阵列与耐酸性挡板完整 · 1.00 Hm]';
-            v1.className = 'tok tok-verified';
-          }
-          el.a1Colloquial.textContent = '外勤观测表明，项目邻近区域出现高频电磁干扰及局部空间几何偏移。';
-          el.a1Colloquial.style.color = 'var(--green)';
           el.a1DescSlot.className = 'clinical-entry';
-          el.a1DescSlot.textContent = 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体。';
+          el.a1DescSlot.textContent = 'SCP-3999 表现为一种具备高强度现实扭曲能力的未知异常实体，现由研究员塔罗兰负责持续休谟监测与档案记录。';
 
           if (savedAct === 2) {
             startAct2();
