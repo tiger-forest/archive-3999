@@ -30,7 +30,7 @@
       --amber-soft: rgba(161, 98, 7, 0.12);
       --crimson: #c61a1a;
       --crimson-soft: rgba(198, 26, 26, 0.08);
-      --font-mono: 'Courier New', Consolas, Monaco, 'JetBrains Mono', 'PingFang SC', 'Microsoft YaHei', monospace;
+      --font-mono: 'Cascadia Code', 'JetBrains Mono', Consolas, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace;
       --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
     }
 
@@ -48,8 +48,11 @@
       background-color: var(--bg-app);
       color: var(--text-main);
       font-family: var(--font-mono);
-      font-size: 15px;
-      line-height: 1.7;
+      font-size: 16px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
       user-select: none;
     }
 
@@ -501,7 +504,7 @@
       line-height: 1.55;
     }
 
-    .doc-section p { margin: 0 0 16px; line-height: 1.75; }
+    .doc-section p { margin: 0 0 16px; line-height: 1.8; font-size: 16px; }
     .field-key { color: var(--text-main); font-weight: 700; }
 
     /* 可交互词条样式 (demo0 纸面高反差) */
@@ -543,19 +546,26 @@
       cursor: default !important;
     }
 
-    /* 经典 SCP 纯黑底 [数据删除] 遮盖块（白纸黑条，最具基金会辨识度） */
+    /* 【数据删除】词条样式：清晰可见的涉密公文印记，非纯黑遮挡块 */
     .tok-redacted {
       display: inline-block;
-      background: #111111 !important;
-      color: #111111 !important;
-      border: 1px solid #111111 !important;
+      color: var(--text-main) !important;
+      background: rgba(23, 23, 22, 0.08) !important;
+      border: 1.5px solid var(--border-strong) !important;
       padding: 1px 7px !important;
-      border-radius: 2px;
+      border-radius: 3px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 15px;
       letter-spacing: 0.5px;
       cursor: default !important;
-      user-select: none;
+      user-select: text;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    #app.void-mode .tok-redacted {
+      color: #f1f5f9 !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.4) !important;
     }
 
     .tok-struck {
@@ -1359,7 +1369,7 @@
         <div class="toolbar-group" id="tool-group">
           <button id="tool-redact" class="btn active" data-tool="redact" title="快捷键 1">
             <span class="btn-key">[1]</span>
-            <span>[数据删除]</span>
+            <span>【数据删除】</span>
           </button>
 
           <button id="tool-strike" class="btn" data-tool="strike" title="快捷键 2">
@@ -1399,7 +1409,7 @@
               <p>
                 <span class="field-key">特殊收容措施：</span>
                 SCP-3999 现收容于
-                <span id="a1-r1" class="tok tok-redact-task" data-a1-redact="1" title="使用 [1] [数据删除] 遮盖机密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span>
+                <span id="a1-r1" class="tok tok-redact-task" data-a1-redact="1" title="使用 [1] 【数据删除】 遮盖机密坐标">Site-118 地下竖井坐标 [38.9°N, 77.0°W]</span>
                 的 Keter 级气密收容间内。收容间内部由一口深达一公里的垂直竖井构成，井口覆盖耐酸性挡板，外部由四名武装警卫二十四小时轮班驻守。
                 <span id="a1-s1" class="tok tok-strike-task" data-a1-strike="1" title="使用 [2] 删除线 划掉不规范批注">（实习生批注：这竖井黑得吓人，我觉得警卫晚上肯定睡不着哈哈）</span>
               </p>
@@ -1408,9 +1418,9 @@
                 竖井内壁每隔 30 米均部署有一台斯克兰顿现实稳定锚（SRA），负责维持内部基准现实读数。当前硬件核验项：
                 <span id="a1-v1" class="tok tok-verify-task" data-a1-verify="1" title="点击核验稳定锚阵列">[待核验：每30米 SRA 阵列与耐酸性挡板完整度]</span>。
                 本项目由站点外勤特工
-                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] [数据删除] 遮盖特工真名">马库斯·陈（编号 #8841）</span>
+                <span id="a1-r2" class="tok tok-redact-task" data-a1-redact="2" title="使用 [1] 【数据删除】 遮盖特工真名">马库斯·陈（编号 #8841）</span>
                 协助转移入库，并经
-                <span id="a1-r3" class="tok tok-redact-task" data-a1-redact="3" title="使用 [1] [数据删除] 遮盖 O5 审批代号">O5-7 机密审批代号 [AURORA-9]</span>
+                <span id="a1-r3" class="tok tok-redact-task" data-a1-redact="3" title="使用 [1] 【数据删除】 遮盖 O5 审批代号">O5-7 机密审批代号 [AURORA-9]</span>
                 授权移交至 3 级<span class="real-anchor" data-anchor="1">研究员塔罗兰</span>全权负责日常建档。
               </p>
 
@@ -1438,7 +1448,7 @@
             <span id="ref-status">请先完成上方建档校验</span>
           </div>
           <div id="ref-cards" class="ref-cards">
-            <div class="ref-empty">完成机密项 [数据删除]（3处）、不规范批注划除（2处）及硬件核验后，此处将提供标准记录卡片。</div>
+            <div class="ref-empty">完成机密项 【数据删除】（3处）、不规范批注划除（2处）及硬件核验后，此处将提供标准记录卡片。</div>
           </div>
         </section>
       </main>
@@ -1493,7 +1503,7 @@
       <div class="status-left">
         <button id="btn-reset-storage" class="btn-reset-subtle" title="清除本地进度并重新开始">[重置档案]</button>
         <span id="hint-tag" class="hint-tag">指引</span>
-        <span id="hint-text" class="hint-text">使用 [1] [数据删除] 遮盖 3 处橙色机密项，用 [2] 删除线 划掉 2 处灰色批注，并点击蓝色硬件核验。</span>
+        <span id="hint-text" class="hint-text">使用 [1] 【数据删除】 遮盖 3 处橙色机密项，用 [2] 删除线 划掉 2 处灰色批注，并点击蓝色硬件核验。</span>
       </div>
       <div style="font-size:12.5px; color:var(--text-muted);">快捷键：1-3 切换工具</div>
     </footer>
@@ -1561,7 +1571,7 @@
       </p>
 
       <div class="final-appendix">
-        <div><strong>附录-1：</strong>[数据删除]</div>
+        <div><strong>附录-1：</strong>【数据删除】</div>
         <div class="final-last-line">我写完了。</div>
       </div>
 
@@ -2272,7 +2282,7 @@
         }, { once: true });
       }
 
-      // 异常入侵 2：两处恶意破坏稳定锚条款，需用 [数据删除] 遮盖
+      // 异常入侵 2：两处恶意破坏稳定锚条款，需用 【数据删除】 遮盖
       function runAct2Round2() {
         State.a2Round = 2;
         Sound.glitch(0.24);
@@ -2285,7 +2295,7 @@
         scrollDoc();
 
         setTool('redact');
-        setHint('稳定锚参数遭篡改！使用 [1] [数据删除] 遮盖上方 2 处恶意篡改！', true);
+        setHint('稳定锚参数遭篡改！使用 [1] 【数据删除】 遮盖上方 2 处恶意篡改！', true);
         setReferenceCards('遮盖 2 处硬件篡改以阻止执行', []);
 
         let done = 0;
@@ -2293,18 +2303,18 @@
           span.addEventListener('click', function () {
             if (this.getAttribute('data-done')) return;
             if (State.tool !== 'redact') {
-              setHint('请先切换到顶部 [1] [数据删除] 工具！', true);
+              setHint('请先切换到顶部 [1] 【数据删除】 工具！', true);
               nudgeTool('redact');
               return;
             }
             this.setAttribute('data-done', '1');
-            this.textContent = '[数据删除]';
+            this.textContent = '【数据删除】';
             this.className = 'tok tok-redacted';
             Sound.confirm();
             done++;
             if (done >= 2) {
               box.classList.add('resolved');
-              log('两处恶意硬件指令已被 [数据删除] 阻断。', 'safe');
+              log('两处恶意硬件指令已被 【数据删除】 阻断。', 'safe');
               addTimeout(runAct2Round3, 500);
             }
           });
@@ -2356,7 +2366,7 @@
         }, { once: true });
       }
 
-      // 异常入侵 4：针对塔罗兰与警卫的双重威胁，用 [数据删除] 或删除线压制
+      // 异常入侵 4：针对塔罗兰与警卫的双重威胁，用 【数据删除】 或删除线压制
       function runAct2Round4() {
         State.a2Round = 4;
         Sound.glitch(0.24);
@@ -2368,7 +2378,7 @@
         el.docDynamic.appendChild(box);
         scrollDoc();
 
-        setHint('检测到认知危害注入！使用 [1] [数据删除] 或 [2] 删除线 压制上方 2 处红字！', true);
+        setHint('检测到认知危害注入！使用 [1] 【数据删除】 或 [2] 删除线 压制上方 2 处红字！', true);
         setReferenceCards('压制全部干扰后将启动 RAISA 稳定协议', []);
 
         let done = 0;
@@ -2376,12 +2386,12 @@
           span.addEventListener('click', function () {
             if (this.getAttribute('data-done')) return;
             if (State.tool !== 'redact' && State.tool !== 'strike') {
-              setHint('请使用 [1] [数据删除] 或 [2] 删除线！', true);
+              setHint('请使用 [1] 【数据删除】 或 [2] 删除线！', true);
               return;
             }
             this.setAttribute('data-done', '1');
             if (State.tool === 'redact') {
-              this.textContent = '[数据删除]';
+              this.textContent = '【数据删除】';
               this.className = 'tok tok-redacted';
             } else {
               this.className = 'tok tok-struck';
@@ -2627,7 +2637,7 @@
                     scrollDoc();
 
                     setTool('strike');
-                    setHint('3999 原地篡改了后半句！立即用 [1] [数据删除] 或 [2] 删除线 压制红字！', true);
+                    setHint('3999 原地篡改了后半句！立即用 [1] 【数据删除】 或 [2] 删除线 压制红字！', true);
                     setReferenceCards('使用工具压制被劫持的红字', []);
 
                     const threatSpan = document.getElementById('a3-l1-threat');
@@ -2637,7 +2647,7 @@
                         this.setAttribute('data-done', '1');
                         Sound.key(false);
                         if (State.tool === 'redact') {
-                          this.textContent = '[数据删除]';
+                          this.textContent = '【数据删除】';
                           this.className = 'tok tok-redacted';
                         } else {
                           this.className = 'tok tok-struck';
@@ -2681,7 +2691,7 @@
         scrollDoc();
 
         setTool('redact');
-        setHint('3999 正在起草针对家属的条款！使用 [1] [数据删除] 遮盖“逐一处决”！', true);
+        setHint('3999 正在起草针对家属的条款！使用 [1] 【数据删除】 遮盖“逐一处决”！', true);
         setReferenceCards('遮盖针对家属的处决指令', []);
 
         const t1 = document.getElementById('a3-l2-threat1');
@@ -2690,7 +2700,7 @@
             if (this.getAttribute('data-done')) return;
             this.setAttribute('data-done', '1');
             Sound.key(false);
-            this.textContent = '[数据删除]';
+            this.textContent = '【数据删除】';
             this.className = 'tok tok-redacted';
 
             // 涂黑触发细节恶化：3999 撕开涂黑并原地喷出极端冷血公文细节
@@ -2733,7 +2743,7 @@
                           scrollDoc();
 
                           setTool('strike');
-                          setHint('指令再次被恶意篡改！用 [2] 删除线 或 [1] [数据删除] 压制红字！', true);
+                          setHint('指令再次被恶意篡改！用 [2] 删除线 或 [1] 【数据删除】 压制红字！', true);
                           setReferenceCards('压制恶意篡改的条款', []);
 
                           const t2 = document.getElementById('a3-l2-threat2');
@@ -2743,7 +2753,7 @@
                               this.setAttribute('data-done', '1');
                               Sound.key(false);
                               if (State.tool === 'redact') {
-                                this.textContent = '[数据删除]';
+                                this.textContent = '【数据删除】';
                                 this.className = 'tok tok-redacted';
                               } else {
                                 this.className = 'tok tok-struck';
@@ -2926,7 +2936,7 @@
         iv.className = 'interview-box';
         iv.innerHTML =
           '<div style="color:var(--amber); font-weight:700; margin-bottom:8px;">&lt;记录开始，03.99.90&gt;</div>' +
-          '<div style="font-size:14px; color:var(--text-dim); margin-bottom:10px;">受访者：<span class="real-anchor" data-anchor="6">研究员塔罗兰</span> ｜ 采访者：Dr. <span class="tok-redacted">[数据删除]</span></div>' +
+          '<div style="font-size:14px; color:var(--text-dim); margin-bottom:10px;">受访者：<span class="real-anchor" data-anchor="6">研究员塔罗兰</span> ｜ 采访者：Dr. <span class="tok-redacted">【数据删除】</span></div>' +
           '<div id="a3-iv-lines"></div>';
         el.docDynamic.appendChild(iv);
         scrollDoc();
@@ -3915,16 +3925,16 @@
         Sound.unlock();
         if (State.ended || State.act !== 1) return;
 
-        // 1. [数据删除] 3 处机密项
+        // 1. 【数据删除】 3 处机密项
         const rEl = e.target.closest('[data-a1-redact]');
         if (rEl && !rEl.getAttribute('data-done')) {
           if (State.tool !== 'redact') {
-            setHint('请先点击顶部 [1] [数据删除] 工具，再点击橙色机密项！', true);
+            setHint('请先点击顶部 [1] 【数据删除】 工具，再点击橙色机密项！', true);
             nudgeTool('redact');
             return;
           }
           rEl.setAttribute('data-done', '1');
-          rEl.textContent = '[数据删除]';
+          rEl.textContent = '【数据删除】';
           rEl.className = 'tok tok-redacted';
           State.a1Redacts++;
           Sound.confirm();
@@ -4042,7 +4052,7 @@
           State.a1Rewritten = true;
           State.a1DescDone = true;
           document.querySelectorAll('[data-a1-redact]').forEach(function (n) {
-            n.textContent = '[数据删除]';
+            n.textContent = '【数据删除】';
             n.className = 'tok tok-redacted';
           });
           document.querySelectorAll('[data-a1-strike]').forEach(function (n) {
