@@ -4587,18 +4587,28 @@
       }
 
       function seedMissingAnchors(maxAnchor) {
-        const missing = [];
-        for (let i = 1; i <= maxAnchor; i++) {
-          if (!document.querySelector('[data-anchor="' + i + '"]')) {
-            missing.push('<span class="real-anchor" data-anchor="' + i + '">研究员塔罗兰</span>');
+        const snippets = {
+          2: '<div>SCP-3999 提议令<span class="real-anchor" data-anchor="2">研究员塔罗兰</span>与一切站点及人员断绝联系。</div>',
+          3: '<div><span class="real-anchor" data-anchor="3">研究员塔罗兰</span>的直系亲属与同事保护条款曾遭撕毁与篡改。</div>',
+          4: '<div>冲突记录：<span class="real-anchor" data-anchor="4">研究员塔罗兰</span>被同时标记为“终结”与“维持存活”。</div>',
+          5: '<div class="clinical-entry">关键条款：<span class="real-anchor" data-anchor="5">研究员塔罗兰</span>不可与香薰蜡烛混淆。</div>',
+          6: '<div class="interview-box" style="margin:8px 0; padding:10px 14px;">受访者：<span class="real-anchor" data-anchor="6">研究员塔罗兰</span> ｜ 采访者：Dr. 【数据删除】</div>',
+          7: '<div class="interview-box" style="margin:8px 0; padding:10px 14px;">受访者：SCP-3999 ｜ 采访者：<span class="real-anchor" data-anchor="7">研究员塔罗兰</span></div>'
+        };
+        const frag = document.createDocumentFragment();
+        let added = false;
+        for (let i = 2; i <= maxAnchor; i++) {
+          if (!document.querySelector('[data-anchor="' + i + '"]') && snippets[i]) {
+            const wrap = document.createElement('div');
+            wrap.className = 'anomaly-entry resolved';
+            wrap.style.margin = '8px 0';
+            wrap.style.padding = '8px 12px';
+            wrap.innerHTML = snippets[i];
+            frag.appendChild(wrap);
+            added = true;
           }
         }
-        if (missing.length > 0) {
-          const seed = document.createElement('div');
-          seed.className = 'anomaly-entry resolved';
-          seed.innerHTML = '<p>前置档案记录索引：' + missing.join(' ｜ ') + '</p>';
-          el.docDynamic.appendChild(seed);
-        }
+        if (added) el.docDynamic.appendChild(frag);
       }
 
       function devJump(target) {
