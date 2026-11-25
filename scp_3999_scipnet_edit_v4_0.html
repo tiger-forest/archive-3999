@@ -3090,6 +3090,7 @@
               text: 'SCP-3999 将被甜瓜收容。SCP-3999 将被邓氏狼吞噬。',
               highlight: true,
               onClick: function () {
+                setReferenceCards('正在录入收容条款……', []);
                 const c1 = document.createElement('div');
                 c1.className = 'clinical-entry';
                 el.docDynamic.appendChild(c1);
@@ -3098,12 +3099,16 @@
                 typeInto(c1, this.text, false, 16, function () {
                   // 接着弹出第二张：认知锚定条款（包含 anchor 5）
                   addTimeout(function () {
+                    let candleDone = false;
                     setReferenceCards('认知锚定条款', [
                       {
                         tag: '',
                         text: '关键条款：研究员塔罗兰不可与香薰蜡烛混淆。',
                         highlight: true,
                         onClick: function () {
+                          if (candleDone) return;
+                          candleDone = true;
+                          setReferenceCards('正在写入认知锚定……', []);
                           const c2 = document.createElement('div');
                           c2.className = 'clinical-entry';
                           // 此处确保写入包含 real-anchor 5
