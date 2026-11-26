@@ -240,6 +240,79 @@
       letter-spacing: 1px;
     }
 
+    #btn-enter-terminal {
+      margin-top: 6px;
+      padding: 13px 30px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.08);
+      transition: all 0.25s ease;
+    }
+
+    #btn-enter-terminal::before {
+      content: '●';
+      font-size: 9px;
+      color: #34d399;
+      text-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+    }
+
+    #btn-enter-terminal:hover {
+      color: #ffffff;
+      background: rgba(16, 185, 129, 0.14);
+      border-color: #34d399;
+      box-shadow: 0 0 26px rgba(52, 211, 153, 0.22);
+      transform: translateY(-1px);
+    }
+
+    #btn-enter-terminal:active,
+    #btn-resume-loop:active {
+      transform: translateY(0);
+    }
+
+    #btn-resume-loop {
+      margin-top: 4px;
+      padding: 13px 30px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #f1f5f9;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 59, 59, 0.48);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 18px rgba(255, 59, 59, 0.12);
+      transition: all 0.25s ease;
+    }
+
+    #btn-resume-loop::before {
+      content: '●';
+      font-size: 9px;
+      color: #ff3b3b;
+      text-shadow: 0 0 8px rgba(255, 59, 59, 0.85);
+    }
+
+    #btn-resume-loop:hover {
+      color: #ffffff;
+      background: rgba(255, 59, 59, 0.16);
+      border-color: #ff3b3b;
+      box-shadow: 0 0 26px rgba(255, 59, 59, 0.28);
+      transform: translateY(-1px);
+    }
+
     .taunt-text {
       max-width: 580px;
       font-size: 20px;
@@ -707,13 +780,41 @@
       border-radius: 6px;
       padding: 30px 36px;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-      transition: background-color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+      transform-origin: top center;
+      transition: background-color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .doc-paper.focus-header-zoom {
+      transform: scale(1.14);
+    }
+
+    #doc-class.focus-highlight {
+      background: rgba(198, 26, 26, 0.09);
+      border-radius: 4px;
+      padding: 2px 7px;
+      outline: 1.5px solid rgba(198, 26, 26, 0.45);
+      transition: all 0.35s ease;
     }
 
     .doc-paper.stripped-paper {
       background: transparent !important;
       border-color: transparent !important;
       box-shadow: none !important;
+    }
+
+    .loop-archived-hidden {
+      display: none !important;
+    }
+
+    .loop-divider {
+      margin: 22px 0 14px;
+      padding: 6px 0;
+      border-top: 1px dashed var(--border-soft);
+      border-bottom: 1px dashed var(--border-soft);
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-align: center;
     }
 
     .doc-paper.cursor-redact { cursor: crosshair; }
@@ -1635,8 +1736,8 @@
     <div class="taunt-text">
       你以为刷新页面就能逃避重写吗？<br />塔罗兰还在里面。
     </div>
-    <button id="btn-resume-loop" class="btn btn-primary" style="padding:12px 22px; font-size:15px;">
-      [ 返回当前文档循环 ]
+    <button id="btn-resume-loop">
+      返回当前文档循环
     </button>
   </div>
 
@@ -1651,8 +1752,8 @@
     <div id="intro-title-block" class="intro-title-block">
       <h1 class="intro-title">SCP-3999：我于万物之中</h1>
       <div class="intro-sub">SCiPNET-EDIT v4.0 // SITE-118 INTERNAL ARCHIVE</div>
-      <button id="btn-enter-terminal" class="btn btn-primary" style="padding: 13px 26px; font-size: 16px;">
-        [ 接入 SCiPNET 终端 ]
+      <button id="btn-enter-terminal">
+        接入 SCiPNET 编辑器终端
       </button>
     </div>
 
@@ -1715,10 +1816,10 @@
             <div class="doc-header">
               <div>
                 <div class="doc-kicker">SCP FOUNDATION // SITE-118 ARCHIVE TERMINAL</div>
-                <h1 class="doc-title">项目编号：SCP-3999</h1>
+                <h1 id="doc-title" class="doc-title">项目编号：SCP-3999</h1>
               </div>
               <div class="doc-meta">
-                <div>编辑权限：3 级（詹姆斯·塔罗兰）</div>
+                <div id="doc-auth-bar">编辑权限：3 级（<span class="linked-talloran" data-link-anchor="1">詹姆斯·塔罗兰</span>）</div>
                 <div id="doc-class">项目等级：<strong style="color:var(--green);">Keter（草稿）</strong></div>
               </div>
             </div>
@@ -2234,6 +2335,9 @@
 
         docScroll: document.getElementById('doc-scroll'),
         docPaper: document.getElementById('doc-paper'),
+        docStatic: document.getElementById('doc-static'),
+        docTitle: document.getElementById('doc-title'),
+        docAuthBar: document.getElementById('doc-auth-bar'),
         docClass: document.getElementById('doc-class'),
         docDynamic: document.getElementById('doc-dynamic'),
         a1DescSlot: document.getElementById('a1-desc-slot'),
@@ -2357,9 +2461,10 @@
       }
 
       function setHint(text, danger) {
-        el.hintText.textContent = text;
+        el.hintText.textContent = text || '';
         el.hintTag.textContent = danger ? '异常' : '指引';
         el.hintTag.className = 'hint-tag' + (danger ? ' danger' : '');
+        el.hintTag.style.display = text ? '' : 'none';
       }
 
       function setTelemetry(hume, hrState, loopText, danger) {
@@ -2453,6 +2558,64 @@
         }, speed || 22);
       }
 
+      function typeStuttered(container, text, isRed, baseSpeed, onDone) {
+        const span = document.createElement('span');
+        const cur = document.createElement('span');
+        cur.className = isRed ? 'cursor-red' : 'cursor-green';
+        container.appendChild(span);
+        container.appendChild(cur);
+        let i = 0;
+        function step() {
+          if (State.ended) return;
+          if (i >= text.length) {
+            cur.remove();
+            if (onDone) onDone();
+            return;
+          }
+          const ch = text.charAt(i);
+          span.textContent += ch;
+          if (i % 2 === 0 || ch === '，' || ch === '。' || ch === '、') Sound.key(isRed);
+          i++;
+          scrollDoc();
+          let delay = (baseSpeed || 32) + Math.floor(Math.random() * 55);
+          if (ch === '，' || ch === '。' || ch === '——' || ch === '、') {
+            delay += 360 + Math.floor(Math.random() * 200);
+          } else if (i > 2 && i < text.length - 1 && Math.random() < 0.24) {
+            delay += 260 + Math.floor(Math.random() * 220);
+          }
+          addTimeout(step, delay);
+        }
+        step();
+      }
+
+      function linkTalloranInNode(root, anchorId) {
+        if (!root) return;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+        const nodes = [];
+        let n;
+        while ((n = walker.nextNode())) {
+          if (n.parentElement && (n.parentElement.classList.contains('real-anchor') || n.parentElement.classList.contains('linked-talloran'))) continue;
+          if (n.nodeValue && n.nodeValue.indexOf('塔罗兰') !== -1) nodes.push(n);
+        }
+        nodes.forEach(function (txtNode) {
+          const frag = document.createDocumentFragment();
+          const parts = txtNode.nodeValue.split(/(研究员詹姆斯·塔罗兰|詹姆斯·塔罗兰|研究员塔罗兰|塔罗兰)/g);
+          parts.forEach(function (part) {
+            if (!part) return;
+            if (part === '研究员詹姆斯·塔罗兰' || part === '詹姆斯·塔罗兰' || part === '研究员塔罗兰' || part === '塔罗兰') {
+              const s = document.createElement('span');
+              s.className = 'linked-talloran';
+              s.setAttribute('data-link-anchor', String(anchorId));
+              s.textContent = part;
+              frag.appendChild(s);
+            } else {
+              frag.appendChild(document.createTextNode(part));
+            }
+          });
+          txtNode.parentNode.replaceChild(frag, txtNode);
+        });
+      }
+
       /* =======================================================================
          6. 0. 序幕：黑屏引子
          ======================================================================= */
@@ -2530,7 +2693,7 @@
 
         typeInto(el.a1DescSlot, text, false, 20, function () {
           log('标准描述已写入，正在进行入库前校验……', 'safe');
-          addTimeout(startAct2, 700);
+          addTimeout(startAct2, 2400);
         });
       }
 
@@ -2596,7 +2759,7 @@
                 typeInto(p, this.text, false, 18, function () {
                   el.docClass.innerHTML = '项目等级：<strong style="color:var(--amber);">Keter（恢复中）</strong>';
                   log('已恢复 Keter 分级与警卫驻守条款。', 'safe');
-                  addTimeout(runAct2Round2, 480);
+                  addTimeout(runAct2Round2, 1900);
                 });
               }
             }
@@ -2637,7 +2800,7 @@
             if (done >= 2) {
               box.classList.add('resolved');
               log('两处恶意硬件指令已被 【数据删除】 阻断。', 'safe');
-              addTimeout(runAct2Round3, 500);
+              addTimeout(runAct2Round3, 1600);
             }
           });
         });
@@ -2682,7 +2845,7 @@
                 typeInto(p, this.text, false, 18, function () {
                   State.stress = 0.35;
                   setTelemetry('0.82 Hm', '趋稳', '#1', false);
-                  addTimeout(runAct2Round4, 500);
+                  addTimeout(runAct2Round4, 1900);
                 });
               }
             }
@@ -2730,7 +2893,7 @@
               setTelemetry('0.96 Hm', '恢复平稳', '#1', false);
               Sound.setDrone(0.1);
               log('RAISA 确认：全部入侵已被压制，可启动斯克兰顿现实稳定锚。', 'safe');
-              addTimeout(startAct2SraProtocol, 500);
+              addTimeout(startAct2SraProtocol, 1300);
             }
           });
         });
@@ -2800,6 +2963,7 @@
                   Sound.confirm();
                   addTimeout(function () {
                     const line2 = document.createElement('div');
+                    line2.id = 'a2-contained-line';
                     line2.className = 'clinical-entry';
                     line2.style.color = 'var(--green)';
                     line2.style.fontWeight = '700';
@@ -2889,42 +3053,123 @@
         saveProgress(3);
         document.title = '草稿(4,192,803) - 未保存';
         el.statusDot.classList.add('danger');
-        el.vignette.style.opacity = '0.78';
-        el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">Apollyon</strong>';
-        setTelemetry('0.14 Hm', '极度过速', '#4,192,803', true);
-        Sound.setDrone(0.56);
 
-        log('假归档已撕毁！循环计数跃升至 Loop #4,192,803。', 'danger');
+        log('假归档已撕毁！终端重置至 Loop #4,192,803。', 'danger');
         runAct3ChaosWave1();
       }
 
       // =======================================================================
-      // 第三幕前半段：假胜利后的文本拉锯（重构为三层递进回合）
+      // 第三幕前半段：两次轮回重置（Loop #4,192,803 滑坡 -> 终结重启 -> Loop #4,192,804 明牌处决）
       // =======================================================================
 
-      // 入口兼容
       function runAct3ChaosWave1() {
-        runAct3Layer1();
+        runAct3Loop1();
       }
 
-      // 第一层：合理隔离滑坡与“半截劫持”（偷梁换柱式拉扯）
-      function runAct3Layer1() {
+      // -----------------------------------------------------------------------
+      // 第一次重开：Loop #4,192,803（看似回到初稿界面，第 2 个编辑点触发异常）
+      // -----------------------------------------------------------------------
+      function runAct3Loop1() {
+        // 折叠隐藏第一、二幕旧内容（保留 DOM 与锚点供第五幕展开）
+        if (el.docStatic) el.docStatic.classList.add('loop-archived-hidden');
+        Array.from(el.docDynamic.children).forEach(function (ch) {
+          ch.classList.add('loop-archived-hidden');
+        });
+
+        // 恢复洁白建档假象
+        el.vignette.style.opacity = '0.16';
+        el.docTitle.textContent = '项目编号：SCP-3999';
+        el.docClass.innerHTML = '项目等级：<strong style="color:var(--green);">Keter（草稿）</strong>';
+        el.docAuthBar.innerHTML = '编辑权限：3 级（<span class="linked-talloran" data-link-anchor="1">詹姆斯·塔罗兰</span>）';
+        setTelemetry('0.98 Hm', '基准稳定', '#4,192,803', false);
+        Sound.setDrone(0.28);
+        el.docScroll.scrollTo({ top: 0, behavior: 'auto' });
+
+        const loop1Wrap = document.createElement('div');
+        loop1Wrap.id = 'a3-loop1-wrap';
+        el.docDynamic.appendChild(loop1Wrap);
+
+        // 完整复刻开篇文档骨架：特殊收容措施 -> 移交记录 -> 前期观测记录 -> 描述（第 1 个编辑点平稳，第 2 个编辑点爆发）
+        const sec1 = document.createElement('div');
+        sec1.className = 'doc-section';
+        sec1.innerHTML =
+          '<p><span class="field-key">特殊收容措施：</span>' +
+          '<span id="a3-l1-slot1" class="blank-desc-box" style="display:inline-block; padding:4px 10px;">[ 待写入标准收容措施…… ]</span></p>' +
+          '<p>本项目由外勤特工<span class="tok tok-redacted">【数据删除】</span>协助转移入库，经 O5-7 审批密钥核准后，移交至 3 级<span class="linked-talloran" data-link-anchor="2">研究员塔罗兰</span>全权负责日常建档与异常观测。</p>' +
+          '<p><span class="field-key">前期观测记录：</span>项目周边照明设施曾多次出现短暂频闪，监控室无线电偶有杂音干扰。除上述环境异常外，收容井内暂未发现实体活动迹象。</p>';
+        loop1Wrap.appendChild(sec1);
+
+        setHint('请录入标准收容措施以完成建档。', false);
+        let firstClicked = false;
+        setReferenceCards('写入标准收容措施', [
+          {
+            tag: '',
+            text: 'SCP-3999 现收容于 Site-118 地下竖井的 Keter 级气密收容间内，由四名武装警卫二十四小时轮班驻守，内部稳定锚维持于 1.00 Hm 基准阈值。',
+            highlight: true,
+            onClick: function () {
+              if (firstClicked) return;
+              firstClicked = true;
+              setHint('', false);
+              setReferenceCards('正在写入……', []);
+              const slot1 = document.getElementById('a3-l1-slot1');
+              if (slot1) {
+                slot1.className = '';
+                slot1.style.padding = '0';
+                slot1.textContent = '';
+                typeInto(slot1, this.text, false, 18, function () {
+                  linkTalloranInNode(sec1, '2');
+                  addTimeout(spawnSecondEditPoint, 1300);
+                });
+              }
+            }
+          }
+        ]);
+
+        // 第 2 个编辑点（描述：）：刚展开即触发异常突破
+        function spawnSecondEditPoint() {
+          const sec2 = document.createElement('div');
+          sec2.className = 'doc-section';
+          sec2.innerHTML =
+            '<p><span class="field-key">描述：</span></p>' +
+            '<div id="a3-l1-slot2" class="blank-desc-box">[ 等待写入项目描述…… ]<span class="cursor-green"></span></div>';
+          loop1Wrap.appendChild(sec2);
+          scrollDoc();
+
+          setReferenceCards('等待系统校验……', []);
+
+          addTimeout(function () {
+            Sound.glitch(0.3);
+            shake();
+            el.vignette.style.opacity = '0.78';
+            el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">Apollyon</strong>';
+            setTelemetry('0.14 Hm', '极度过速', '#4,192,803', true);
+            Sound.setDrone(0.56);
+            sec2.remove();
+            runAct3PhaseB1(loop1Wrap);
+          }, 1100);
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Phase B1：半截劫持 + 偷换文档主语为塔罗兰 + 冷静否认存在（anchor 2）
+      // -----------------------------------------------------------------------
+      function runAct3PhaseB1(container) {
+        const host = container || el.docDynamic;
         const box = document.createElement('div');
         box.className = 'anomaly-entry';
         const p = document.createElement('p');
         p.style.margin = '0 0 10px';
         box.appendChild(p);
-        el.docDynamic.appendChild(box);
+        host.appendChild(box);
         scrollDoc();
 
-        setHint('3999 正在起草隔离提案……', false);
-        setReferenceCards('等待异常文本稳定……', []);
+        setHint('', false);
+        setReferenceCards('等待文本稳定……', []);
 
         const partA = 'SCP-3999当前无法被收容，正促成ZK级现实终结场景。最为可行的方案是令';
         const partB = '与一切基金会站点及人员自我断绝联系。破坏能力将会';
 
-        typeInto(p, partA, true, 24, function () {
-          // 插入真实锚点 2
+        typeInto(p, partA, true, 30, function () {
           const anchor2 = document.createElement('span');
           anchor2.className = 'real-anchor';
           anchor2.setAttribute('data-anchor', '2');
@@ -2933,80 +3178,89 @@
           Sound.key(true);
           scrollDoc();
 
-          typeInto(p, partB, true, 24, function () {
+          typeInto(p, partB, true, 30, function () {
             const fumble = document.createElement('span');
             fumble.id = 'a3-l1-fumble';
             p.appendChild(fumble);
 
-            // 1. 逐字打出“停止”
             const w1 = document.createElement('span');
             w1.style.color = 'var(--crimson)';
             w1.style.fontWeight = '700';
             fumble.appendChild(w1);
 
-            typeInto(w1, '停止', true, 55, function () {
-              // 停顿后划掉“停止”
+            typeInto(w1, '停止', true, 65, function () {
               addTimeout(function () {
                 w1.style.textDecoration = 'line-through';
                 w1.style.opacity = '0.6';
                 Sound.glitch(0.18);
                 scrollDoc();
 
-                // 2. 逐字打出“得以控制”
                 addTimeout(function () {
-                  const sp1 = document.createTextNode(' ');
-                  fumble.appendChild(sp1);
+                  fumble.appendChild(document.createTextNode(' '));
                   const w2 = document.createElement('span');
                   w2.style.color = 'var(--crimson)';
                   w2.style.fontWeight = '700';
                   fumble.appendChild(w2);
 
-                  typeInto(w2, '得以控制', true, 55, function () {
-                    // 停顿后划掉“得以控制”
+                  typeInto(w2, '得以控制', true, 65, function () {
                     addTimeout(function () {
                       w2.style.textDecoration = 'line-through';
                       w2.style.opacity = '0.6';
                       Sound.glitch(0.18);
                       scrollDoc();
 
-                      // 3. 逐字打出“残留少许。”
                       addTimeout(function () {
-                        const sp2 = document.createTextNode(' ');
-                        fumble.appendChild(sp2);
+                        fumble.appendChild(document.createTextNode(' '));
                         const w3 = document.createElement('span');
                         w3.style.color = 'var(--crimson)';
                         w3.style.fontWeight = '700';
                         fumble.appendChild(w3);
 
-                        typeInto(w3, '残留少许。', true, 65, function () {
-                          // 提供玩家反驳卡片
-                          addTimeout(function () {
-                  setReferenceCards('驳回隔离提案', [
+                        typeInto(w3, '残留少许。', true, 75, function () {
+                          addTimeout(spawnRejectCard, 900);
+                        });
+                      }, 550);
+                    }, 900);
+                  });
+                }, 550);
+              }, 900);
+            });
+          });
+        });
+
+        function spawnRejectCard() {
+          let clicked = false;
+          setReferenceCards('驳回隔离提案', [
             {
               tag: '',
               text: '驳回隔离提案：研究员塔罗兰须留在 Site-118 接受常规观测与同事协助。',
               highlight: true,
               onClick: function () {
+                if (clicked) return;
+                clicked = true;
                 setReferenceCards('正在录入驳回条款……', []);
                 const replyDiv = document.createElement('div');
                 replyDiv.className = 'clinical-entry';
                 replyDiv.id = 'a3-l1-reply-box';
-                el.docDynamic.appendChild(replyDiv);
+                host.appendChild(replyDiv);
                 scrollDoc();
 
-                typeInto(replyDiv, this.text, false, 18, function () {
-                  // 3999 当场半截劫持原地篡改
+                typeInto(replyDiv, this.text, false, 24, function () {
                   addTimeout(function () {
                     Sound.glitch(0.3);
                     shake();
+                    // 同步将顶部项目编号偷换为“研究员塔罗兰”
+                    if (el.docTitle) {
+                      el.docTitle.innerHTML = '项目编号：<span style="text-decoration:line-through; color:var(--text-dim);">SCP-3999</span> <span style="color:var(--crimson);">研究员塔罗兰</span>';
+                    }
                     replyDiv.innerHTML =
                       '驳回隔离提案：研究员塔罗兰须<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">留在 Site-118 接受常规观测与同事协助</span>' +
                       '<span class="tok-threat" id="a3-l1-threat" style="color:var(--crimson); font-weight:700; cursor:pointer;">与一切人类断绝联系，并在偏僻之地迅速自我了断。</span>';
                     scrollDoc();
 
                     setTool('strike');
-                    setHint('3999 原地篡改了后半句！立即用 [1] 【数据删除】 或 [2] 删除线 压制红字！', true);
-                    setReferenceCards('使用工具压制被劫持的红字', []);
+                    setHint('文档已被篡改。', true);
+                    setReferenceCards('压制被篡改的内容', []);
 
                     const threatSpan = document.getElementById('a3-l1-threat');
                     if (threatSpan) {
@@ -3021,289 +3275,739 @@
                           this.className = 'tok tok-struck';
                         }
 
-                        // 3999 冷酷反击补刀
+                        // 沉默 1.4s 后，冷静整段覆写否定存在
                         addTimeout(function () {
-                          Sound.glitch(0.2);
-                          const rip = document.createElement('div');
-                          rip.style.color = '#ff5252';
-                          rip.style.fontSize = '13.5px';
-                          rip.style.marginTop = '8px';
-                          rip.textContent = '（遮盖无效。备选方案：与一切动物断绝联系，或将其发射到太阳。）';
-                          box.appendChild(rip);
+                          Sound.glitch(0.18);
+                          Sound.setDrone(0.65);
+                          replyDiv.innerHTML =
+                            '<div style="color:var(--text-dim); text-decoration:line-through; margin-bottom:6px;">驳回隔离提案：研究员塔罗兰须留在 Site-118 接受常规观测与同事协助。</div>' +
+                            '<div style="color:var(--crimson); font-weight:700;">特殊收容措施（修订版）：研究员塔罗兰不存在。</div>';
+                          linkTalloranInNode(replyDiv, '2');
                           scrollDoc();
+                          setHint('', false);
 
-                          addTimeout(runAct3Layer2, 900);
-                        }, 300);
+                          addTimeout(spawnExistCard, 1500);
+                        }, 1400);
                       });
                     }
-                  }, 400);
+                  }, 1400);
                 });
               }
             }
           ]);
-                          }, 500);
-                        });
-                      }, 400);
-                    }, 650);
-                  });
-                }, 400);
-              }, 650);
-            });
-          });
-        });
-      }
-
-      // 第二层：精准的官僚恶意（“越遮盖，细节越血腥具体”）
-      function runAct3Layer2() {
-        const box = document.createElement('div');
-        box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[特殊收容措施 · 附录 3999-B]</div>' +
-          '<p style="margin:0;"><span class="real-anchor" data-anchor="3">研究员塔罗兰</span>的家属将被<span class="tok-threat" id="a3-l2-threat1" style="color:var(--crimson); font-weight:700; cursor:pointer;">逐一处决</span>。</p>';
-        el.docDynamic.appendChild(box);
-        scrollDoc();
-
-        setTool('redact');
-        setHint('3999 正在起草针对家属的条款！使用 [1] 【数据删除】 遮盖“逐一处决”！', true);
-        setReferenceCards('遮盖针对家属的处决指令', []);
-
-        const t1 = document.getElementById('a3-l2-threat1');
-        if (t1) {
-          t1.addEventListener('click', function () {
-            if (this.getAttribute('data-done')) return;
-            this.setAttribute('data-done', '1');
-            Sound.key(false);
-            this.textContent = '【数据删除】';
-            this.className = 'tok tok-redacted';
-
-            // 涂黑触发细节恶化：3999 撕开涂黑并原地喷出极端冷血公文细节
-            addTimeout(function () {
-              Sound.glitch(0.35);
-              shake();
-              const expansion = document.createElement('div');
-              expansion.style.color = '#ff5252';
-              expansion.style.fontSize = '13.5px';
-              expansion.style.marginTop = '8px';
-              expansion.style.lineHeight = '1.7';
-              expansion.innerHTML =
-                '（3999 撕开了涂黑块：细节恶化）<br />' +
-                '从机动特遣队挑选在黑尔精神病态评价量表中得分 30 以上的特工。首先处决其父母，随后抵达宾夕法尼亚州立大学，使用配备消音器的雷明顿 700 狙击步枪近距离点射爆头处决其妹妹，并将尸体钉在办公室门外泼上 10 公升汽油点燃。';
-              box.appendChild(expansion);
-              scrollDoc();
-
-              // 底部参考栏弹出保护卡片
-              addTimeout(function () {
-                setReferenceCards('写入保护条款', [
-                  {
-                    tag: '',
-                    text: '立即保护研究员塔罗兰的所有同事与直系亲属。',
-                    highlight: true,
-                    onClick: function () {
-                      setReferenceCards('正在写入……', []);
-                      const replyDiv = document.createElement('div');
-                      replyDiv.className = 'clinical-entry';
-                      el.docDynamic.appendChild(replyDiv);
-                      scrollDoc();
-
-                      typeInto(replyDiv, this.text, false, 18, function () {
-                        // 3999 再次半截劫持篡改
-                        addTimeout(function () {
-                          Sound.glitch(0.32);
-                          shake();
-                          replyDiv.innerHTML =
-                            '立即<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">保护研究员塔罗兰的所有同事与直系亲属</span>' +
-                            '在站点自助餐厅向所有与塔罗兰接触过的员工投毒（直至并包括 O5 议会成员），<span class="tok-threat" id="a3-l2-threat2" style="color:var(--crimson); font-weight:700; cursor:pointer;">所有同事须在其面前砍掉手掌并剜去双眼</span>。';
-                          scrollDoc();
-
-                          setTool('strike');
-                          setHint('指令再次被恶意篡改！用 [2] 删除线 或 [1] 【数据删除】 压制红字！', true);
-                          setReferenceCards('压制恶意篡改的条款', []);
-
-                          const t2 = document.getElementById('a3-l2-threat2');
-                          if (t2) {
-                            t2.addEventListener('click', function () {
-                              if (this.getAttribute('data-done')) return;
-                              this.setAttribute('data-done', '1');
-                              Sound.key(false);
-                              if (State.tool === 'redact') {
-                                this.textContent = '【数据删除】';
-                                this.className = 'tok tok-redacted';
-                              } else {
-                                this.className = 'tok tok-struck';
-                              }
-                              addTimeout(runAct3Layer3, 800);
-                            });
-                          }
-                        }, 400);
-                      });
-                    }
-                  }
-                ]);
-              }, 600);
-            }, 350);
-          });
-        }
-      }
-
-      // 第三层：逻辑互斥排比 + 塔罗兰绝望荒诞收容提案（玩家写入）+ 剧本转场
-      function runAct3Layer3() {
-        const box = document.createElement('div');
-        box.className = 'anomaly-entry';
-        box.innerHTML =
-          '<div style="font-size:12.5px; color:var(--crimson); margin-bottom:8px;">[收容逻辑雪崩 · 互斥冲突指令]</div>' +
-          '<div id="a3-l3-lines"></div>';
-        el.docDynamic.appendChild(box);
-        scrollDoc();
-
-        const linesBox = document.getElementById('a3-l3-lines');
-        setTool('strike');
-        setHint('互斥命令过载！用 [2] 删除线 划掉红色冲突指令！', true);
-        setReferenceCards('划掉互斥冲突指令', []);
-
-        // 1. 高频互斥排比拉锯：依次弹出 3 条互相打架的短命令
-        function spawnMutex1() {
-          const p1 = document.createElement('p');
-          p1.style.margin = '0 0 8px';
-          p1.innerHTML = '<span class="real-anchor" data-anchor="4">研究员塔罗兰</span><span class="tok-threat" style="color:var(--crimson); font-weight:700; cursor:pointer;">被终结。</span>';
-          linesBox.appendChild(p1);
-          Sound.key(true);
-          scrollDoc();
-
-          const target = p1.querySelector('.tok-threat');
-          target.addEventListener('click', function () {
-            if (this.getAttribute('data-done')) return;
-            this.setAttribute('data-done', '1');
-            this.className = 'tok tok-struck';
-            Sound.key(false);
-            addTimeout(spawnMutex2, 240);
-          });
         }
 
-        function spawnMutex2() {
-          const p2 = document.createElement('p');
-          p2.style.margin = '0 0 8px';
-          p2.innerHTML = '研究员塔罗兰须通过必要一切手段<span class="tok-threat" style="color:var(--crimson); font-weight:700; cursor:pointer;">被维持存活。</span>';
-          linesBox.appendChild(p2);
-          Sound.key(true);
-          scrollDoc();
-
-          const target = p2.querySelector('.tok-threat');
-          target.addEventListener('click', function () {
-            if (this.getAttribute('data-done')) return;
-            this.setAttribute('data-done', '1');
-            this.className = 'tok tok-struck';
-            Sound.key(false);
-            addTimeout(spawnMutex3, 240);
-          });
-        }
-
-        function spawnMutex3() {
-          const p3 = document.createElement('p');
-          p3.style.margin = '0 0 8px';
-          p3.innerHTML = '<span class="tok-threat" style="color:var(--crimson); font-weight:700; cursor:pointer;">研究员塔罗兰不是 SCP-3999。研究员塔罗兰与 SCP-3999 之间存在深刻的联系。</span>';
-          linesBox.appendChild(p3);
-          Sound.key(true);
-          scrollDoc();
-
-          const target = p3.querySelector('.tok-threat');
-          target.addEventListener('click', function () {
-            if (this.getAttribute('data-done')) return;
-            this.setAttribute('data-done', '1');
-            this.className = 'tok tok-struck';
-            Sound.key(false);
-            // 互斥指令化解后，转入塔罗兰（玩家）主动写入荒诞降维收容提案
-            addTimeout(spawnTalloranAbsurdClauses, 400);
-          });
-        }
-
-        // 2. 条款由塔罗兰起草（甜瓜、邓氏狼、不可与香薰蜡烛混淆）
-        function spawnTalloranAbsurdClauses() {
-          setHint('起草收容与自我认知锚定条款。', false);
-          setReferenceCards('起草收容条款', [
+        function spawnExistCard() {
+          let clicked = false;
+          setReferenceCards('存在性声明', [
             {
-              tag: '',
-              text: 'SCP-3999 将被甜瓜收容。SCP-3999 将被邓氏狼吞噬。',
+              tag: '[声明存在]',
+              text: '我存在。研究员塔罗兰，编号 ████-77-T。这份文档是我起草的。',
               highlight: true,
               onClick: function () {
-                setReferenceCards('正在录入收容条款……', []);
-                const c1 = document.createElement('div');
-                c1.className = 'clinical-entry';
-                el.docDynamic.appendChild(c1);
+                if (clicked) return;
+                clicked = true;
+                setReferenceCards('正在写入……', []);
+                const existDiv = document.createElement('div');
+                existDiv.className = 'clinical-entry';
+                host.appendChild(existDiv);
                 scrollDoc();
 
-                typeInto(c1, this.text, false, 16, function () {
-                  // 接着弹出第二张：认知锚定条款（包含 anchor 5）
+                typeInto(existDiv, this.text, false, 24, function () {
                   addTimeout(function () {
-                    let candleDone = false;
-                    setReferenceCards('认知锚定条款', [
-                      {
-                        tag: '',
-                        text: '关键条款：研究员塔罗兰不可与香薰蜡烛混淆。',
-                        highlight: true,
-                        onClick: function () {
-                          if (candleDone) return;
-                          candleDone = true;
-                          setReferenceCards('正在写入认知锚定……', []);
-                          const c2 = document.createElement('div');
-                          c2.className = 'clinical-entry';
-                          // 此处确保写入包含 real-anchor 5
-                          c2.innerHTML = '关键条款：<span class="real-anchor" data-anchor="5">研究员塔罗兰</span>不可与香薰蜡烛混淆。';
-                          el.docDynamic.appendChild(c2);
-                          Sound.key(false);
-                          scrollDoc();
+                    Sound.glitch(0.15);
+                    existDiv.innerHTML = '<span style="color:var(--crimson); text-decoration:line-through;">' + existDiv.textContent + '</span>';
+                    linkTalloranInNode(existDiv, '2');
+                    scrollDoc();
+                    addTimeout(function () { runAct3PhaseB2(host); }, 1300);
+                  }, 1200);
+                });
+              }
+            }
+          ]);
+        }
+      }
 
-                          // 3999 划掉甜瓜收容条款并嘲弄咆哮
-                          addTimeout(function () {
-                            Sound.glitch(0.28);
-                            shake();
-                            c1.innerHTML = '<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">' + c1.textContent + '</span>';
-                            const taunt = document.createElement('div');
-                            taunt.style.color = '#ff5252';
-                            taunt.style.fontSize = '13.5px';
-                            taunt.style.marginTop = '8px';
-                            taunt.textContent = '（3999 咆哮：甜瓜腐烂。邓氏狼灭绝。你依然在我的腹中。）';
-                            el.docDynamic.appendChild(taunt);
-                            scrollDoc();
+      // -----------------------------------------------------------------------
+      // Phase B2：人员名单 + 细节恶化（anchor 3）+ 官僚式劫持
+      // -----------------------------------------------------------------------
+      function runAct3PhaseB2(container) {
+        const host = container || el.docDynamic;
+        let box = null;
+        setHint('', false);
+        setReferenceCards('', []);
 
-                            // 切出剧本转场
-                            addTimeout(spawnScriptTransition, 700);
-                          }, 450);
-                        }
-                      }
-                    ]);
-                  }, 200);
+        // Step 1：SCP 文档处决记录（路线一，有名字有脸的目标）
+        const rosterLines = [
+          '处决记录 // 编号：EXEC-4192803（关联目标清零）',
+          '目标 01：████████ 博士（文献归档部门，连续五年无事故记录）—— 已纳入连带处决队列。',
+          '目标 02：████████（行政助理，每周三在自助餐厅为塔罗兰留一份咖啡，不加糖）—— 已纳入连带处决队列。',
+          '目标 03：████████（MTF-Pi-1 副队长，曾两次在演习中与塔罗兰搭档）—— 已纳入连带处决队列。',
+          '目标 04–05：塔罗兰父母（████，宾夕法尼亚州）—— 已锁定坐标。',
+          '目标 06：塔罗兰妹妹（████，宾夕法尼亚州立大学在读）—— 已锁定坐标。'
+        ];
+
+        let rIdx = 0;
+        function startRosterSync() {
+          box = document.createElement('div');
+          box.className = 'anomaly-entry';
+          host.appendChild(box);
+          scrollDoc();
+          setReferenceCards('正在同步处决记录……', []);
+          nextRosterLine();
+        }
+
+        function nextRosterLine() {
+          if (rIdx >= rosterLines.length) {
+            addTimeout(spawnUnreadEchoes, 2600);
+            return;
+          }
+          const line = document.createElement('div');
+          line.style.fontSize = rIdx === 0 ? '13.5px' : '14px';
+          line.style.color = rIdx === 0 ? 'var(--crimson)' : 'var(--text-main)';
+          if (rIdx === 0) line.style.fontWeight = '700';
+          line.style.marginBottom = rIdx === 0 ? '8px' : '4px';
+          line.textContent = rosterLines[rIdx++];
+          box.appendChild(line);
+          Sound.key(false);
+          scrollDoc();
+          addTimeout(nextRosterLine, 1500);
+        }
+
+        startRosterSync();
+
+        // Step 1.5：单向联络回响（未读讯息当场熄灭）
+        function spawnUnreadEchoes() {
+          const msgBox = document.createElement('div');
+          msgBox.className = 'script-box';
+          msgBox.style.fontSize = '13.5px';
+          host.appendChild(msgBox);
+
+          const m1 = document.createElement('div');
+          m1.style.marginBottom = '8px';
+          m1.innerHTML =
+            '<div style="color:var(--text-dim); font-size:12.5px;"><span id="a3-b2-m1-status">[内部讯息 · 未读]</span> 发件人：████████（行政助理）</div>' +
+            '<div>“你今天没来餐厅，咖啡已经凉了。外面的警报是怎么回事？”</div>';
+          msgBox.appendChild(m1);
+          Sound.key(false);
+          scrollDoc();
+
+          addTimeout(function () {
+            const m2 = document.createElement('div');
+            m2.innerHTML =
+              '<div style="color:var(--text-dim); font-size:12.5px;"><span id="a3-b2-m2-status">[外网邮件 · 未读]</span> 发件人：████（宾夕法尼亚州立大学）</div>' +
+              '<div>“哥，我刚下课，你上周说这周能打电话……”</div>';
+            msgBox.appendChild(m2);
+            Sound.key(false);
+            scrollDoc();
+
+            addTimeout(function () {
+              Sound.glitch(0.24);
+              const s1 = document.getElementById('a3-b2-m1-status');
+              const s2 = document.getElementById('a3-b2-m2-status');
+              if (s1) {
+                s1.textContent = '[已注销 · 无遗言]';
+                s1.style.color = 'var(--crimson)';
+                s1.style.fontWeight = '700';
+              }
+              if (s2) {
+                s2.textContent = '[已确认终结]';
+                s2.style.color = 'var(--crimson)';
+                s2.style.fontWeight = '700';
+              }
+              scrollDoc();
+              addTimeout(spawnExecutionClause, 2200);
+            }, 3800);
+          }, 3200);
+        }
+
+        // Step 2：处决条款（anchor 3）+ 三段式撕开恶化
+        function spawnExecutionClause() {
+          const p = document.createElement('p');
+          p.style.margin = '12px 0 0';
+          p.innerHTML = '<span class="real-anchor" data-anchor="3">研究员塔罗兰</span>的家属将被<span class="tok-threat" id="a3-b2-threat1" style="color:var(--crimson); font-weight:700; cursor:pointer;">逐一处决</span>。';
+          box.appendChild(p);
+          Sound.glitch(0.2);
+          scrollDoc();
+
+          setTool('redact');
+          setReferenceCards('遮盖处决条款', []);
+
+          const t1 = document.getElementById('a3-b2-threat1');
+          if (t1) {
+            t1.addEventListener('click', function () {
+              if (this.getAttribute('data-done')) return;
+              this.setAttribute('data-done', '1');
+              Sound.key(false);
+              this.textContent = '【数据删除】';
+              this.className = 'tok tok-redacted';
+
+              addTimeout(function () {
+                Sound.glitch(0.35);
+                shake();
+
+                const d1 = document.createElement('div');
+                d1.style.color = '#ff5252';
+                d1.style.marginTop = '8px';
+                d1.textContent = '从机动特遣队挑选黑尔精神病态评价量表得分 30 以上的特工，先在宾夕法尼亚州处决其父母。';
+                box.appendChild(d1);
+                scrollDoc();
+
+                addTimeout(function () {
+                  Sound.glitch(0.22);
+                  const d2 = document.createElement('div');
+                  d2.style.color = '#ff5252';
+                  d2.style.marginTop = '4px';
+                  d2.textContent = '随后抵达宾夕法尼亚州立大学，使用配备消音器的雷明顿 700 狙击步枪近距离点射。';
+                  box.appendChild(d2);
+                  scrollDoc();
+
+                  addTimeout(function () {
+                    Sound.glitch(0.18);
+                    const d3 = document.createElement('div');
+                    d3.style.color = '#ff5252';
+                    d3.style.marginTop = '4px';
+                    d3.textContent = '将尸体钉在办公室门外，泼上 10 公升汽油点燃。';
+                    box.appendChild(d3);
+                    scrollDoc();
+
+                    addTimeout(spawnPanicCard, 1600);
+                  }, 2000);
+                }, 2200);
+              }, 700);
+            });
+          }
+        }
+
+        // Step 3a：慌乱求生卡片（被当场否定后才退回公文模板）
+        function spawnPanicCard() {
+          let clicked = false;
+          setReferenceCards('', [
+            {
+              tag: '',
+              text: '冲我来，别动宾夕法尼亚那边。',
+              highlight: true,
+              onClick: function () {
+                if (clicked) return;
+                clicked = true;
+                setReferenceCards('', []);
+                const panicDiv = document.createElement('div');
+                panicDiv.className = 'clinical-entry';
+                host.appendChild(panicDiv);
+                scrollDoc();
+
+                typeStuttered(panicDiv, this.text, false, 26, function () {
+                  addTimeout(function () {
+                    Sound.glitch(0.25);
+                    shake();
+                    panicDiv.innerHTML =
+                      '<span style="color:var(--text-dim); text-decoration:line-through;">' + panicDiv.textContent + '</span>' +
+                      ' <span style="color:var(--crimson); font-weight:700;">（驳回。）</span>';
+                    linkTalloranInNode(panicDiv, '3');
+                    scrollDoc();
+                    addTimeout(spawnProtectCard, 1100);
+                  }, 1100);
                 });
               }
             }
           ]);
         }
 
-        // 3. 剧本碎片无缝衔接首次采访
-        function spawnScriptTransition() {
-          const sBox = document.createElement('div');
-          sBox.className = 'script-box';
-          sBox.innerHTML =
-            '<div style="color:#94a3b8; font-size:13px; margin-bottom:6px;">内部 某收容室 - 夜间</div>' +
-            '<div><strong>塔罗兰：</strong>让我出去！让我出去！这不好笑伙计们！这东西会在这儿慢慢杀死我！外面有人在吗？</div>' +
-            '<div style="color:#ff5252; margin-top:4px;"><strong>SCP-3999：</strong>（发出可怖的尖啸。混沌在门缝外剧烈撞击。）</div>';
-          el.docDynamic.appendChild(sBox);
+        // Step 3b：退回标准保护卡片 + 官僚式劫持
+        function spawnProtectCard() {
+          let clicked = false;
+          setReferenceCards('写入保护条款', [
+            {
+              tag: '',
+              text: '立即保护研究员塔罗兰的所有同事与直系亲属。',
+              highlight: true,
+              onClick: function () {
+                if (clicked) return;
+                clicked = true;
+                setReferenceCards('正在写入……', []);
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'clinical-entry';
+                host.appendChild(replyDiv);
+                scrollDoc();
+
+                typeStuttered(replyDiv, this.text, false, 24, function () {
+                  addTimeout(function () {
+                    Sound.glitch(0.28);
+                    shake();
+                    replyDiv.innerHTML =
+                      '立即<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">保护研究员塔罗兰的所有同事与直系亲属</span>' +
+                      '<span class="tok-threat" id="a3-b2-threat2" style="color:var(--crimson); font-weight:700; cursor:pointer;">确认以上所有行动均已完成，并记录于案。</span>';
+                    scrollDoc();
+
+                    setTool('strike');
+                    setReferenceCards('划除篡改条款', []);
+
+                    const t2 = document.getElementById('a3-b2-threat2');
+                    if (t2) {
+                      t2.addEventListener('click', function () {
+                        if (this.getAttribute('data-done')) return;
+                        this.setAttribute('data-done', '1');
+                        Sound.key(false);
+                        if (State.tool === 'redact') {
+                          this.textContent = '【数据删除】';
+                          this.className = 'tok tok-redacted';
+                        } else {
+                          this.className = 'tok tok-struck';
+                        }
+                        linkTalloranInNode(box, '3');
+                        linkTalloranInNode(replyDiv, '3');
+                        addTimeout(function () { spawnLoop1End(host); }, 1100);
+                      });
+                    }
+                  }, 1300);
+                });
+              }
+            }
+          ]);
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Loop 1 终点：先出现可划掉的“已被终结” -> 维持存活 -> 被划掉 -> 再次被终结（anchor 4）-> 1.5s 黑屏冷重启
+      // -----------------------------------------------------------------------
+      function spawnLoop1End(host) {
+        setHint('', false);
+        setTool('strike');
+        setReferenceCards('划除异常判定', []);
+
+        const preBox = document.createElement('div');
+        preBox.className = 'anomaly-entry';
+        preBox.innerHTML = '<span class="tok-threat" id="a3-l1-preterm" style="color:var(--crimson); font-weight:700; cursor:pointer;">研究员塔罗兰已被终结。</span>';
+        host.appendChild(preBox);
+        Sound.key(true);
+        scrollDoc();
+
+        const preTerm = document.getElementById('a3-l1-preterm');
+        if (preTerm) {
+          preTerm.addEventListener('click', function () {
+            if (this.getAttribute('data-done')) return;
+            this.setAttribute('data-done', '1');
+            this.className = 'tok tok-struck';
+            Sound.key(false);
+            linkTalloranInNode(preBox, '4');
+            addTimeout(spawnSurviveCard, 600);
+          });
+        }
+
+        function spawnSurviveCard() {
+          let clicked = false;
+          setReferenceCards('', [
+            {
+              tag: '',
+              text: '研究员塔罗兰须通过必要一切手段被维持存活。',
+              highlight: true,
+              onClick: function () {
+                if (clicked) return;
+                clicked = true;
+                setReferenceCards('', []);
+                const r2Div = document.createElement('div');
+                r2Div.className = 'clinical-entry';
+                host.appendChild(r2Div);
+                scrollDoc();
+
+                typeStuttered(r2Div, this.text, false, 24, function () {
+                  addTimeout(function () {
+                    Sound.glitch(0.22);
+                    r2Div.innerHTML = '<span style="color:var(--crimson); text-decoration:line-through;">' + r2Div.textContent + '</span>';
+                    linkTalloranInNode(r2Div, '4');
+                    scrollDoc();
+
+                    addTimeout(function () {
+                      const endBox = document.createElement('div');
+                      endBox.className = 'anomaly-entry';
+                      const pEnd = document.createElement('p');
+                      pEnd.style.margin = '0';
+                      pEnd.innerHTML = '<span class="real-anchor" data-anchor="4">研究员塔罗兰</span>';
+                      endBox.appendChild(pEnd);
+                      host.appendChild(endBox);
+                      scrollDoc();
+
+                      const spanEnd = document.createElement('span');
+                      spanEnd.style.color = 'var(--crimson)';
+                      spanEnd.style.fontWeight = '700';
+                      pEnd.appendChild(spanEnd);
+
+                      typeInto(spanEnd, '被终结。', true, 45, function () {
+                        addTimeout(function () {
+                          el.flash.style.opacity = '1';
+                          Sound.silenceImmediate();
+                          Sound.whiteNoiseBeep(0.2);
+                          addTimeout(function () {
+                            host.classList.add('loop-archived-hidden');
+                            el.flash.style.opacity = '0';
+                            runAct3Loop2();
+                          }, 1500);
+                        }, 1400);
+                      });
+                    }, 900);
+                  }, 1100);
+                });
+              }
+            }
+          ]);
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // 第二次重开：Loop #4,192,804（明牌塔罗兰收容与处决界面 -> 接回“不是 3999”及后续）
+      // -----------------------------------------------------------------------
+      function runAct3Loop2() {
+        document.title = '草稿(4,192,804) - 未保存';
+        el.vignette.style.opacity = '0.84';
+        if (el.docTitle) el.docTitle.innerHTML = '项目编号：<span style="color:var(--crimson);">研究员塔罗兰</span>';
+        if (el.docClass) el.docClass.innerHTML = '项目等级：<strong style="color:var(--crimson);">待处决</strong>';
+        if (el.docAuthBar) el.docAuthBar.innerHTML = '<span style="color:var(--crimson);">收容状态：第 4,192,804 次循环处决中</span>';
+        setTelemetry('0.08 Hm', '临界崩溃', '#4,192,804', true);
+        Sound.setDrone(0.62);
+        el.docScroll.scrollTo({ top: 0, behavior: 'auto' });
+
+        log('终端重启：Loop #4,192,804。', 'danger');
+
+        const loop2Wrap = document.createElement('div');
+        loop2Wrap.id = 'a3-loop2-wrap';
+        el.docDynamic.appendChild(loop2Wrap);
+
+        // 完整复刻开篇文档结构，但内容已彻底替换成针对塔罗兰的收容与处决档案
+        const docBase = document.createElement('div');
+        docBase.className = 'doc-section';
+        docBase.innerHTML =
+          '<p><span class="field-key" style="color:var(--crimson);">特殊收容措施：</span>' +
+          '研究员塔罗兰现收容于 Site-118 感官剥夺气密单元内。收容间由无门窗的封闭腔体构成，内部不设任何斯克兰顿现实稳定锚。对象须在循环重置中持续承受物理重塑、高温灼烧与记忆剥离，直至认知彻底瓦解。</p>' +
+          '<p>本收容对象已由<span class="tok tok-redacted">【数据删除】</span>移交处置，经循环协议自动核准，永久剥夺其 3 级编辑权限及全部站点联络通道。</p>' +
+          '<p><span class="field-key" style="color:var(--crimson);">前期观测与处决记录：</span>' +
+          '关联人员及直系亲属已全部清零。对象在第 4,192,803 次循环中试图写入存活条款的行为已被判定为异常抵抗，当前正在执行第 4,192,804 次本体终结。</p>' +
+          '<p><span class="field-key">描述：</span></p>';
+        loop2Wrap.appendChild(docBase);
+        linkTalloranInNode(docBase, '5');
+        Sound.key(true);
+        scrollDoc();
+
+        setHint('', false);
+        let futileClicked = false;
+        setReferenceCards('', [
+          {
+            tag: '',
+            text: '申请复核 / 终止处决程序',
+            highlight: false,
+            onClick: function () {
+              if (futileClicked) return;
+              futileClicked = true;
+              setReferenceCards('', []);
+              Sound.glitch(0.22);
+              const deny = document.createElement('div');
+              deny.className = 'anomaly-entry';
+              deny.style.color = 'var(--crimson)';
+              deny.style.fontWeight = '700';
+              deny.textContent = '权限不足。收容物无权修改自身处决协议。';
+              loop2Wrap.appendChild(deny);
+              scrollDoc();
+              addTimeout(function () { spawnLoop2MemoryFragment(loop2Wrap); }, 1500);
+            }
+          }
+        ]);
+
+        // 草稿残片（挪至“收容物无权修改自身处决协议”之后）
+        function spawnLoop2MemoryFragment(host) {
+          const frag = document.createElement('div');
+          frag.className = 'script-box';
+          frag.style.transition = 'opacity 0.5s ease';
+          const header = document.createElement('div');
+          header.style.color = '#94a3b8';
+          header.style.fontSize = '13px';
+          header.style.marginBottom = '8px';
+          header.textContent = '[附件：草稿残片，作者不明，日期不明]';
+          frag.appendChild(header);
+
+          const fragLines = [
+            '我记得窗外有光。',
+            '或者我以为我记得。',
+            '现在想想，那个光可能从未在那里。',
+            '',
+            '我无法确认我的手有多少根手指。',
+            '我数了七次，每次得出不同的结果。',
+            '',
+            '我能确认的：有人在喊我的名字。',
+            '我能确认的：喊声在某一刻停了。',
+            '我不知道是因为他们放弃了，还是因为他们消失了。'
+          ];
+
+          host.appendChild(frag);
           scrollDoc();
 
-          setHint('现实维度急剧震颤！点击底部【参考栏】向系统发起身份核验！', true);
+          let fIdx = 0;
+          function nextFragLine() {
+            if (fIdx >= fragLines.length) {
+              addTimeout(function () {
+                Sound.glitch(0.25);
+                frag.style.textDecoration = 'line-through';
+                frag.style.color = 'var(--crimson)';
+                frag.style.opacity = '0.55';
+                addTimeout(function () {
+                  frag.style.opacity = '0';
+                  addTimeout(function () {
+                    frag.remove();
+                    runAct3PhaseC(host);
+                  }, 600);
+                }, 1800);
+              }, 4500);
+              return;
+            }
+            const txt = fragLines[fIdx++];
+            const row = document.createElement('div');
+            if (!txt) {
+              row.style.height = '8px';
+            } else {
+              row.textContent = txt;
+              row.style.opacity = '0';
+              row.style.transition = 'opacity 0.65s ease';
+              requestAnimationFrame(function () {
+                row.style.opacity = '1';
+              });
+            }
+            frag.appendChild(row);
+            scrollDoc();
+            addTimeout(nextFragLine, txt ? 1150 : 500);
+          }
+
+          addTimeout(nextFragLine, 700);
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Phase C：匿名“不是 3999” -> 私人备注 -> 香薰蜡烛折磨与反制（anchor 5）
+      // -----------------------------------------------------------------------
+      function runAct3PhaseC(container) {
+        const host = container || el.docDynamic;
+        setHint('', false);
+        setTool('strike');
+        setReferenceCards('', []);
+
+        // C1 回合 3：分两行依次静默淡入并依次被划掉
+        function spawnC1Round3() {
+          const p3a = document.createElement('p');
+          p3a.style.margin = '14px 0 8px';
+          p3a.style.opacity = '0';
+          p3a.style.transition = 'opacity 0.6s ease';
+          p3a.style.color = 'var(--text-main)';
+          p3a.innerHTML = '<span id="a3-c1-amb-1">研究员塔罗兰不是 SCP-3999。</span>';
+          host.appendChild(p3a);
+          scrollDoc();
+
+          requestAnimationFrame(function () {
+            p3a.style.opacity = '1';
+          });
+
+          const amb1 = document.getElementById('a3-c1-amb-1');
+          addTimeout(function () {
+            if (amb1) {
+              amb1.className = 'tok tok-struck';
+              Sound.glitch(0.14);
+            }
+            linkTalloranInNode(p3a, '5');
+
+            addTimeout(function () {
+              const p3b = document.createElement('p');
+              p3b.style.margin = '0 0 14px';
+              p3b.style.opacity = '0';
+              p3b.style.transition = 'opacity 0.6s ease';
+              p3b.style.color = 'var(--text-main)';
+              p3b.innerHTML = '<span id="a3-c1-amb-2">研究员塔罗兰与 SCP-3999 之间存在深刻的联系。</span>';
+              host.appendChild(p3b);
+              scrollDoc();
+
+              requestAnimationFrame(function () {
+                p3b.style.opacity = '1';
+              });
+
+              const amb2 = document.getElementById('a3-c1-amb-2');
+              addTimeout(function () {
+                if (amb2) {
+                  amb2.className = 'tok tok-struck';
+                  Sound.glitch(0.14);
+                }
+                linkTalloranInNode(p3b, '5');
+                addTimeout(spawnPrivateNote, 1200);
+              }, 2400);
+            }, 950);
+          }, 2200);
+        }
+
+        spawnC1Round3();
+
+        // C1.5：私人备注（路线三，冷静统计）
+        function spawnPrivateNote() {
+          const noteBox = document.createElement('div');
+          noteBox.className = 'anomaly-entry';
+          noteBox.style.whiteSpace = 'pre-line';
+          noteBox.style.color = 'var(--text-main)';
+          host.appendChild(noteBox);
+          scrollDoc();
+
+          const noteText =
+            '备注（来源不明）：\n\n' +
+            'Loop #3,847,201，第301天。\n' +
+            '研究员塔罗兰在此循环中共发出43次求助信号。\n' +
+            '其中21次在送达前被截断。\n' +
+            '其余22次均被接收并予以回应。\n' +
+            '回应者均已在 Loop #3,847,201 结束前终结。\n\n' +
+            'Loop #3,847,202，第1天。\n' +
+            '研究员塔罗兰重新开始填写建档表格。';
+
+          typeInto(noteBox, noteText, false, 42, function () {
+            linkTalloranInNode(noteBox, '4');
+            addTimeout(spawnCandleTorment, 3500);
+          });
+        }
+
+        // C2：3999 陈述事实般施加香薰蜡烛折磨 + 塔罗兰两张卡片反制
+        function spawnCandleTorment() {
+          const candleBox = document.createElement('div');
+          candleBox.className = 'anomaly-entry';
+          candleBox.style.color = 'var(--crimson)';
+          candleBox.style.fontWeight = '700';
+          host.appendChild(candleBox);
+          Sound.glitch(0.22);
+          scrollDoc();
+
+          const tormentText = '研究员塔罗兰是一支正在燃烧的香薰蜡烛。蜡油正在高温中融化、流淌并碳化，他在持续的灼烧剧痛中消耗自身，直至彻底燃尽。';
+          typeInto(candleBox, tormentText, true, 34, function () {
+            linkTalloranInNode(candleBox, '5');
+            addTimeout(spawnAbsurdCards, 1500);
+          });
+        }
+
+        function spawnAbsurdCards() {
+          let melonDone = false;
+          let candleDone = false;
+          let melonDiv = null;
+
+          function renderRemainingCards() {
+            const cards = [];
+            if (!melonDone) {
+              cards.push({
+                tag: '',
+                text: 'SCP-3999 将被甜瓜收容。SCP-3999 将被邓氏狼吞噬。',
+                highlight: true,
+                onClick: function () {
+                  if (melonDone) return;
+                  melonDone = true;
+                  renderRemainingCards();
+                  melonDiv = document.createElement('div');
+                  melonDiv.className = 'clinical-entry';
+                  host.appendChild(melonDiv);
+                  scrollDoc();
+                  typeStuttered(melonDiv, this.text, false, 20, checkBothDone);
+                }
+              });
+            }
+            if (!candleDone) {
+              cards.push({
+                tag: '',
+                text: '关键条款：研究员塔罗兰不可与香薰蜡烛混淆。',
+                highlight: true,
+                onClick: function () {
+                  if (candleDone) return;
+                  candleDone = true;
+                  renderRemainingCards();
+                  const c2 = document.createElement('div');
+                  c2.className = 'clinical-entry';
+                  c2.innerHTML = '关键条款：<span class="real-anchor" data-anchor="5">研究员塔罗兰</span>不可与香薰蜡烛混淆。';
+                  host.appendChild(c2);
+                  Sound.key(false);
+                  scrollDoc();
+                  checkBothDone();
+                }
+              });
+            }
+            setReferenceCards('', cards);
+          }
+
+          let reactionTriggered = false;
+          function checkBothDone() {
+            if (!melonDone || !candleDone || reactionTriggered) return;
+            reactionTriggered = true;
+
+            addTimeout(function () {
+              Sound.glitch(0.2);
+              if (melonDiv) {
+                melonDiv.innerHTML = '<span class="tok-struck" style="color:var(--text-dim); text-decoration:line-through;">' + melonDiv.textContent + '</span>';
+              }
+              scrollDoc();
+
+              addTimeout(function () {
+                const tauntBox = document.createElement('div');
+                tauntBox.style.color = 'var(--crimson)';
+                tauntBox.style.fontWeight = '700';
+                tauntBox.style.marginTop = '8px';
+                const tLine1 = document.createElement('div');
+                const tLine2 = document.createElement('div');
+                tLine2.style.marginTop = '4px';
+                tauntBox.appendChild(tLine1);
+                tauntBox.appendChild(tLine2);
+                host.appendChild(tauntBox);
+                scrollDoc();
+
+                typeInto(tLine1, '甜瓜已腐烂。邓氏狼已灭绝。', true, 42, function () {
+                  addTimeout(function () {
+                    // 无键盘音，仅 drone 的冷静陈述
+                    let i = 0;
+                    const msg = '蜡油仍在滴落。你依然在我的腹中。';
+                    const iv = addInterval(function () {
+                      if (State.ended) { clearInterval(iv); return; }
+                      tLine2.textContent += msg.charAt(i);
+                      i++;
+                      scrollDoc();
+                      if (i >= msg.length) {
+                        clearInterval(iv);
+                        addTimeout(function () { runAct3PhaseD(host); }, 1600);
+                      }
+                    }, 42);
+                  }, 1500);
+                });
+              }, 900);
+            }, 1100);
+          }
+
+          renderRemainingCards();
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Phase D：剧本碎片与转场 -> 首次采访
+      // -----------------------------------------------------------------------
+      function runAct3PhaseD(container) {
+        const host = container || el.docDynamic;
+        Sound.whiteNoiseBeep(0.25);
+        const sBox = document.createElement('div');
+        sBox.className = 'script-box';
+        sBox.innerHTML =
+          '<div style="color:#94a3b8; font-size:13px; margin-bottom:6px;">内部 某收容室 - 夜间</div>' +
+          '<div><strong>塔罗兰：</strong>（持续敲门）让我出去！外面有人吗？——这东西会在这里慢慢杀死我的。</div>' +
+          '<div style="color:#ff5252; margin-top:4px;"><strong>SCP-3999：</strong>（尖啸。混沌在门缝外剧烈撞击。）</div>';
+        host.appendChild(sBox);
+        linkTalloranInNode(sBox, '5');
+        scrollDoc();
+
+        addTimeout(function () {
+          setHint('现实维度急剧震颤。', true);
           setReferenceCards('呼叫站点核验系统', [
             {
               tag: '[系统请求 · 身份核验]',
               text: '核验当前站点编号与操作员詹姆斯·塔罗兰身份档案',
               highlight: true,
               onClick: function () {
+                setHint('', false);
                 setReferenceCards('正在接通站点采访记录……', []);
                 startAct3FirstInterview();
               }
             }
           ]);
-        }
-
-        spawnMutex1();
+        }, 800);
       }
 
       // 第三幕阶段 2：自然切入加长版首次采访（Dr. █████████ 删节噪音）
@@ -3656,7 +4360,7 @@
         }
       }
 
-      function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone, intervalMs, chunksPerPara) {
+      function streamOnlyParagraphs(container, totalParas, endsWithExist, onDone, intervalMs, chunksPerPara, keepRefCards) {
         State.a3Stage = 4;
         isOnlyStreaming = true;
         onlyBsCount = 0;
@@ -3665,14 +4369,16 @@
         let paraIndex = 0;
 
         setHint('异常文字持续涌入！按 Backspace 退格键或点击下方按钮尝试清除！', true);
-        setReferenceCards('尝试清除异常写入', [
-          {
-            tag: '[ 退格清除 · Backspace ]',
-            text: '⌫ 退格删除异常字符',
-            highlight: false,
-            onClick: function () { triggerOnlyBackspace(); }
-          }
-        ]);
+        if (!keepRefCards) {
+          setReferenceCards('尝试清除异常写入', [
+            {
+              tag: '[ 退格清除 · Backspace ]',
+              text: '⌫ 退格删除异常字符',
+              highlight: false,
+              onClick: function () { triggerOnlyBackspace(); }
+            }
+          ]);
+        }
 
         function runOneParagraph() {
           if (State.ended) return;
@@ -3695,7 +4401,7 @@
             if (Date.now() < onlyBriefFreezeUntil) return;
 
             const txt = (isLast && endsWithExist && chunkIdx === chunksInPara - 1) ? '只有存在' : '只有只有';
-            appendOnlyChunk(wallPara, txt);
+            appendOnlyChunk(activeOnlyPara || wallPara, txt);
 
             if (chunkIdx % 2 === 0) Sound.key(true);
             if (chunkIdx % 2 === 0) scrollDoc();
@@ -3710,7 +4416,7 @@
               } else {
                 isOnlyStreaming = false;
                 activeOnlyPara = null;
-                setReferenceCards('', []);
+                if (!keepRefCards) setReferenceCards('', []);
                 if (onDone) addTimeout(onDone, 550);
               }
             }
@@ -3723,79 +4429,111 @@
       // 第三幕阶段 4：大提顿仪式与「只有」洪流
       function startAct3OnlyMultiply() {
         State.a3Stage = 4;
+        State.a3HelpClicks = 0;
         setTelemetry('ERR Hm', '极度过速', '#4,192,803', true);
 
         const amcDiv = document.createElement('div');
         amcDiv.className = 'clinical-entry';
-        amcDiv.innerHTML =
-          '<p style="margin-bottom:12px; text-decoration:line-through; color:var(--text-dim); line-height:1.85; font-size:14px; word-break:break-all;">' +
-          '研究员塔罗兰的大学同学所养的宠物将在大提顿国家公园（Grand Teton National Park）的随机地点成为仪式祭品，尸体的脑浆将飞溅在一块岩石上并用一碗黄油爆米花和清爽可口可乐®冲刷。请欣赏节目，只有在AMC影院公司，只有SCP-3999，只有在Applebees，只有在沃尔玛，只有在巴诺书店，只有在家得宝，只有在麦当劳，只有在Wawa，只有在伍兹霍尔海洋研究所，只有在你的地下室，只有在你身后，只在唯一，只有只有只有只有只有只有只有只有只有只有只有只有只有只有</p>';
+        const amcP = document.createElement('p');
+        amcP.style.marginBottom = '12px';
+        amcP.style.textDecoration = 'line-through';
+        amcP.style.color = 'var(--text-dim)';
+        amcP.style.lineHeight = '1.85';
+        amcP.style.fontSize = '14px';
+        amcP.style.wordBreak = 'break-all';
+        amcDiv.appendChild(amcP);
         el.docDynamic.appendChild(amcDiv);
         scrollDoc();
+
+        const amcText = '研究员塔罗兰的大学同学所养的宠物将在大提顿国家公园（Grand Teton National Park）的随机地点成为仪式祭品，尸体的脑浆将飞溅在一块岩石上并用一碗黄油爆米花和清爽可口可乐®冲刷。请欣赏节目，只有在AMC影院公司，只有SCP-3999，只有在Applebees，只有在沃尔玛，只有在巴诺书店，只有在家得宝，只有在麦当劳，只有在Wawa，只有在伍兹霍尔海洋研究所，只有在你的地下室，只有在你身后，只在唯一，只有只有只有只有只有只有只有只有只有只有只有只有只有只有';
 
         setHint('异常文字涌现……', true);
         setReferenceCards('', []);
 
-        // 停顿 1.6 秒让玩家读完大提顿段落，再开始第一大段“只有”慢速渗出并划掉
-        addTimeout(function () {
-          streamOnlyParagraphs(el.docDynamic, 1, false, function () {
-            // 刷完后再停顿 1.2 秒，再弹出【救命，拜托】
-            addTimeout(openHelpModal, 1200);
-          }, 82, 48);
-        }, 1600);
-      }
-
-      // 第三幕阶段 5：中央【救命，拜托】
-      function openHelpModal() {
-        State.a3Stage = 5;
-        State.a3HelpClicks = 0;
-        el.helpNudge.textContent = '';
-        el.helpModal.classList.add('open');
-        Sound.glitch(0.3);
-
-        function armNudgeTimer() {
-          if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
-          State.a3HelpNudgeTimer = setTimeout(function () {
-            if (State.a3Stage === 5 && State.a3HelpClicks < 5) {
-              el.helpNudge.textContent = '多点几次！';
+        const MAX_HELP_CLICKS = 5;
+        let helpCardUnlocked = false;
+        function renderHelpCard() {
+          if (State.a3Stage !== 4 && State.a3Stage !== 5) return;
+          const cards = [
+            {
+              tag: '[ 退格清除 · Backspace ]',
+              text: '⌫ 退格删除异常字符',
+              highlight: false,
+              onClick: function () { triggerOnlyBackspace(); }
             }
-          }, 2400);
+          ];
+          if (helpCardUnlocked && State.a3HelpClicks < MAX_HELP_CLICKS) {
+            cards.push({
+              tag: '',
+              text: '救命，拜托',
+              highlight: true,
+              onClick: function () {
+                if ((State.a3Stage !== 4 && State.a3Stage !== 5) || State.a3HelpClicks >= MAX_HELP_CLICKS) return;
+                State.a3HelpClicks++;
+                Sound.key(false);
+                const p = document.createElement('div');
+                p.className = 'clinical-entry';
+                p.innerHTML = '<p class="help-plea-text" style="margin:6px 0; font-size:15px; font-weight:700; color:#f87171;">救命, 拜托</p>';
+                el.docDynamic.appendChild(p);
+
+                // 停顿一瞬后被 3999 划掉
+                const pleaEl = p.querySelector('.help-plea-text');
+                addTimeout(function () {
+                  if (pleaEl) {
+                    pleaEl.style.textDecoration = 'line-through';
+                    pleaEl.style.color = 'var(--crimson)';
+                    pleaEl.style.opacity = '0.7';
+                    Sound.glitch(0.16);
+                  }
+                }, 400);
+
+                // 让后续涌出的“只有”接着在“救命, 拜托”下方出现
+                if (isOnlyStreaming) {
+                  const nextPara = document.createElement('div');
+                  nextPara.className = 'only-flood-block';
+                  nextPara.style.fontSize = '15px';
+                  nextPara.style.lineHeight = '1.85';
+                  nextPara.style.letterSpacing = '0.5px';
+                  nextPara.style.wordBreak = 'break-all';
+                  nextPara.style.margin = '14px 0';
+                  el.docDynamic.appendChild(nextPara);
+                  activeOnlyPara = nextPara;
+                }
+
+                scrollDoc();
+                renderHelpCard();
+              }
+            });
+          }
+          setReferenceCards('尝试清除异常写入', cards);
         }
 
-        armNudgeTimer();
-
-        el.btnHelpBig.onclick = function () {
-          Sound.unlock();
-          if (State.a3Stage !== 5) return;
-          State.a3HelpClicks++;
-          Sound.key(false);
-
-          if (State.a3HelpClicks < 5) {
-            el.helpNudge.textContent = State.a3HelpClicks >= 2 ? '继续点，多点几次！' : '';
-            armNudgeTimer();
-          } else {
-            if (State.a3HelpNudgeTimer) clearTimeout(State.a3HelpNudgeTimer);
-            el.helpModal.classList.remove('open');
-
-            // 写入文档正文【救命, 拜托】（按原版文档展现，干净单行，不带删除线）
-            const p = document.createElement('div');
-            p.className = 'clinical-entry';
-            p.innerHTML = '<p style="margin:14px 0; font-size:15px; font-weight:700; color:#f87171;">救命, 拜托</p>';
-            el.docDynamic.appendChild(p);
-            scrollDoc();
-
-            // 第二大段“只有”慢速渗出并划掉，随后停顿 2.0 秒给玩家充分反应时间，再出现噩梦
+        // 先逐字打出大提顿段落，停顿 1.8 秒后再开始“只有”渗出；洪流出来一会儿后再浮现“救命，拜托”
+        typeInto(amcP, amcText, true, 24, function () {
+          linkTalloranInNode(amcDiv, '6');
+          addTimeout(function () {
+            renderHelpCard();
+            addTimeout(function () {
+              helpCardUnlocked = true;
+              renderHelpCard();
+            }, 2800);
             streamOnlyParagraphs(el.docDynamic, 1, false, function () {
-              addTimeout(startAct3Nightmares, 2000);
-            }, 82, 48);
-          }
-        };
+              addTimeout(function () {
+                streamOnlyParagraphs(el.docDynamic, 1, false, function () {
+                  setReferenceCards('', []);
+                  addTimeout(startAct3Nightmares, 2600);
+                }, 82, 54, true);
+              }, 1400);
+            }, 82, 54, true);
+          }, 1800);
+        });
       }
 
       // 第三幕阶段 6：三句噩梦，划去后爆发第三波“只有”洪流与终末自白
       function startAct3Nightmares() {
         State.a3Stage = 6;
         State.a3NightmaresDone = 0;
+        setReferenceCards('', []);
         setTool('strike');
 
         const box = document.createElement('div');
@@ -3905,7 +4643,7 @@
 
       function runAct4Round() {
         if (State.a4Round >= ACT4_ROUNDS.length) {
-          addTimeout(startAct5, 900);
+          addTimeout(startAct5, 2000);
           return;
         }
         const cfg = ACT4_ROUNDS[State.a4Round];
@@ -3960,17 +4698,18 @@
               log('成功将 SCP-3999 的发言损坏为系统错误！', 'safe');
             }
 
-            // 塔罗兰冷酷接话
+            // 塔罗兰冷酷接话，并在说完后按句长留足阅读时间再让 3999 开口
             addTimeout(function () {
               const tRow = document.createElement('div');
               tRow.className = 'iv-line';
               tRow.innerHTML = '<strong class="iv-speaker-talloran-a4" style="color:var(--green);">塔罗兰：</strong>';
               body.appendChild(tRow);
-              typeInto(tRow, cfg.talloranReply, false, 20, function () {
+              typeInto(tRow, cfg.talloranReply, false, 26, function () {
                 State.a4Round++;
-                addTimeout(runAct4Round, 550);
+                const readDelay = Math.max(1800, 1100 + cfg.talloranReply.length * 36);
+                addTimeout(runAct4Round, readDelay);
               });
-            }, 350);
+            }, 500);
           }
         });
       }
@@ -4003,7 +4742,7 @@
         setReferenceCards('终局归档程序执行中……', []);
 
         const textPart1 = '最终收容描述：经证实，SCP-3999 完全寄生并依附于';
-        const textPart2 = '的自身存在。只要彻底抹除“研究员塔罗兰”在文档中的所有存在记录，SCP-3999 也将随之彻底死亡——';
+        const textPart2 = '的自身存在。只要彻底抹除“研究员塔罗兰”本身，SCP-3999 也将随之彻底死亡——';
 
         const spanPart1 = document.createElement('span');
         box.appendChild(spanPart1);
@@ -4050,6 +4789,7 @@
                   redSpan.className = 'tok-threat';
                   redSpan.textContent = '并将研究员塔罗兰的残骸永远封存于虚空之中。';
                   box.appendChild(redSpan);
+                  linkTalloranInNode(box, '8');
                   scrollDoc();
 
                   setTool('strike');
@@ -4068,11 +4808,11 @@
                     this.className = 'tok tok-struck';
                     addTimeout(startAct5RealAnchorDeletion, 650);
                   });
-                }, 3200);
+                }, 5500);
               }
-            }, 22);
+            }, 30);
           }
-        }, 22);
+        }, 30);
       }
 
       // 2. 在真实累积下来的长文档中，逐个删除原本就存在的「研究员塔罗兰」
@@ -4080,6 +4820,31 @@
         State.a5Stage = 2;
         State.a5AnchorsDone = 0;
         State.a5BlockedByInterference = false;
+
+        // 展开此前两次轮回重开时折叠隐藏的旧档（保留完整长卷轴与全部 8 处锚点）
+        if (el.docStatic) el.docStatic.classList.remove('loop-archived-hidden');
+        Array.from(el.docDynamic.children).forEach(function (ch) {
+          ch.classList.remove('loop-archived-hidden');
+        });
+        const l1Wrap = document.getElementById('a3-loop1-wrap');
+        if (l1Wrap && !document.getElementById('a3-loop1-div')) {
+          const d1 = document.createElement('div');
+          d1.id = 'a3-loop1-div';
+          d1.className = 'loop-divider';
+          d1.textContent = '—— Loop #4,192,803 归档残余 ——';
+          el.docDynamic.insertBefore(d1, l1Wrap);
+        }
+        const l2Wrap = document.getElementById('a3-loop2-wrap');
+        if (l2Wrap && !document.getElementById('a3-loop2-div')) {
+          const d2 = document.createElement('div');
+          d2.id = 'a3-loop2-div';
+          d2.className = 'loop-divider';
+          d2.textContent = '—— Loop #4,192,804 归档残余 ——';
+          el.docDynamic.insertBefore(d2, l2Wrap);
+        }
+
+        // 为文档中尚未归属的“塔罗兰”文字统一关联到就近的锚点 1（或已标记的对应锚点）
+        linkTalloranInNode(el.docPaper, '1');
 
         const anchors = document.querySelectorAll('.real-anchor');
         State.a5AnchorsTotal = anchors.length;
@@ -4130,13 +4895,23 @@
         Sound.key(false);
         Sound.confirm();
 
+        const anchorId = anchorEl.getAttribute('data-anchor');
+        if (anchorId) {
+          document.querySelectorAll('.linked-talloran[data-link-anchor="' + anchorId + '"]').forEach(function (node) {
+            node.className = 'erased-anchor';
+            node.style.color = 'var(--text-dim)';
+            node.style.textDecoration = 'line-through';
+            node.textContent = '已抹除';
+          });
+        }
+
         // 划除采访记录中的塔罗兰时，采访内容中的所有发言人「塔罗兰：」联动抹除
-        if (anchorEl.getAttribute('data-anchor') === '6') {
+        if (anchorId === '6') {
           document.querySelectorAll('.iv-speaker-talloran-a3').forEach(function (speaker) {
             speaker.innerHTML = '<span class="erased-anchor" style="color:var(--text-dim); text-decoration:line-through;">已抹除</span>：';
           });
         }
-        if (anchorEl.getAttribute('data-anchor') === '7') {
+        if (anchorId === '7') {
           document.querySelectorAll('.iv-speaker-talloran-a4').forEach(function (speaker) {
             speaker.innerHTML = '<span class="erased-anchor" style="color:var(--text-dim); text-decoration:line-through;">已抹除</span>：';
           });
@@ -4185,6 +4960,10 @@
           if (topbarEl) topbarEl.style.backgroundColor = barBg;
           if (statusbarEl) statusbarEl.style.backgroundColor = barBg;
           if (el.refDock) el.refDock.style.backgroundColor = barBg;
+          if (el.refDrawer) {
+            el.refDrawer.style.backgroundColor = barBg;
+            el.refDrawer.style.borderColor = borderCol;
+          }
           if (progress >= 0.45) {
             el.app.classList.add('darkening-half');
           }
@@ -4231,6 +5010,10 @@
           if (topbarEl) topbarEl.style.backgroundColor = '';
           if (statusbarEl) statusbarEl.style.backgroundColor = '';
           if (el.refDock) el.refDock.style.backgroundColor = '';
+          if (el.refDrawer) {
+            el.refDrawer.style.backgroundColor = '';
+            el.refDrawer.style.borderColor = '';
+          }
           el.docPaper.classList.add('stripped-paper');
           el.app.classList.add('void-mode');
           Sound.silenceImmediate();
@@ -4392,8 +5175,8 @@
                                 el.docDynamic.appendChild(loveLine);
                                 scrollDoc();
 
-                                // 逐字打出「我爱自己。」，极慢沉重（320ms/字）
-                                typeInto(loveLine, '我爱自己。', false, 320, function () {
+                                // 逐字打出「我爱自己。」，极慢沉重（560ms/字）
+                                typeInto(loveLine, '我爱自己。', false, 560, function () {
                                   setHint('……', false);
 
                                   // 慢速省略号，之后再提供"我写完了"
@@ -4431,7 +5214,7 @@
                       el.refCards.appendChild(hoverCard);
                       setHint('点击底部卡片。', false);
                     });
-                  }, 550);
+                  }, 2200);
                 });
               }
             }
