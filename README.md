@@ -13,7 +13,7 @@
 ## 游玩方式
 
 ### 方式一：浏览器直接游玩（推荐）
-* 若已开启 GitHub Pages，可直接访问在线页面体验；
+* **在线试玩**：[https://tiger-forest.github.io/archive-3999/](https://tiger-forest.github.io/archive-3999/)
 * 或直接下载仓库中的 [index.html](index.html) / [scp_3999_scipnet_edit_v4_0.html](scp_3999_scipnet_edit_v4_0.html)，使用任意现代浏览器（Chrome / Edge / Firefox）打开即可。
 * **纯单文件、零外部依赖**：无需联网加载字体或音频，所有音效均通过内置 Web Audio API 实时合成。
 
