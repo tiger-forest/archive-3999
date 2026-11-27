@@ -14,7 +14,7 @@ namespace Scp3999Launcher
             byte[] htmlBytes = LoadEmbeddedHtml();
             if (htmlBytes == null || htmlBytes.Length == 0)
             {
-                MessageBox.Show("无法加载内置文档资源。", "档案：编号3999", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("无法加载内置文档资源。", "档案编号3999", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
