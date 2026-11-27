@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="dist_exe/icon_preview.png" alt="档案编号3999" width="112" />
+</div>
+
 # 档案编号3999
 
 基于 SCP 基金会经典条目《SCP-3999：我于万物之中》（*SCP-3999 - I Am At The Center of Everything That Happens To Me*）改编的单文件伪终端交互叙事作品。
